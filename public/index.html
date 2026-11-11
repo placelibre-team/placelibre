@@ -28,8 +28,10 @@
       <button class="tool" id="t3d" aria-pressed="true"><span>▦</span>3D</button>
       <button class="tool" id="tSat" aria-pressed="false"><span>◩</span>Photo</button>
       <button class="tool" id="tPark" aria-pressed="false"><span>P</span>Parkings</button>
+      <button class="tool" id="tLeg" aria-pressed="false"><span>?</span>Légende</button>
       <button class="tool" id="tMe" aria-pressed="false"><span>◎</span>Moi</button>
     </div>
+    <div class="legendp" id="legendPanel" hidden></div>
     <div class="drawbar" id="drawbar" hidden>
       <p id="drawHelp"><b>Cartographier une file de places.</b> Touche le début de la file de voitures, puis la fin. Ajoute des points si la rue tourne.</p>
       <div class="chips" id="typeChips"></div>
@@ -123,6 +125,7 @@
     <div class="card">
       <h2>Légende</h2>
       <div class="legend">
+        <span><i style="background:#2f6fd6"></i>€ Payant</span><span><i style="background:#2bb673"></i>0 € Gratuit</span><span><i style="background:#5bb5ef"></i>ZB Zone bleue</span><span><i style="background:#9b6b4a"></i>R Résidents</span><span><i style="background:#e08a2c"></i>Livraison</span><span><i style="background:#8a5cd6"></i>PMR</span>
         <span><i style="background:var(--free)"></i>Libre, très probable</span>
         <span><i style="background:var(--mid)"></i>Libre, probable</span>
         <span><i style="background:var(--low)"></i>Libre, peu sûr</span>
