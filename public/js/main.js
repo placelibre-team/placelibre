@@ -50,3 +50,6 @@ function listMode(why){
   }
   load(0);
 })();
+
+/* Installation sur l'écran d'accueil : cache pour une ouverture rapide */
+if('serviceWorker' in navigator && location.protocol === 'https:') window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
