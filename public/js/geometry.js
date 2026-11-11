@@ -96,3 +96,22 @@ async function loadParkings(){
   });
   setData('parks', {type:'FeatureCollection', features:PARKINGS});
 }
+
+
+/* Bâtiments de l'IGN avec leur vraie hauteur (en cache 30 jours sur le téléphone) */
+async function loadBuildings(){
+  let fc = readCache('plj:bd1', 30*864e5);
+  if(!fc){
+    try{
+      const j = await (await fetch(BD_URL)).json();
+      const r6 = p => [+p[0].toFixed(6), +p[1].toFixed(6)];
+      fc = {type:'FeatureCollection', features:j.features.map(f => {
+        const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+        return {type:'Feature', properties:{h:(f.properties && f.properties.hauteur) || 6},
+          geometry:{type:'MultiPolygon', coordinates:polys.map(p => p.map(ring => ring.map(r6)))}};
+      })};
+      if(fc.features.length) writeCache('plj:bd1', fc);
+    }catch(e){ return null; }
+  }
+  return fc.features.length ? fc : null;
+}
