@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123a47">
+<title>Place Libre Juan</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Carte 3D plein écran, recherche en haut, outils à droite, panneau des rues en bas */
+:root{
+  --bg:#f3f6f6; --surface:#ffffff; --fg:#14262c; --muted:#5c7178; --line:#d6e0e2;
+  --accent:#0f6f86; --accent-fg:#ffffff;
+  --free:#1f9d55; --mid:#d9961a; --low:#8fa39a; --soon:#e0672b; --occ:#3d474b;
+  --display:"Space Grotesk",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1719; --surface:#152326; --fg:#e4eef0; --muted:#93a8ad; --line:#26393d;
+  --accent:#3bb3cf; --accent-fg:#06262e; --free:#3fc37a; --mid:#e8ac3a; --low:#7f938a; --soon:#f0844e; --occ:#9aa6aa;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1719; --surface:#152326; --fg:#e4eef0; --muted:#93a8ad; --line:#26393d;
+  --accent:#3bb3cf; --accent-fg:#06262e; --free:#3fc37a; --mid:#e8ac3a; --low:#7f938a; --soon:#f0844e; --occ:#9aa6aa;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:15px/1.4 var(--body);-webkit-text-size-adjust:100%}
+#app{height:100%;display:grid;grid-template-rows:auto 1fr auto}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;gap:8px;align-items:center;background:var(--surface);border-bottom:1px solid var(--line);
+  padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:8px;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.brand{font:700 15px var(--display);letter-spacing:-.01em;white-space:nowrap}
+.brand b{color:var(--accent)}
+#searchForm{flex:1;display:flex;min-width:0}
+#q{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px 0 0 10px;padding:9px 10px;font:inherit}
+#searchForm button{border:0;background:var(--accent);color:var(--accent-fg);border-radius:0 10px 10px 0;padding:0 12px;font-weight:600}
+.icon-btn{border:1px solid var(--line);background:var(--bg);border-radius:10px;width:40px;height:38px;display:grid;place-items:center;flex:none}
+
+.map-wrap{position:relative;min-height:0}
+#map{position:absolute;inset:0}
+.maplibregl-ctrl-attrib{font-size:10px}
+
+.tools{position:absolute;top:10px;right:max(10px,env(safe-area-inset-right,0px));z-index:5;display:flex;flex-direction:column;gap:6px}
+.tool{width:46px;min-height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);
+  font:600 11px/1.1 var(--body);display:grid;place-items:center;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.tool[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.tool span{font-size:16px;line-height:1}
+
+.drawbar{position:absolute;left:max(10px,env(safe-area-inset-left,0px));right:calc(66px + env(safe-area-inset-right,0px));top:10px;z-index:6;
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.drawbar p{margin:0;font-size:13px;color:var(--muted)}
+.drawbar p b{color:var(--fg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.row2{display:flex;gap:8px}
+.row2 .btn{flex:1}
+
+.sheet{background:var(--surface);border-top:1px solid var(--line);max-height:44vh;display:flex;flex-direction:column;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));padding-top:10px;gap:10px}
+.status{display:flex;flex-direction:column;gap:2px}
+.status strong{font:600 15px var(--display)}
+.status small{color:var(--muted)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:11px 10px;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.list-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.list-head h2{margin:0;font:600 12px var(--display);text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.list-head button{border:0;background:none;color:var(--accent);font-size:13px;padding:0}
+#list{list-style:none;margin:0;padding:0;overflow-y:auto;min-height:0;display:flex;flex-direction:column}
+#list li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+#list li:last-child{border-bottom:0}
+.bar{width:34px;height:8px;border-radius:4px;background:var(--line);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.li-main{min-width:0}
+.li-main b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-main span{color:var(--muted);font-size:13px}
+.li-dist{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.pct{font:700 20px/1 var(--display);font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
+.pct small{font-size:12px;margin-left:1px}
+.li-main span{display:block}
+.li-main .l2{color:var(--fg);font-size:12.5px}
+#list li .detail{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;padding:6px 0 4px;cursor:default}
+.det-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
+.det-row b{color:var(--fg);font-variant-numeric:tabular-nums}
+.det-h{margin:4px 0 0;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.spark{width:100%;height:auto;display:block}
+.det-src{margin:0;font-size:12px;color:var(--muted)}
+.empty{color:var(--muted);font-size:13px;padding:6px 0;cursor:default!important;display:block!important}
+
+.pop{font:13px/1.4 var(--body);color:#14262c;min-width:180px}
+.pop b{font-family:var(--display)}
+.pop .row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.pop button{border:1px solid #c9d3d6;border-radius:8px;background:#fff;color:#14262c;padding:6px 9px;font-size:12px;font-weight:600}
+.pop button.go{background:#1f9d55;border-color:#1f9d55;color:#fff}
+.pop button.del{color:#c43d3d}
+.me-dot{width:16px;height:16px;border-radius:50%;background:#2a7de1;border:3px solid #fff;box-shadow:0 0 0 6px rgba(42,125,225,.2)}
+.car-pin{width:26px;height:26px;border-radius:50%;background:var(--fg);color:var(--surface);display:grid;place-items:center;font-size:14px;border:2px solid #fff}
+.dest-pin{width:18px;height:18px;background:var(--accent);border:2px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg)}
+
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(46vh + env(safe-area-inset-bottom,0px));z-index:2000;
+  background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:12px;max-width:min(92vw,420px);font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+
+#settings{position:fixed;inset:0;z-index:3000;background:var(--bg);overflow-y:auto;
+  padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.set-wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.set-wrap h1{font:700 22px var(--display);margin:0}
+.set-wrap h2{font:600 15px var(--display);margin:0 0 4px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.card p,.card li{margin:0;color:var(--muted);font-size:14px}
+.card ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.url{display:flex;gap:6px;align-items:center}
+.url code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:12px;user-select:all}
+.kv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-variant-numeric:tabular-nums}
+.kv span:nth-child(odd){color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
+textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font:12px ui-monospace,monospace;padding:8px}
+.danger{color:#c43d3d}
+.fail{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:8px;max-width:420px;margin:0 auto;
+  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(76px,env(safe-area-inset-right,0px))}
+.fail b{font:600 17px var(--display)}
+.fail p{margin:0;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <span class="brand">Place<b>Libre</b></span>
+    <form id="searchForm" autocomplete="off">
+      <input id="q" type="search" placeholder="Où vas-tu ?" aria-label="Destination">
+      <button type="submit">Aller</button>
+    </form>
+    <button class="icon-btn" id="btnMenu" aria-label="Réglages">⚙︎</button>
+  </header>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="tools">
+      <button class="tool" id="tDraw" aria-pressed="false"><span>✎</span>Carto</button>
+      <button class="tool" id="t3d" aria-pressed="true"><span>▦</span>3D</button>
+      <button class="tool" id="tSat" aria-pressed="false"><span>◩</span>Photo</button>
+      <button class="tool" id="tPark" aria-pressed="false"><span>P</span>Parkings</button>
+      <button class="tool" id="tMe" aria-pressed="false"><span>◎</span>Moi</button>
+    </div>
+    <div class="drawbar" id="drawbar" hidden>
+      <p id="drawHelp"><b>Cartographier une file de places.</b> Touche le début de la file de voitures, puis la fin. Ajoute des points si la rue tourne.</p>
+      <div class="chips" id="typeChips"></div>
+      <div class="row2">
+        <button class="btn" id="dUndo">Annuler le point</button>
+        <button class="btn primary" id="dSave">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="sheet" aria-label="Rues">
+    <div class="status" id="status"><strong>Chargement de la carte…</strong><small></small></div>
+    <div class="actions">
+      <button class="btn" id="btnPark">Je me gare ici</button>
+      <button class="btn primary" id="btnLeave">Je pars</button>
+    </div>
+    <div class="list-head"><h2 id="listTitle">Rues autour de toi</h2><button id="btnClearDest" hidden>Effacer la destination</button></div>
+    <ul id="list"></ul>
+  </section>
+</div>
+
+<div id="toast" role="status" hidden></div>
+
+<div id="settings" hidden>
+  <div class="set-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h1>Réglages</h1><button class="btn" id="btnCloseSet">Fermer</button>
+    </div>
+
+    <div class="card">
+      <h2>Qui es-tu ?</h2>
+      <p>Ton prénom s'affiche chez les autres quand tu libères ou signales une place.</p>
+      <div class="chips" id="meChips"></div>
+    </div>
+
+    <div class="card">
+      <h2>Comment tester dans la rue</h2>
+      <ol>
+        <li>Touche <b>Carto</b> : la vue passe en photo aérienne. Dessine les files de places de ta rue (début → fin) et choisis le type.</li>
+        <li>Chaque file est découpée en places de 5 m, avec une voiture 3D sur chacune.</li>
+        <li>En te promenant, touche une place et indique <b>Libre</b> ou <b>Occupée</b>.</li>
+        <li>Quand tu pars ou te gares, le Bluetooth (ou les boutons en bas) met à jour la place la plus proche.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Bluetooth automatique (iPhone, même verrouillé)</h2>
+      <p>Crée 2 automatisations dans l'app <b>Raccourcis</b> → <b>Automatisation</b> → <b>+</b> → <b>Bluetooth</b> → ta voiture → <b>Exécuter immédiatement</b>.</p>
+      <p><b>1. « Est connecté » (tu pars)</b>, ajoute 2 actions :</p>
+      <ol>
+        <li><b>Obtenir la position actuelle</b></li>
+        <li><b>Obtenir le contenu de l'URL</b> : URL ci-dessous, Méthode <b>POST</b>, Corps de la requête <b>JSON</b> avec 4 champs : <b>k</b> = texte <code>depart</code>, <b>lat</b> = Latitude (de la position), <b>lng</b> = Longitude, <b>by</b> = ton prénom.</li>
+      </ol>
+      <div class="url"><code id="busUrl"></code><button class="btn" data-copy="busUrl">Copier</button></div>
+      <p><b>2. « Est déconnecté » (tu t'es garé)</b> : la même chose, avec <b>k</b> = <code>arrive</code>.</p>
+      <p>L'appli n'a pas besoin d'être ouverte : tes amis voient la place changer en direct.</p>
+    </div>
+
+    <div class="card">
+      <h2>D’où viennent les données</h2>
+      <ol>
+        <li><b>Ville d’Antibes (open data)</b> : 10 horodateurs rue Bricka, payant 9h-12h et 14h-18h en semaine, 1re heure gratuite, gratuit le week-end et les jours fériés. 1 place PMR au 12 rue Saint-Honorat.</li>
+        <li><b>Photos aériennes IGN</b> : emplacement de chaque place.</li>
+        <li><b>Modèle de prévision</b> : heure, jour, saison, jours fériés, Jazz à Juan, heures payantes. Il marche dès le premier jour, sans utilisateurs.</li>
+        <li><b>Utilisateurs</b> : Bluetooth automatique, boutons Je pars / Je me gare, signalements. Chaque départ affine la prévision de la rue.</li>
+      </ol>
+      <p>Pas encore disponibles : occupation en direct des parkings, tickets des applis de paiement (PayByPhone, Flowbird), capteurs. Ces données ne sont pas publiques à Antibes : il faudra un partenariat avec la Ville ou les opérateurs.</p>
+    </div>
+
+    <div class="card">
+      <h2>Ce que l'IA a appris</h2>
+      <div class="kv" id="modelKv"></div>
+      <p>Le délai entre la connexion Bluetooth et le vrai départ s'ajuste à chaque trajet. La durée de vie d'une place libre s'ajuste avec tes signalements.</p>
+    </div>
+
+    <div class="card">
+      <h2>Légende</h2>
+      <div class="legend">
+        <span><i style="background:var(--free)"></i>Libre, très probable</span>
+        <span><i style="background:var(--mid)"></i>Libre, probable</span>
+        <span><i style="background:var(--low)"></i>Libre, peu sûr</span>
+        <span><i style="background:var(--soon)"></i>Voiture qui part</span>
+        <span><i style="background:#3d474b"></i>Occupée (vue récemment)</span>
+        <span><i style="background:#a3adb1"></i>Inconnue</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Partager ta cartographie</h2>
+      <p>Copie tes files de places pour les envoyer à tes associés, ou colle les leurs ici.</p>
+      <div class="row2"><button class="btn" id="btnExport">Copier ma carto</button><button class="btn" id="btnImport">Importer</button></div>
+      <textarea id="importBox" aria-label="Cartographie à importer" placeholder="Colle ici une cartographie copiée depuis l'appli"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Données</h2>
+      <p id="dataInfo"></p>
+      <button class="btn" id="btnReloadData">Recharger les rues OpenStreetMap</button>
+      <button class="btn danger" id="btnReset">Tout effacer</button>
+      <p id="resetConfirm" hidden>Appuie encore une fois pour confirmer.</p>
+      <p>Sources : © OpenStreetMap, OpenFreeMap, photos aériennes © IGN (BD ORTHO, licence ouverte).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function start(){
+'use strict';
+
+/* ---------- Constantes ---------- */
+const KEY = 'plj:v2';
+const BBOX = [43.552, 7.090, 43.582, 7.135];          // Juan-les-Pins (S, O, N, E)
+const CENTER = [7.1056, 43.5712];                      // [lng, lat]
+const OVERPASS = 'https://overpass-api.de/api/interpreter';
+const SLOT_LEN = 5.3;                                  // longueur d'une place (m)
+const LINK_M = 25;                                     // distance max pour rattacher un départ à une place
+const MOVE_M = 35;                                     // distance qui confirme le départ
+const TYPES = {
+  free:{label:'Gratuit', color:'#1f9d55'}, pay:{label:'Payant', color:'#2f5fb3'},
+  blue:{label:'Zone bleue', color:'#3a8fd5'}, res:{label:'Résidents', color:'#8a5a44'},
+  deliv:{label:'Livraison', color:'#b0702a'}, pmr:{label:'PMR', color:'#7a4fc0'},
+  unk:{label:'Non précisé', color:'#7d8b90'}
+};
+/* Places déjà cartographiées (photo aérienne IGN) : rue Bricka et rue Saint-Honorat */
+const BASE_SEGS = [{"id": "b01", "pts": [[7.1049561, 43.5715131], [7.105276, 43.5714848]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b02", "pts": [[7.1053852, 43.5714758], [7.1055647, 43.57146]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b03", "pts": [[7.1057753, 43.5714407], [7.1060484, 43.571417]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b04", "pts": [[7.1048, 43.5714701], [7.1060484, 43.5713605]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b05", "pts": [[7.1038341, 43.5716297], [7.1040526, 43.5716127]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b06", "pts": [[7.1042554, 43.5715212], [7.1046456, 43.5714895]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b07", "pts": [[7.1025561, 43.5717352], [7.1027745, 43.571716]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b08", "pts": [[7.1033753, 43.5716809], [7.1036484, 43.5716538]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b09", "pts": [[7.1061561, 43.5713927], [7.1064526, 43.5713679]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b10", "pts": [[7.1067023, 43.5713362], [7.1069207, 43.5713181]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b11", "pts": [[7.10606, 43.5713439], [7.1069207, 43.5712774]], "type": "pay", "name": "Rue Bricka", "src": "base"}, {"id": "b12", "pts": [[7.1069962, 43.5709739], [7.1069962, 43.5709038]], "type": "free", "name": "Rue Saint-Honorat", "src": "base"}, {"id": "b13", "pts": [[7.107068, 43.5709942], [7.107068, 43.5709004]], "type": "free", "name": "Rue Saint-Honorat", "src": "base"}, {"id": "b14", "pts": [[7.1070087, 43.57075], [7.1070149, 43.5706347]], "type": "free", "name": "Rue Saint-Honorat", "src": "base"}, {"id": "b15", "pts": [[7.1070789, 43.57075], [7.1070805, 43.5706776]], "type": "free", "name": "Rue Saint-Honorat", "src": "base"}, {"id": "b16", "pts": [[7.1070056, 43.5711794], [7.1070071, 43.5710742]], "type": "free", "name": "Rue Saint-Honorat", "src": "base"}, {"id": "b17", "pts": [[7.1070071, 43.5703747], [7.1069525, 43.5698852]], "type": "free", "name": "Rue Saint-Honorat", "src": "base"}, {"id": "b18", "pts": [[7.1070929, 43.5703521], [7.1070399, 43.5698852]], "type": "free", "name": "Rue Saint-Honorat", "src": "base"}];
+const DEF = {me:'', segments:[], removedBase:[], slotState:{}, loose:[], history:[], parked:null, dest:null,
+  model:{delay:45, delayN:0, tau:180, tauN:0}};
+
+/* ---------- État ---------- */
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function load(){
+  try{
+    const r = JSON.parse(localStorage.getItem(KEY) || 'null');
+    const s = Object.assign(clone(DEF), r || {});
+    s.model = Object.assign({}, DEF.model, s.model || {});
+    return mergeBase(s);
+  }catch(e){return mergeBase(clone(DEF));}
+}
+function mergeBase(s){
+  s.removedBase = s.removedBase || [];
+  BASE_SEGS.forEach(b => {
+    const ex = s.segments.find(x => x.id === b.id);
+    if(ex){ ex.type = b.type; ex.pts = b.pts; ex.name = b.name; }
+    else if(!s.removedBase.includes(b.id)) s.segments.push(clone(b));
+  });
+  s.obs = s.obs || {};
+  return s;
+}
+let S = load();
+function save(){try{localStorage.setItem(KEY, JSON.stringify(S));}catch(e){}}
+(function prune(){
+  const now = Date.now();
+  S.loose = S.loose.filter(s => now - s.t < 2*3600e3);
+  S.history = S.history.filter(h => now - h.t < 60*864e5).slice(-3000);
+  Object.keys(S.slotState).forEach(k => { const st = S.slotState[k]; if(Math.max(st.free||0, st.occ||0) < now - 7*864e5) delete S.slotState[k]; });
+  save();
+})();
+
+let OSM_SEGS = [], SLOTS = [], SLOT_BY_ID = {}, PARKINGS = [];
+let lastPos = null, pendingDepart = null, wake = null, mapReady = false;
+let mode = 'view', draft = [], draftType = 'free';
+
+/* ---------- Outils ---------- */
+const $ = id => document.getElementById(id);
+function dist(a, b){
+  const R = 6371000, t = Math.PI/180;
+  const dLat = (b.lat-a.lat)*t, dLng = (b.lng-a.lng)*t;
+  const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+function fmtDist(m){return m < 1000 ? Math.round(m/10)*10 + ' m' : (m/1000).toFixed(1).replace('.', ',') + ' km';}
+function fmtAge(sec){return sec < 60 ? Math.max(0, Math.round(sec)) + ' s' : Math.round(sec/60) + ' min';}
+function hhmm(t){return new Date(t).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});}
+function esc(s){return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+let toastTimer;
+function toast(msg, ms){
+  const el = $('toast'); el.textContent = msg; el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, ms || 4500);
+}
+function readCache(k, maxAge){
+  try{const c = JSON.parse(localStorage.getItem(k)||'null'); if(c && Date.now()-c.t < maxAge) return c.v;}catch(e){}
+  return null;
+}
+function writeCache(k, v){try{localStorage.setItem(k, JSON.stringify({t:Date.now(), v}));}catch(e){}}
+async function requestWake(){try{ if(navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); }catch(e){}}
+function releaseWake(){try{ if(wake) wake.release(); }catch(e){} wake = null;}
+function getPos(timeout){
+  return new Promise((res, rej) => {
+    if(!navigator.geolocation) return rej(new Error('nogps'));
+    navigator.geolocation.getCurrentPosition(
+      p => res({lat:p.coords.latitude, lng:p.coords.longitude, acc:p.coords.accuracy}),
+      rej, {enableHighAccuracy:true, timeout:timeout||12000, maximumAge:5000});
+  });
+}
+
+/* ---------- Géométrie : découpe d'une file en places ---------- */
+function toM(p, ref){return [(p[0]-ref[0])*111320*Math.cos(ref[1]*Math.PI/180), (p[1]-ref[1])*111320];}
+function toLL(x, y, ref){return [ref[0] + x/(111320*Math.cos(ref[1]*Math.PI/180)), ref[1] + y/111320];}
+function slotsForLine(pts, segId, offset){
+  const ref = pts[0], out = []; let k = 0;
+  for(let i = 0; i < pts.length - 1; i++){
+    const a = toM(pts[i], ref), b = toM(pts[i+1], ref);
+    const dx = b[0]-a[0], dy = b[1]-a[1], L = Math.hypot(dx, dy);
+    if(L < 3) continue;
+    const ux = dx/L, uy = dy/L, px = -uy, py = ux;
+    const ox = px*(offset||0), oy = py*(offset||0);
+    const n = Math.max(1, Math.floor(L/SLOT_LEN)), sl = L/n, hl = sl*0.42, hw = 0.95;
+    for(let j = 0; j < n; j++){
+      const c = (j + 0.5)*sl, cx = a[0] + ux*c + ox, cy = a[1] + uy*c + oy;
+      const ring = [[-hl,-hw],[hl,-hw],[hl,hw],[-hl,hw]].map(([s,w]) => toLL(cx + ux*s + px*w, cy + uy*s + py*w, ref));
+      ring.push(ring[0]);
+      const ctr = toLL(cx, cy, ref);
+      out.push({id:segId + '-' + (k++), ring, lng:ctr[0], lat:ctr[1]});
+    }
+  }
+  return out;
+}
+function rebuildSlots(){
+  SLOTS = []; SLOT_BY_ID = {};
+  const all = S.segments.concat(OSM_SEGS);
+  all.forEach(seg => {
+    const off = seg.src === 'osm' ? seg.side*4 : 0;
+    slotsForLine(seg.pts, seg.id, off).forEach(s => {
+      s.segId = seg.id; s.type = seg.type; s.name = seg.name || ''; s.src = seg.src;
+      SLOTS.push(s); SLOT_BY_ID[s.id] = s;
+    });
+  });
+  PMR_POINTS.forEach(pt => { const sl = nearestSlot(pt, 12); if(sl){ sl.type = 'pmr'; sl.pmrLabel = pt.label; } });
+}
+function segById(id){return S.segments.find(s => s.id === id) || OSM_SEGS.find(s => s.id === id);}
+function nearestSlot(p, max){
+  let best = null, bd = max || LINK_M;
+  SLOTS.forEach(s => { const d = dist(p, s); if(d < bd){ bd = d; best = s; } });
+  return best;
+}
+
+/* ---------- Modèle « IA » ---------- */
+function learnDelay(sec){
+  const m = S.model;
+  m.delay = m.delayN === 0 ? sec : m.delay*0.7 + sec*0.3;
+  m.delay = Math.min(300, Math.max(5, m.delay)); m.delayN++;
+}
+function learnTau(ageSec, found){
+  const m = S.model;
+  const target = found ? Math.max(ageSec*1.5, 60) : Math.max(ageSec*0.7, 30);
+  m.tau = Math.min(900, Math.max(30, m.tau*0.8 + target*0.2)); m.tauN++;
+}
+function freeLevel(fr, now){
+  const age = (now - fr)/1000, c = Math.exp(-age / S.model.tau);
+  if(c < 0.08) return null;
+  return {k: c > 0.5 ? 'high' : c > 0.2 ? 'mid' : 'low', conf:c, age};
+}
+function slotState(id, now){
+  const st = S.slotState[id];
+  if(!st) return {k:'unk'};
+  if(st.soon && now < st.soon) return {k:'soon', secs:Math.ceil((st.soon - now)/1000)};
+  const fr = st.free || 0, oc = st.occ || 0;
+  if(fr > oc){ const l = freeLevel(fr, now); if(l) return l; return {k:'unk'}; }
+  if(oc && now - oc < 3*3600e3) return {k:'occ', age:(now - oc)/1000};
+  return {k:'unk'};
+}
+function stateText(st){
+  switch(st.k){
+    case 'soon': return 'Voiture qui part · libre dans ~' + st.secs + ' s';
+    case 'high': case 'mid': case 'low': return 'Libre depuis ' + fmtAge(st.age) + ' · ' + Math.round(st.conf*100) + ' % de chances';
+    case 'occ': return 'Occupée (vue il y a ' + fmtAge(st.age) + ')';
+    default: return 'État inconnu';
+  }
+}
+
+/* ---------- Données de la Ville d'Antibes et prévision ---------- */
+// Sources open data (data.gouv.fr, Ville d'Antibes, licence ouverte) :
+//  « Horodateurs à Antibes Juan-les-Pins » : 10 horodateurs rue Bricka (n° 250 à 259), payant 9h-12h et 14h-18h,
+//    1 h gratuite par jour, gratuit samedi, dimanche et jours fériés, zone résidents 20 €/mois.
+//  « Places de stationnement PMR » : 1 place au 12 rue Saint-Honorat.
+//  « Stationnement à Antibes Juan-les-Pins » : 796 places sur voirie au centre de Juan-les-Pins.
+const RULES = {
+  'Rue Bricka': {paid:true, hours:[[9,12],[14,18]], freeWeekend:true, firstHourFree:true,
+    residents:'20 €/mois ou 60 €/trimestre', src:'10 horodateurs (n° 250 à 259) recensés par la Ville d’Antibes'},
+  'Rue Saint-Honorat': {paid:false, src:'Aucun horodateur recensé par la Ville d’Antibes : gratuit, à confirmer sur place'}
+};
+const PMR_POINTS = [{lat:43.5705576, lng:7.1069424, label:'Place PMR, 12 rue Saint-Honorat'}];
+function easter(y){
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+    h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+    mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  return new Date(y, mo-1, da);
+}
+function isHoliday(d){
+  const key = (d.getMonth()+1) + '-' + d.getDate();
+  if(['1-1','5-1','5-8','7-14','8-15','11-1','11-11','12-25'].includes(key)) return true;
+  const e = easter(d.getFullYear());
+  return [1,39,50].some(n => { const x = new Date(e); x.setDate(x.getDate()+n); return x.getMonth() === d.getMonth() && x.getDate() === d.getDate(); });
+}
+function dayOff(d){ return d.getDay() === 0 || d.getDay() === 6 || isHoliday(d); }
+function paidAt(rule, d){
+  if(!rule || !rule.paid) return false;
+  if(rule.freeWeekend && dayOff(d)) return false;
+  const h = d.getHours() + d.getMinutes()/60;
+  return rule.hours.some(([a,b]) => h >= a && h < b);
+}
+function ruleText(street, d){
+  const rule = RULES[street]; if(!rule) return '';
+  if(!rule.paid) return 'Gratuit';
+  const h = d.getHours() + d.getMinutes()/60;
+  if(paidAt(rule, d)){ const end = rule.hours.find(([a,b]) => h >= a && h < b)[1]; return 'Payant jusqu’à ' + end + ' h' + (rule.firstHourFree ? ' · 1re heure gratuite' : ''); }
+  if(!dayOff(d)){ const nx = rule.hours.find(([a]) => a > h); if(nx) return 'Gratuit maintenant · payant dès ' + nx[0] + ' h'; }
+  return 'Gratuit maintenant';
+}
+// Modèle de départ (sans utilisateurs) : taux d'occupation typique d'une rue de centre balnéaire, heure par heure,
+// corrigé par la saison, les week-ends, Jazz à Juan et les heures payantes (qui font tourner les voitures).
+const BASE_OCC = [.95,.96,.96,.96,.95,.93,.90,.88,.88,.90,.90,.90,.93,.93,.90,.90,.90,.91,.94,.95,.95,.95,.95,.95];
+const MONTH_ADJ = [-.03,-.03,-.02,-.01,0,.02,.04,.05,.02,-.01,-.03,-.02];
+function jazzAJuan(d){ return d.getMonth() === 6 && d.getDate() >= 10 && d.getDate() <= 25 && d.getHours() >= 18; }
+function priorAt(street, d){
+  const h = d.getHours(), paid = paidAt(RULES[street], d);
+  let occ = BASE_OCC[h] + MONTH_ADJ[d.getMonth()] + (dayOff(d) && h >= 10 && h < 20 ? .02 : 0) + (jazzAJuan(d) ? .03 : 0) - (paid ? .03 : 0);
+  occ = Math.min(.99, Math.max(.6, occ));
+  const lam = paid ? .6 : (h >= 7 && h < 21 ? .25 : .05);   // départs par place et par heure
+  return {occ, lam};
+}
+function streetN(street){ return SLOTS.filter(s => s.name === street && s.type !== 'pmr').length; }
+function learnedLam(street, d){
+  const o = S.obs[street]; if(!o) return null;
+  const c = o.c[d.getDay()*24 + d.getHours()] || 0;
+  if(c < 3) return null;
+  return c / Math.max(1, (o.d || []).length) / Math.max(1, streetN(street));
+}
+function chanceAt(street, d){
+  const N = streetN(street); if(!N) return 0;
+  const pr = priorAt(street, d); let lam = pr.lam;
+  const L = learnedLam(street, d); if(L != null) lam = (lam + 2*L) / 3;
+  const E = N*(1 - pr.occ)*0.2 + N*lam*(5/60)*0.15;   // places libres « trouvables » en 5 min
+  return 1 - Math.exp(-0.35*E);
+}
+function liveInfo(street, now){
+  let q = 1, n = 0;
+  SLOTS.forEach(s => {
+    if(s.name !== street || s.type === 'pmr') return;
+    const st = slotState(s.id, now);
+    if(st.k === 'soon'){ q *= 0.15; n++; }
+    else if(st.conf){ q *= (1 - st.conf*0.9); if(st.k !== 'low') n++; }
+  });
+  return {p:1 - q, n};
+}
+function chanceNow(street){
+  const now = Date.now(), a = chanceAt(street, new Date(now)), b = liveInfo(street, now);
+  return {p:1 - (1 - a)*(1 - b.p), prior:a, live:b.p, nl:b.n};
+}
+function recordObs(slotId, ts){
+  const sl = SLOT_BY_ID[slotId]; if(!sl || !sl.name) return;
+  const o = S.obs[sl.name] || (S.obs[sl.name] = {c:{}, d:[]}), d = new Date(ts), key = d.getDay()*24 + d.getHours();
+  o.c[key] = (o.c[key] || 0) + 1;
+  const day = d.toISOString().slice(0,10); if(!o.d.includes(day)){ o.d.push(day); if(o.d.length > 90) o.d.shift(); }
+}
+
+/* ---------- Temps réel partagé (rue Bricka, rue Saint-Honorat) ---------- */
+const BUS = 'https://ntfy.sh/placelibre-juan-q7m2x9k4';
+const isShared = id => /^b\d\d-/.test(id);
+let syncOk = false;
+function applyEv(ev){
+  if(!ev || !ev.slot || !SLOT_BY_ID[ev.slot] || !ev.ts) return false;
+  const st = S.slotState[ev.slot] || (S.slotState[ev.slot] = {});
+  if(ev.ts <= (st.ts || 0)) return false;
+  st.ts = ev.ts; st.by = ev.by || '';
+  if(ev.k === 'soon' || ev.k === 'free') recordObs(ev.slot, ev.ts);
+  if(ev.k === 'soon'){ st.free = ev.eta; st.soon = ev.eta; }
+  else if(ev.k === 'free'){ st.free = ev.ts; st.soon = null; }
+  else if(ev.k === 'occ'){ st.occ = ev.ts; st.soon = null; }
+  return true;
+}
+// Événements envoyés directement par le Raccourci iPhone (Bluetooth) : {k:'depart'|'arrive', lat, lng, by}
+const num = v => parseFloat(String(v == null ? '' : v).replace(',', '.'));
+function fromMsg(m){
+  let ev; try{ ev = JSON.parse(m.message); }catch(e){ return null; }
+  if(!ev || typeof ev !== 'object') return null;
+  if(!ev.ts) ev.ts = (m.time || 0) * 1000;
+  if(ev.k === 'depart' || ev.k === 'arrive'){
+    const p = {lat:num(ev.lat), lng:num(ev.lng)};
+    if(isNaN(p.lat) || isNaN(p.lng)) return null;
+    const sl = nearestSlot(p, 35); if(!sl) return null;
+    return ev.k === 'depart' ? {slot:sl.id, k:'soon', ts:ev.ts, eta:ev.ts + S.model.delay*1000, by:ev.by || ''}
+                             : {slot:sl.id, k:'occ', ts:ev.ts, by:ev.by || ''};
+  }
+  return ev;
+}
+function share(slotId, k, eta){
+  const ev = {slot:slotId, k, ts:Date.now(), eta:eta || null, by:S.me || ''};
+  applyEv(ev);
+  if(isShared(slotId)) fetch(BUS, {method:'POST', body:JSON.stringify(ev)}).catch(() => {});
+}
+async function syncStart(){
+  try{
+    const r = await fetch(BUS + '/json?poll=1&since=all');
+    const txt = await r.text(); let ch = false;
+    txt.split('\n').forEach(l => { if(!l.trim()) return; try{ const m = JSON.parse(l); if(m.event === 'message') ch = applyEv(fromMsg(m)) || ch; }catch(e){} });
+    syncOk = true; if(ch) save(); render();
+  }catch(e){}
+  try{
+    const es = new EventSource(BUS + '/sse');
+    es.onopen = () => { syncOk = true; renderStatus(); };
+    es.onerror = () => { syncOk = false; renderStatus(); };
+    es.onmessage = e => {
+      try{
+        const m = JSON.parse(e.data); if(m.event !== 'message') return;
+        const ev = fromMsg(m);
+        if(ev && applyEv(ev)){
+          save(); renderMapData(); renderList(); renderStatus();
+          const sl = SLOT_BY_ID[ev.slot], who = ev.by && ev.by !== S.me ? ev.by : (ev.by ? '' : 'Quelqu’un');
+          if(who && ev.k !== 'occ') toast(who + ' : une place se libère ' + (sl && sl.name ? sl.name.replace(/^Rue/, 'rue') : 'dans la rue') + '.');
+        }
+      }catch(err){}
+    };
+  }catch(e){}
+}
+
+/* ---------- Départ / arrivée ---------- */
+function markFree(p, when, soonUntil, src){
+  const slot = nearestSlot(p);
+  if(slot){
+    if(soonUntil) share(slot.id, 'soon', soonUntil); else share(slot.id, 'free');
+    return {slotId:slot.id};
+  }
+  const l = {id:'l' + Date.now(), lat:p.lat, lng:p.lng, t:Date.now(), free:when, soon:soonUntil || null};
+  S.loose.push(l); return {looseId:l.id};
+}
+async function startDepart(src, paramPos){
+  const now = Date.now();
+  if(pendingDepart && now - pendingDepart.t < 60000){ toast('Départ déjà en cours.'); return; }
+  let cur = paramPos || null;
+  if(!cur){ try{ cur = await getPos(8000); }catch(e){} }
+  let spot = null;
+  if(S.parked && (!cur || dist(S.parked, cur) < 300)) spot = {lat:S.parked.lat, lng:S.parked.lng};
+  else if(cur) spot = {lat:cur.lat, lng:cur.lng};
+  if(!spot){ toast('Position introuvable : autorise la localisation pour ce site.'); return; }
+  const eta = now + S.model.delay*1000;
+  const ref = markFree(spot, eta, eta, src);
+  S.history.push({type:'depart', lat:spot.lat, lng:spot.lng, t:now});
+  S.parked = null; save();
+  pendingDepart = Object.assign({spot, t:now}, ref);
+  requestWake(); startWatch();
+  toast(ref.slotId ? 'Départ détecté : ta place passe en libre dans ~' + Math.round(S.model.delay) + ' s.'
+                   : 'Départ détecté, mais aucune place cartographiée ici : un point est ajouté.');
+  fly(spot, 18);
+  render();
+  const myT = now;
+  setTimeout(() => { if(pendingDepart && pendingDepart.t === myT){ pendingDepart = null; releaseWake(); render(); } }, 10*60*1000);
+}
+function confirmMove(){
+  const now = Date.now(), measured = (now - pendingDepart.t)/1000 - 5;
+  if(measured > 2 && measured < 600) learnDelay(measured);
+  if(pendingDepart.slotId) share(pendingDepart.slotId, 'free');
+  if(pendingDepart.looseId){ const l = S.loose.find(x => x.id === pendingDepart.looseId); if(l){ l.free = now; l.soon = null; } }
+  pendingDepart = null; releaseWake(); save(); render();
+  toast('Tu roules : place libérée. Délai mesuré : ' + Math.max(0, Math.round(measured)) + ' s.');
+}
+async function doArrive(src, paramPos){
+  let cur = paramPos || null;
+  if(!cur){ try{ cur = await getPos(); }catch(e){ toast('Position introuvable : autorise la localisation pour ce site.'); return; } }
+  const now = Date.now();
+  if(pendingDepart){ pendingDepart = null; releaseWake(); }
+  const slot = nearestSlot(cur);
+  if(slot){
+    const st = S.slotState[slot.id] || (S.slotState[slot.id] = {});
+    if(st.free && st.free > (st.occ||0)) learnTau(Math.max(0, (now - st.free)/1000), true);
+    share(slot.id, 'occ');
+  }
+  S.loose.forEach(l => { if(dist(l, cur) < LINK_M) l.done = true; });
+  S.parked = {lat:cur.lat, lng:cur.lng, t:now};
+  S.history.push({type:'arrive', lat:cur.lat, lng:cur.lng, t:now});
+  save(); render();
+  toast('Voiture garée' + (slot ? ' sur une place cartographiée.' : '. Aucune place cartographiée ici : dessine-la avec Carto.'));
+}
+function report(slotId, isFree){
+  const now = Date.now(), st = S.slotState[slotId] || (S.slotState[slotId] = {});
+  if(!isFree && st.free && st.free > (st.occ||0) && now - st.free < 3600e3) learnTau((now - st.free)/1000, false);
+  share(slotId, isFree ? 'free' : 'occ');
+  const s = SLOT_BY_ID[slotId];
+  if(s) S.history.push({type:isFree ? 'report_free' : 'report_occ', lat:s.lat, lng:s.lng, t:now, seg:s.segId});
+  save(); render();
+}
+
+/* ---------- Position en continu ---------- */
+let watchId = null, meMarker = null;
+function startWatch(){
+  if(watchId !== null || !navigator.geolocation) return;
+  watchId = navigator.geolocation.watchPosition(p => {
+    lastPos = {lat:p.coords.latitude, lng:p.coords.longitude, acc:p.coords.accuracy, speed:p.coords.speed};
+    if(pendingDepart){
+      const d = dist(lastPos, pendingDepart.spot);
+      if(d > MOVE_M || (lastPos.speed != null && lastPos.speed > 2.5 && d > 15)) confirmMove();
+    }
+    drawMe(); renderList();
+  }, () => {}, {enableHighAccuracy:true, maximumAge:3000, timeout:20000});
+}
+function drawMe(){
+  if(!mapReady || !lastPos) return;
+  if(!meMarker){ const el = document.createElement('div'); el.className = 'me-dot'; meMarker = new maplibregl.Marker({element:el}).setLngLat([lastPos.lng, lastPos.lat]).addTo(map); }
+  else meMarker.setLngLat([lastPos.lng, lastPos.lat]);
+}
+
+/* ---------- Carte ---------- */
+const map = new maplibregl.Map({
+  container:'map', style:'https://tiles.openfreemap.org/styles/liberty',
+  center:CENTER, zoom:17.6, pitch:55, bearing:-20, maxPitch:75,
+  attributionControl:{compact:true}
+});
+map.addControl(new maplibregl.NavigationControl({showCompass:true, showZoom:false, visualizePitch:true}), 'bottom-right');
+
+function fly(p, z){ if(mapReady) map.flyTo({center:[p.lng, p.lat], zoom:z || 18, essential:true}); }
+function firstSymbolId(){ const l = map.getStyle().layers.find(x => x.type === 'symbol'); return l ? l.id : undefined; }
+function buildingLayers(){ return map.getStyle().layers.filter(l => /building/.test(l.id)).map(l => l.id); }
+
+map.on('load', () => {
+  // Photo aérienne IGN (gratuite, licence ouverte)
+  map.addSource('ign', {type:'raster', tileSize:256, maxzoom:19, attribution:'© IGN BD ORTHO',
+    tiles:['https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/jpeg&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}']});
+  map.addLayer({id:'sat', type:'raster', source:'ign', layout:{visibility:'none'}}, firstSymbolId());
+
+  // Bâtiments 3D si le style n'en a pas déjà
+  if(!map.getStyle().layers.some(l => l.type === 'fill-extrusion')){
+    const src = Object.keys(map.getStyle().sources).find(k => map.getStyle().sources[k].type === 'vector');
+    if(src) map.addLayer({id:'building-3d-pl', type:'fill-extrusion', source:src, 'source-layer':'building', minzoom:14,
+      paint:{'fill-extrusion-color':'#d9d3c9', 'fill-extrusion-height':['coalesce',['get','render_height'],8],
+        'fill-extrusion-base':['coalesce',['get','render_min_height'],0], 'fill-extrusion-opacity':0.85}});
+  }
+
+  map.addSource('segs', {type:'geojson', data:emptyFC()});
+  map.addSource('slots', {type:'geojson', data:emptyFC()});
+  map.addSource('loose', {type:'geojson', data:emptyFC()});
+  map.addSource('draft', {type:'geojson', data:emptyFC()});
+  map.addSource('parks', {type:'geojson', data:emptyFC()});
+
+  map.addLayer({id:'segs-line', type:'line', source:'segs',
+    paint:{'line-color':['get','color'], 'line-width':['interpolate',['linear'],['zoom'],15,1,19,3], 'line-opacity':0.55, 'line-dasharray':[2,1]}});
+  map.addLayer({id:'slots-fill', type:'fill', source:'slots',
+    paint:{'fill-color':['match',['get','k'],'high','#22b35e','mid','#e0a43a','low','#9fb3a3','soon','#f07a3a','occ','#5c676b','#a3adb1'],
+      'fill-opacity':['match',['get','k'],'high',0.95,'mid',0.9,'low',0.75,0.45],
+      'fill-outline-color':['get','tcolor']}});
+  map.addLayer({id:'slots-car', type:'fill-extrusion', source:'slots', minzoom:15.5,
+    filter:['in',['get','k'],['literal',['occ','unk','soon']]],
+    paint:{'fill-extrusion-color':['match',['get','k'],'occ','#3d474b','soon','#f07a3a','#a9b4b8'],
+      'fill-extrusion-height':['match',['get','k'],'soon',1.55,1.45], 'fill-extrusion-base':0.25, 'fill-extrusion-opacity':0.95}});
+  map.addLayer({id:'loose', type:'circle', source:'loose',
+    paint:{'circle-radius':9, 'circle-color':['match',['get','k'],'high','#22b35e','mid','#e0a43a','soon','#f07a3a','#9fb3a3'],
+      'circle-stroke-color':'#fff', 'circle-stroke-width':2}});
+  map.addLayer({id:'parks', type:'circle', source:'parks', layout:{visibility:'none'},
+    paint:{'circle-radius':8, 'circle-color':['match',['get','fee'],'free','#1f9d55','pay','#2f5fb3','#7d8b90'], 'circle-stroke-color':'#fff', 'circle-stroke-width':2}});
+  map.addLayer({id:'draft-line', type:'line', source:'draft', paint:{'line-color':'#f0c419', 'line-width':4}});
+  map.addLayer({id:'draft-pt', type:'circle', source:'draft', filter:['==',['geometry-type'],'Point'],
+    paint:{'circle-radius':7, 'circle-color':'#f0c419', 'circle-stroke-color':'#14262c', 'circle-stroke-width':2}});
+
+  mapReady = true;
+  rebuildSlots(); render(); drawMe();
+  loadOsmStreets();
+});
+map.on('error', e => { if(e && e.error && /style/i.test(String(e.error.message||''))) toast('La carte n’a pas pu se charger (réseau).'); });
+
+function emptyFC(){return {type:'FeatureCollection', features:[]};}
+
+/* ---------- Rendu ---------- */
+function slotsFC(){
+  const now = Date.now();
+  return {type:'FeatureCollection', features:SLOTS.map(s => {
+    const st = slotState(s.id, now);
+    return {type:'Feature', properties:{id:s.id, k:st.k, tcolor:(TYPES[s.type]||TYPES.unk).color}, geometry:{type:'Polygon', coordinates:[s.ring]}};
+  })};
+}
+function segsFC(){
+  return {type:'FeatureCollection', features:S.segments.concat(OSM_SEGS).map(seg => ({type:'Feature',
+    properties:{id:seg.id, color:(TYPES[seg.type]||TYPES.unk).color}, geometry:{type:'LineString', coordinates:seg.pts}}))};
+}
+function looseFC(){
+  const now = Date.now();
+  return {type:'FeatureCollection', features:S.loose.filter(l => !l.done).map(l => {
+    let k = null;
+    if(l.soon && now < l.soon) k = 'soon'; else { const f = freeLevel(l.free, now); k = f && f.k; }
+    if(!k) return null;
+    return {type:'Feature', properties:{id:l.id, k}, geometry:{type:'Point', coordinates:[l.lng, l.lat]}};
+  }).filter(Boolean)};
+}
+function draftFC(){
+  const f = draft.map(p => ({type:'Feature', properties:{}, geometry:{type:'Point', coordinates:p}}));
+  if(draft.length > 1) f.push({type:'Feature', properties:{}, geometry:{type:'LineString', coordinates:draft}});
+  return {type:'FeatureCollection', features:f};
+}
+function setData(id, data){ const s = mapReady && map.getSource(id); if(s) s.setData(data); }
+let carMarker = null, destMarker = null;
+function drawPins(){
+  if(!mapReady) return;
+  if(carMarker){ carMarker.remove(); carMarker = null; }
+  if(S.parked){ const el = document.createElement('div'); el.className = 'car-pin'; el.textContent = '🚗';
+    carMarker = new maplibregl.Marker({element:el}).setLngLat([S.parked.lng, S.parked.lat])
+      .setPopup(new maplibregl.Popup({offset:16}).setHTML('<div class="pop"><b>Ta voiture</b><br>Garée à ' + hhmm(S.parked.t) + '</div>')).addTo(map); }
+  if(destMarker){ destMarker.remove(); destMarker = null; }
+  $('btnClearDest').hidden = !S.dest;
+  if(S.dest){ const el = document.createElement('div'); el.className = 'dest-pin';
+    destMarker = new maplibregl.Marker({element:el}).setLngLat([S.dest.lng, S.dest.lat])
+      .setPopup(new maplibregl.Popup({offset:14}).setHTML('<div class="pop"><b>Destination</b><br>' + esc(S.dest.label) + '</div>')).addTo(map); }
+}
+function renderMapData(){ setData('slots', slotsFC()); setData('loose', looseFC()); }
+function renderStatus(){
+  const now = Date.now(); let main, sub;
+  if(pendingDepart){
+    const st = pendingDepart.slotId ? slotState(pendingDepart.slotId, now) : null;
+    main = 'Départ en cours';
+    sub = st && st.k === 'soon' ? 'Ta place passe en libre dans ~' + st.secs + ' s · garde l’appli ouverte pour confirmer' : 'En attente que la voiture bouge pour confirmer';
+  }else if(mode === 'draw'){
+    main = 'Mode cartographie';
+    sub = draft.length ? draft.length + ' point' + (draft.length > 1 ? 's' : '') + ' posé' + (draft.length > 1 ? 's' : '') : 'Touche le début de la file de places';
+  }else{
+    let free = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid' || k === 'soon') free++; });
+    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' en ce moment' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
+    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places sur la carte' : SLOTS.length + ' places sur la carte · touche Carto pour en ajouter';
+  }
+  if(!S.me) sub = 'Choisis ton prénom dans ⚙︎ pour que les autres voient qui signale · ' + sub;
+  $('status').innerHTML = '<strong>' + esc(main) + '</strong><small>' + (syncOk ? '<span style="color:var(--free);font-weight:600">● En direct</span> · ' : '') + esc(sub) + '</small>';
+}
+let openStreet = null;
+function chanceColor(p){ return p >= .5 ? 'var(--free)' : p >= .25 ? 'var(--mid)' : 'var(--soon)'; }
+function sparkSVG(street){
+  const d = new Date(), pts = [];
+  for(let h = 0; h < 24; h++){ const x = new Date(d); x.setHours(h, 30, 0, 0); pts.push(chanceAt(street, x)); }
+  const W = 280, H = 64, px = h => 6 + h*(W - 12)/23, py = p => H - 16 - p*(H - 24);
+  const line = pts.map((p, h) => px(h).toFixed(1) + ',' + py(p).toFixed(1)).join(' ');
+  const area = px(0).toFixed(1) + ',' + py(0) + ' ' + line + ' ' + px(23).toFixed(1) + ',' + py(0);
+  const nh = d.getHours() + d.getMinutes()/60;
+  return '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Chances de trouver une place au fil de la journée">' +
+    '<polygon points="' + area + '" fill="var(--accent)" opacity=".12"/>' +
+    '<polyline points="' + line + '" fill="none" stroke="var(--accent)" stroke-width="2"/>' +
+    '<line x1="' + px(nh) + '" x2="' + px(nh) + '" y1="4" y2="' + (H - 16) + '" stroke="var(--fg)" stroke-dasharray="3 3" stroke-width="1"/>' +
+    [0, 6, 12, 18, 23].map(h => '<text x="' + px(h) + '" y="' + (H - 2) + '" font-size="10" text-anchor="middle" fill="var(--muted)">' + h + 'h</text>').join('') +
+    '</svg>';
+}
+function renderList(){
+  const ref = S.dest || lastPos || {lat:CENTER[1], lng:CENTER[0]};
+  $('listTitle').textContent = S.dest ? 'Rues près de ta destination' : lastPos ? 'Rues autour de toi' : 'Rues de Juan-les-Pins';
+  const now = Date.now(), nowD = new Date(now), groups = {};
+  SLOTS.forEach(s => {
+    const key = s.name ? 'n:' + s.name : 's:' + s.segId;
+    const g = groups[key] || (groups[key] = {name:s.name || 'Rue sans nom', n:0, d:Infinity, best:null, pmr:0});
+    if(s.type === 'pmr') g.pmr++; else g.n++;
+    const d = dist(ref, s); if(d < g.d){ g.d = d; g.best = s; }
+  });
+  const list = Object.values(groups).filter(g => g.d < 1500).map(g => Object.assign(g, chanceNow(g.name)))
+    .sort((a,b) => b.p - a.p || a.d - b.d).slice(0, 14);
+  const ul = $('list'); ul.innerHTML = '';
+  if(!list.length){
+    ul.innerHTML = '<li class="empty">Pas encore de places cartographiées près d’ici. Touche <b>Carto</b> à droite de la carte, puis dessine les files de places de ta rue sur la photo aérienne.</li>';
+    return;
+  }
+  list.forEach(g => {
+    const li = document.createElement('li'), open = openStreet === g.name;
+    li.innerHTML = '<span class="pct" style="color:' + chanceColor(g.p) + '">' + Math.round(g.p*100) + '<small>%</small></span>' +
+      '<div class="li-main"><b></b><span class="l1"></span><span class="l2"></span></div><span class="li-dist">' + fmtDist(g.d) + '</span>';
+    li.querySelector('b').textContent = g.name;
+    li.querySelector('.l1').textContent = 'de chances de trouver en 5 min · ' + (g.n ? (g.n + ' places') : '') + (g.pmr ? ' + ' + g.pmr + ' PMR' : '');
+    li.querySelector('.l2').textContent = (g.nl ? g.nl + (g.nl > 1 ? ' places signalées libres' : ' place signalée libre') + ' en direct · ' : '') + (ruleText(g.name, nowD) || '');
+    if(open){
+      const rule = RULES[g.name], det = document.createElement('div'); det.className = 'detail';
+      det.innerHTML = '<div class="det-row"><span>Prévision (heure, jour, saison, règles)</span><b>' + Math.round(g.prior*100) + ' %</b></div>' +
+        '<div class="det-row"><span>Signalements en direct</span><b>' + (g.live > 0.05 ? Math.round(g.live*100) + ' %' : 'aucun') + '</b></div>' +
+        '<p class="det-h">Aujourd’hui, heure par heure</p>' + sparkSVG(g.name) +
+        (rule ? '<p class="det-src">' + esc(rule.src) + (rule.residents ? ' · Abonnement résidents : ' + esc(rule.residents) : '') + '</p>' : '');
+      li.appendChild(det);
+    }
+    li.addEventListener('click', () => { openStreet = open ? null : g.name; renderList(); if(!open) fly(g.best, 18.5); });
+    ul.appendChild(li);
+  });
+}
+function render(){
+  if(mapReady){ setData('segs', segsFC()); setData('draft', draftFC()); renderMapData(); drawPins(); }
+  renderStatus(); renderList();
+}
+
+/* ---------- Clics sur la carte ---------- */
+let popup = null;
+map.on('click', e => {
+  if(mode === 'draw'){ draft.push([e.lngLat.lng, e.lngLat.lat]); setData('draft', draftFC()); renderStatus(); return; }
+  const f = map.queryRenderedFeatures(e.point, {layers:['slots-car','slots-fill','loose','parks']});
+  if(!f.length) return;
+  const p = f[0].properties, layer = f[0].layer.id;
+  let html = '';
+  if(layer === 'slots-car' || layer === 'slots-fill'){
+    const s = SLOT_BY_ID[p.id]; if(!s) return;
+    const st = slotState(s.id, Date.now()), seg = segById(s.segId);
+        const raw = S.slotState[s.id], by = raw && raw.by && st.k !== 'unk' ? ' · signalé par ' + raw.by : '';
+    html = '<div class="pop"><b>' + esc(s.name || 'Place dans la rue') + '</b><br>' + esc((TYPES[s.type]||TYPES.unk).label) + ' · ' + esc(stateText(st) + by) +
+      '<div class="row"><button class="go" data-act="free" data-id="' + s.id + '">Libre</button><button data-act="occ" data-id="' + s.id + '">Occupée</button></div>' +
+      (seg && seg.src !== 'osm' ? '<div class="row"><button class="del" data-act="delseg" data-id="' + seg.id + '">Supprimer cette file</button></div>' :
+        '<div class="row"><small>File issue d’OpenStreetMap</small></div>') + '</div>';
+  }else if(layer === 'loose'){
+    html = '<div class="pop"><b>Place libérée</b><br>Hors places cartographiées<div class="row"><button data-act="loosegone" data-id="' + p.id + '">Plus là</button></div></div>';
+  }else if(layer === 'parks'){
+    html = '<div class="pop"><b>' + esc(p.name) + '</b><br>' + (p.fee === 'free' ? 'Gratuit' : p.fee === 'pay' ? 'Payant' : 'Tarif inconnu') + (p.cap ? ' · ' + esc(p.cap) + ' places' : '') + '</div>';
+  }
+  if(popup) popup.remove();
+  popup = new maplibregl.Popup({offset:8}).setLngLat(e.lngLat).setHTML(html).addTo(map);
+});
+['slots-car','slots-fill','loose','parks'].forEach(id => {
+  map.on('mouseenter', id, () => { if(mode !== 'draw') map.getCanvas().style.cursor = 'pointer'; });
+  map.on('mouseleave', id, () => { map.getCanvas().style.cursor = ''; });
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const id = b.dataset.id, act = b.dataset.act;
+  if(act === 'free'){ report(id, true); toast('Place signalée libre.'); }
+  else if(act === 'occ'){ report(id, false); toast('Place signalée occupée.'); }
+  else if(act === 'delseg'){ if(BASE_SEGS.some(b => b.id === id)) S.removedBase.push(id); S.segments = S.segments.filter(s => s.id !== id); rebuildSlots(); save(); render(); toast('File supprimée.'); }
+  else if(act === 'loosegone'){ const l = S.loose.find(x => x.id === id); if(l){ learnTau(Math.max(0,(Date.now() - l.free)/1000), false); l.done = true; save(); render(); } }
+  if(popup){ popup.remove(); popup = null; }
+});
+
+/* ---------- Mode cartographie ---------- */
+function buildChips(){
+  const box = $('typeChips'); box.innerHTML = '';
+  Object.entries(TYPES).forEach(([k, t]) => {
+    if(k === 'unk') return;
+    const b = document.createElement('button'); b.className = 'chip'; b.type = 'button';
+    b.textContent = t.label; b.setAttribute('aria-pressed', String(k === draftType));
+    b.addEventListener('click', () => { draftType = k; buildChips(); });
+    box.appendChild(b);
+  });
+}
+function setMode(m){
+  mode = m; draft = [];
+  $('drawbar').hidden = m !== 'draw'; $('tDraw').setAttribute('aria-pressed', String(m === 'draw'));
+  if(m === 'draw'){ buildChips(); setSat(true); set3d(false); if(map.getZoom() < 18) map.easeTo({zoom:18.5}); }
+  if(popup){ popup.remove(); popup = null; }
+  render();
+}
+$('tDraw').addEventListener('click', () => setMode(mode === 'draw' ? 'view' : 'draw'));
+$('dUndo').addEventListener('click', () => { draft.pop(); setData('draft', draftFC()); renderStatus(); });
+$('dSave').addEventListener('click', async () => {
+  if(draft.length < 2){ toast('Pose au moins deux points : le début et la fin de la file.'); return; }
+  const seg = {id:'u' + Date.now(), pts:draft.slice(), type:draftType, name:'', src:'user'};
+  S.segments.push(seg); draft = []; rebuildSlots(); save(); render();
+  const n = SLOTS.filter(s => s.segId === seg.id).length;
+  toast(n + ' place' + (n > 1 ? 's' : '') + ' ajoutée' + (n > 1 ? 's' : '') + '. Continue avec la file suivante.');
+  // Nom de la rue
+  try{
+    const mid = seg.pts[Math.floor(seg.pts.length/2)];
+    const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&lat=' + mid[1] + '&lon=' + mid[0], {headers:{'Accept-Language':'fr'}});
+    const j = await r.json(); const road = j.address && (j.address.road || j.address.pedestrian || j.address.square);
+    if(road){ seg.name = road; rebuildSlots(); save(); render(); }
+  }catch(e){}
+});
+
+/* ---------- Outils de vue ---------- */
+let is3d = true, isSat = false;
+function set3d(on){
+  is3d = on; $('t3d').setAttribute('aria-pressed', String(on));
+  if(!mapReady) return;
+  map.easeTo({pitch:on ? 55 : 0, bearing:on ? map.getBearing() : 0});
+  buildingLayers().forEach(id => { if(map.getLayer(id) && map.getLayer(id).type === 'fill-extrusion') map.setLayoutProperty(id, 'visibility', on && !isSat ? 'visible' : 'none'); });
+}
+function setSat(on){
+  isSat = on; $('tSat').setAttribute('aria-pressed', String(on));
+  if(!mapReady) return;
+  map.setLayoutProperty('sat', 'visibility', on ? 'visible' : 'none');
+  buildingLayers().forEach(id => { if(map.getLayer(id) && map.getLayer(id).type === 'fill-extrusion') map.setLayoutProperty(id, 'visibility', is3d && !on ? 'visible' : 'none'); });
+}
+$('t3d').addEventListener('click', () => set3d(!is3d));
+$('tSat').addEventListener('click', () => setSat(!isSat));
+let parksOn = false;
+$('tPark').addEventListener('click', async () => {
+  parksOn = !parksOn; $('tPark').setAttribute('aria-pressed', String(parksOn));
+  if(parksOn && !PARKINGS.length) await loadParkings();
+  if(mapReady) map.setLayoutProperty('parks', 'visibility', parksOn ? 'visible' : 'none');
+});
+$('tMe').addEventListener('click', async () => {
+  startWatch();
+  if(lastPos) fly(lastPos, 18);
+  else { try{ const p = await getPos(); lastPos = p; drawMe(); fly(p, 18); }catch(e){ toast('Autorise la localisation pour ce site dans les réglages du navigateur.'); } }
+});
+
+/* ---------- Données OpenStreetMap ---------- */
+async function overpass(q){
+  const r = await fetch(OVERPASS, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data=' + encodeURIComponent(q)});
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+const PARK_OK = /^(lane|street_side|on_kerb|half_on_kerb|shoulder|yes|parallel|diagonal|perpendicular|marked)$/;
+async function loadOsmStreets(force){
+  let segs = force ? null : readCache('plj:osmst', 7*864e5);
+  if(!segs){
+    try{
+      const j = await overpass('[out:json][timeout:25];way["highway"][~"^parking:(left|right|both|lane)"~"."](' + BBOX.join(',') + ');out tags geom;');
+      segs = [];
+      j.elements.forEach(w => {
+        if(!w.geometry || w.geometry.length < 2) return;
+        const t = w.tags || {}, pts = w.geometry.map(g => [g.lon, g.lat]);
+        ['left','right'].forEach(side => {
+          const v = t['parking:' + side] || t['parking:both'] || t['parking:lane:' + side] || t['parking:lane:both'];
+          if(!v || !PARK_OK.test(v)) return;
+          const fee = t['parking:' + side + ':fee'] || t['parking:both:fee'];
+          const cond = t['parking:condition:' + side] || t['parking:condition:both'] || '';
+          const restr = t['parking:' + side + ':restriction'] || t['parking:both:restriction'] || '';
+          let type = 'unk';
+          if(fee === 'no' || cond === 'free') type = 'free';
+          else if(fee === 'yes' || cond === 'ticket') type = 'pay';
+          else if(/disc/.test(cond + restr)) type = 'blue';
+          else if(/resid/.test(cond + restr)) type = 'res';
+          segs.push({id:'o' + w.id + side[0], pts, type, name:t.name || '', src:'osm', side:side === 'left' ? 1 : -1});
+        });
+      });
+      writeCache('plj:osmst', segs);
+    }catch(e){ segs = []; toast('Les rues OpenStreetMap n’ont pas pu être chargées. Tu peux cartographier toi-même avec Carto.'); }
+  }
+  OSM_SEGS = segs; rebuildSlots(); render(); renderSettings();
+}
+async function loadParkings(){
+  let els = readCache('plj:osmpark', 7*864e5);
+  if(!els){
+    try{
+      const j = await overpass('[out:json][timeout:25];nwr["amenity"="parking"]["name"](' + BBOX.join(',') + ');out center tags;');
+      els = j.elements.map(e => ({lat:e.lat != null ? e.lat : (e.center && e.center.lat), lng:e.lon != null ? e.lon : (e.center && e.center.lon), tags:e.tags || {}}))
+        .filter(e => e.lat != null && !/^(private|customers|no)$/.test(e.tags.access || ''));
+      writeCache('plj:osmpark', els);
+    }catch(e){ els = []; toast('Parkings non chargés (réseau).'); }
+  }
+  const now = new Date(), summer = now.getMonth() >= 5 && now.getMonth() <= 8;
+  PARKINGS = els.map(e => {
+    const n = (e.tags.name || '').toLowerCase();
+    let fee = e.tags.fee === 'no' ? 'free' : e.tags.fee === 'yes' ? 'pay' : 'unk';
+    if(/nation|chataign|châtaign/.test(n)) fee = 'free';
+    if(/palmiers/.test(n)) fee = summer ? 'pay' : 'free';
+    if(/gallice|congr|ambassadeurs|esterel|estérel|antibes.les.pins/.test(n)) fee = 'pay';
+    return {type:'Feature', properties:{name:e.tags.name, fee, cap:e.tags.capacity || ''}, geometry:{type:'Point', coordinates:[e.lng, e.lat]}};
+  });
+  setData('parks', {type:'FeatureCollection', features:PARKINGS});
+}
+
+/* ---------- Destination ---------- */
+$('searchForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const q = $('q').value.trim(); if(!q) return;
+  try{
+    const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=fr&bounded=1&viewbox=7.06,43.61,7.16,43.53&q=' + encodeURIComponent(q), {headers:{'Accept-Language':'fr'}});
+    const j = await r.json();
+    if(!j.length){ toast('Adresse introuvable à Juan-les-Pins / Antibes.'); return; }
+    S.dest = {lat:+j[0].lat, lng:+j[0].lon, label:j[0].display_name.split(',').slice(0,2).join(',')}; save();
+    fly(S.dest, 18); render(); $('q').blur();
+  }catch(err){ toast('Recherche impossible (réseau).'); }
+});
+$('btnClearDest').addEventListener('click', () => { S.dest = null; save(); render(); });
+
+/* ---------- Boutons du bas ---------- */
+$('btnPark').addEventListener('click', () => doArrive('manuel'));
+$('btnLeave').addEventListener('click', () => startDepart('manuel'));
+
+/* ---------- Réglages ---------- */
+const base = location.origin + location.pathname;
+$('busUrl').textContent = 'https://ntfy.sh/placelibre-juan-q7m2x9k4';
+
+function buildMe(){
+  const box = $('meChips'); box.innerHTML = '';
+  ['Shad','Tom','Stan'].forEach(n => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = n;
+    b.setAttribute('aria-pressed', String(S.me === n));
+    b.addEventListener('click', () => { S.me = n; save(); buildMe(); renderStatus(); toast('Tu es ' + n + '.'); });
+    box.appendChild(b);
+  });
+}
+function renderSettings(){
+  buildMe();
+  const m = S.model;
+  $('modelKv').innerHTML =
+    '<span>Délai Bluetooth → départ</span><span>' + Math.round(m.delay) + ' s</span>' +
+    '<span>Départs mesurés</span><span>' + m.delayN + '</span>' +
+    '<span>Durée de vie d’une place libre</span><span>' + fmtAge(m.tau) + '</span>' +
+    '<span>Signalements utilisés</span><span>' + m.tauN + '</span>';
+  const userSlots = SLOTS.filter(s => s.src !== 'osm').length;
+  $('dataInfo').textContent = S.segments.length + ' files dessinées (' + userSlots + ' places) · ' + OSM_SEGS.length + ' côtés de rue venant d’OpenStreetMap · ' +
+    S.history.length + ' événements enregistrés. Tout reste sur ton téléphone.';
+}
+$('btnMenu').addEventListener('click', () => { renderSettings(); $('settings').hidden = false; });
+$('btnCloseSet').addEventListener('click', () => { $('settings').hidden = true; $('resetConfirm').hidden = true; });
+document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
+  navigator.clipboard.writeText($(b.dataset.copy).textContent).then(() => toast('Lien copié.'), () => toast('Copie impossible : appuie longtemps sur le lien pour le sélectionner.'));
+}));
+$('btnExport').addEventListener('click', () => {
+  const txt = JSON.stringify({app:'placelibre', v:2, segments:S.segments});
+  navigator.clipboard.writeText(txt).then(() => toast('Cartographie copiée : colle-la dans un message.'),
+    () => { $('importBox').value = txt; $('importBox').select(); toast('Sélectionne le texte et copie-le à la main.'); });
+});
+$('btnImport').addEventListener('click', () => {
+  try{
+    const j = JSON.parse($('importBox').value);
+    const segs = (j.segments || []).filter(s => s && s.id && Array.isArray(s.pts) && s.pts.length > 1);
+    let added = 0;
+    segs.forEach(s => { if(!S.segments.some(x => x.id === s.id)){ S.segments.push({id:s.id, pts:s.pts, type:TYPES[s.type] ? s.type : 'unk', name:String(s.name||''), src:'user'}); added++; } });
+    rebuildSlots(); save(); render(); renderSettings(); $('importBox').value = '';
+    toast(added + ' file' + (added > 1 ? 's' : '') + ' importée' + (added > 1 ? 's' : '') + '.');
+  }catch(e){ toast('Texte non reconnu : colle exactement ce qui a été copié depuis l’appli.'); }
+});
+$('btnReloadData').addEventListener('click', () => { toast('Rechargement…'); loadOsmStreets(true); });
+let resetArmed = false;
+$('btnReset').addEventListener('click', () => {
+  if(!resetArmed){ resetArmed = true; $('resetConfirm').hidden = false; setTimeout(() => { resetArmed = false; $('resetConfirm').hidden = true; }, 5000); return; }
+  S = mergeBase(clone(DEF)); save(); resetArmed = false; $('resetConfirm').hidden = true;
+  rebuildSlots(); render(); renderSettings(); toast('Données effacées.');
+});
+
+/* ---------- Démarrage ---------- */
+rebuildSlots(); render(); startWatch(); syncStart();
+setInterval(() => { renderMapData(); renderStatus(); if(document.visibilityState === 'visible') renderList(); }, 2000);
+
+const P = new URLSearchParams(location.search), evt = P.get('evt');
+if(evt){
+  const lat = parseFloat(P.get('lat')), lng = parseFloat(P.get('lng'));
+  const pp = (!isNaN(lat) && !isNaN(lng)) ? {lat, lng} : null;
+  try{ history.replaceState(null, '', location.pathname); }catch(e){}
+  if(evt === 'depart') startDepart('Bluetooth', pp);
+  else if(evt === 'arrive') doArrive('Bluetooth', pp);
+}
+}
+
+/* ---------- Chargement de la bibliothèque de carte (avec source de secours) ---------- */
+(function(){
+  const LIBS = ['https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js',
+                'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js'];
+  function showFail(){
+    document.getElementById('map').innerHTML =
+      '<div class="fail"><b>La carte ne peut pas s’afficher ici.</b>' +
+      '<p>Cet écran bloque la connexion à internet (c’est le cas dans l’aperçu de Claude).</p>' +
+      '<p>Mets le fichier en ligne (par exemple sur app.netlify.com/drop), puis ouvre le lien obtenu sur ton téléphone dans Safari ou Chrome.</p></div>';
+    const st = document.getElementById('status');
+    if(st) st.innerHTML = '<strong>Carte indisponible dans cet aperçu</strong><small>Ouvre l’appli depuis son lien en ligne</small>';
+  }
+  function load(i){
+    if(i >= LIBS.length) return showFail();
+    const s = document.createElement('script');
+    s.src = LIBS[i];
+    s.onload = () => { if(window.maplibregl){ try{ start(); }catch(e){ console.error(e); showFail(); } } else load(i + 1); };
+    s.onerror = () => load(i + 1);
+    document.head.appendChild(s);
+  }
+  load(0);
+})();
+</script>
+</body>
+</html>

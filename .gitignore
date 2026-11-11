@@ -1,0 +1,26 @@
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+.netlify/
+
+# Dépendances et caches
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Données réelles et artefacts locaux
+data/private/
+data/raw/
+*.sqlite
+*.sqlite3
+*.db
+logs/
+*.log
+
+# Système
+.DS_Store
+Thumbs.db
