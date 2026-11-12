@@ -60,7 +60,8 @@ Un événement est un message JSON envoyé sur le canal temps réel (ntfy). Vers
 
 Aucune coordonnée GPS n'est envoyée pour les places du registre : la place suffit.
 Le Raccourci iPhone envoie un format court `{k:'depart'|'arrive', lat, lng, by}`, converti à la réception
-en événement `soon` ou `occ` sur la place la plus proche (35 m au plus).
+en événement `soon` ou `occ` sur la place la plus proche (35 m au plus), puis validé
+comme les autres événements. Sans `ts`, l'heure est celle du serveur ntfy à la réception.
 
 ### Événements refusés à la réception
 

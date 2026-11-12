@@ -11,7 +11,7 @@ const EV_V = 1;
 const EV_KINDS = new Set(['soon', 'free', 'occ', 'ctl']);
 const EV_MAX_AHEAD = 10*60e3;   // tolérance d'horloge entre téléphones
 function validEv(ev){
-  return !!ev && typeof ev.slot === 'string' && EV_KINDS.has(ev.k) &&
+  return !!ev && typeof ev.slot === 'string' && isShared(ev.slot) && EV_KINDS.has(ev.k) &&
     Number.isFinite(ev.ts) && ev.ts > 0 && ev.ts <= Date.now() + EV_MAX_AHEAD &&
     (ev.v == null || ev.v <= EV_V);
 }
@@ -45,7 +45,8 @@ function fromMsg(m){
     if(isNaN(p.lat) || isNaN(p.lng)) return null;
     const sl = nearestSlot(p, 35); if(!sl) return null;
     const base = {id:ev.id, slot:sl.id, ts:ev.ts, by:ev.by || '', src:'bluetooth', acc:num(ev.acc)};
-    return ev.k === 'depart' ? Object.assign(base, {k:'soon', eta:ev.ts + S.model.delay*1000}) : Object.assign(base, {k:'occ'});
+    const conv = ev.k === 'depart' ? Object.assign(base, {k:'soon', eta:ev.ts + S.model.delay*1000}) : Object.assign(base, {k:'occ'});
+    return validEv(conv) ? conv : null;   // même contrôle (place du registre, date) que les autres événements
   }
   return validEv(ev) ? ev : null;
 }
