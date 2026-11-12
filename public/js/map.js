@@ -92,6 +92,7 @@ function initMap(){
       const s = SLOT_BY_ID[p.id]; if(!s) return;
       const st = slotState(s.id, Date.now()), seg = segById(s.segId);
       const raw = S.slotState[s.id], by = raw && raw.by && st.k !== 'unk' ? ' · signalé par ' + raw.by : '';
+      const cf = raw && raw.conflict && st.k !== 'unk' ? ' · signalements contradictoires' : '';
       const ty = TYPES[s.type] || TYPES.unk, rt = ruleText(s.name, new Date()), rule = RULES[s.name];
       let info = '';
       if(s.type === 'pmr') info = 'Réservée aux titulaires de la carte mobilité inclusion' + (s.pmrLabel ? ' · ' + esc(s.pmrLabel) : '');
@@ -104,7 +105,7 @@ function initMap(){
       html = '<div class="pop"><b>' + esc(s.name || 'Place dans la rue') + '</b>' +
         '<div class="tbadge" style="background:' + ty.color + '">' + esc(ty.sym ? ty.sym + ' · ' + ty.label : ty.label) + '</div>' +
         (info ? '<div class="pinfo">' + info + '</div>' : '') +
-        '<div class="pstate">' + esc(stateText(st) + by) + '</div>' +
+        '<div class="pstate">' + esc(stateText(st) + by + cf) + '</div>' +
         '<div class="row"><button class="go" data-act="free" data-id="' + s.id + '">Libre</button><button data-act="occ" data-id="' + s.id + '">Occupée</button></div>' +
         (seg && seg.src !== 'osm' ? '<div class="row"><button class="del" data-act="delseg" data-id="' + seg.id + '">Supprimer cette file</button></div>' :
           '<div class="row"><small>File issue d’OpenStreetMap</small></div>') + '</div>';

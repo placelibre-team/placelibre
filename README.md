@@ -36,7 +36,13 @@ Depuis la racine du dépôt, avec Python 3 et Node.js :
 ```bash
 python3 -m unittest tests/test_pilot_data.py
 node tests/pilot-rules.test.cjs
+node tests/sync-validation.test.cjs    # signalements refusés (place inconnue, date fausse)
+node tests/sync-convergence.test.cjs   # même état sur deux téléphones (ordre, doublons, contradictions)
+node tests/sync-coupure.test.cjs       # coupure réseau : file d'attente et heure d'origine
+node outils/verifier-places.js         # registre des places
 ```
+
+Les tests de signalements simulent des téléphones sans réseau : rien n'est envoyé, ni sur le canal réel ni sur le canal de test.
 
 ## Attention pendant les essais
 

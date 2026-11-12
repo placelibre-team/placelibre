@@ -24,7 +24,8 @@ function renderStatus(){
   }
   if(!S.me) sub = 'Choisis ton prénom dans ⚙︎ pour que les autres voient qui signale · ' + sub;
   const live = syncOk ? '<span style="color:var(--free);font-weight:600">● ' + (TEST ? 'Canal de test' : 'En direct') + '</span> · ' : '';
-  $('status').innerHTML = '<strong>' + esc(main) + '</strong><small>' + live + esc(sub) + '</small>';
+  const n = S.outbox.length, wait = n ? ' · ' + n + ' envoi' + (n > 1 ? 's' : '') + ' en attente (réseau)' : '';
+  $('status').innerHTML = '<strong>' + esc(main) + '</strong><small>' + live + esc(sub + wait) + '</small>';
 }
 
 /* Contrôles à 5, 10 et 30 min après un départ */
