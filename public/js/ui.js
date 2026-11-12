@@ -1,6 +1,12 @@
 /* PlaceLibre · interface : état, contrôles, liste des rues, réglages */
 'use strict';
 
+function bestStreet(){
+  const names = {}, M = survModel(); SLOTS.forEach(s => { if(s.name && s.type !== 'pmr') names[s.name] = 1; });
+  let best = null;
+  Object.keys(names).forEach(n => { const c = chanceNow(n, lastPos, M); if(!best || c.p > best.p) best = {name:n, p:c.p}; });
+  return best;
+}
 function renderStatus(){
   const now = Date.now(); let main, sub;
   if(pendingDepart){
@@ -12,7 +18,8 @@ function renderStatus(){
     sub = draft.length ? draft.length + ' point' + (draft.length > 1 ? 's' : '') + ' posé' + (draft.length > 1 ? 's' : '') : 'Touche le début de la file de places';
   }else{
     let free = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid' || k === 'soon') free++; });
-    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' en ce moment' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
+    const bs = !free && SLOTS.length ? bestStreet() : null;
+    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' en ce moment' : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
     sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places sur la carte' : SLOTS.length + ' places sur la carte · touche Carto pour en ajouter';
   }
   if(!S.me) sub = 'Choisis ton prénom dans ⚙︎ pour que les autres voient qui signale · ' + sub;
@@ -205,3 +212,58 @@ $('btnReset').addEventListener('click', () => {
   S = mergeBase(clone(DEF)); JIDS = new Set(); save(); resetArmed = false; $('resetConfirm').hidden = true;
   rebuildSlots(); render(); renderSettings(); toast('Données effacées.');
 });
+
+
+/* ---------- Signalement rapide « en passant » ---------- */
+async function passHere(isFree){
+  let cur = lastPos; try{ cur = await getPos(8000); lastPos = cur; }catch(e){}
+  if(!cur){ toast('Position introuvable : autorise la localisation pour ce site.'); return; }
+  if(isFree){
+    const s = nearestSlot(cur, 25);
+    if(s) report(s.id, true); else { markFree(cur, Date.now(), null, {src:'signalement', acc:cur.acc != null ? cur.acc : null}); save(); render(); }
+    toast('Merci ! Place libre signalée ici.');
+  }else{
+    const near = SLOTS.filter(s => dist(cur, s) < 35);
+    if(!near.length){ toast('Aucune place cartographiée à moins de 35 m.'); return; }
+    near.forEach(s => report(s.id, false));
+    toast('Merci ! ' + near.length + ' place' + (near.length > 1 ? 's' : '') + ' notée' + (near.length > 1 ? 's' : '') + ' occupée' + (near.length > 1 ? 's' : '') + '.');
+  }
+  if(cur) startWatch();
+}
+$('btnPassFree').addEventListener('click', () => passHere(true));
+$('btnPassFull').addEventListener('click', () => passHere(false));
+
+/* ---------- Accueil (première ouverture) ---------- */
+const WKEY = 'plj:welcome' + (TEST ? ':test' : '');
+function welcomeSeen(){ try{ return !!localStorage.getItem(WKEY); }catch(e){ return true; } }
+function isIosBrowser(){ return /iphone|ipad/i.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches); }
+function closeWelcome(){ try{ localStorage.setItem(WKEY, '1'); }catch(e){} $('welcome').hidden = true; renderStatus(); }
+function showWelcome(step){
+  const box = $('wcBody'), steps = isIosBrowser() ? 3 : 2; $('welcome').hidden = false;
+  const dots = '<div class="dots">' + Array.from({length:steps}, (_, i) => '<b class="' + (i === step ? 'on' : '') + '"></b>').join('') + '</div>';
+  let body = '';
+  if(step === 0){
+    body = '<h1>Trouve une place, aide les autres</h1><p>PlaceLibre montre où se garer à Juan-les-Pins. Plus on est nombreux à signaler, plus c’est juste.</p>' +
+      '<input id="wcName" placeholder="Ton prénom" maxlength="20" autocomplete="given-name" value="' + esc(S.me || '') + '">' +
+      '<button class="btn primary" id="wcNext">Continuer</button><button class="skip" id="wcSkip">Passer</button>';
+  }else if(step === 1){
+    body = '<h1>3 gestes qui aident tout le monde</h1><div class="steps">' +
+      '<div class="st"><i>1</i><div><b>Tu pars</b><span>Touche « Je pars » : ta place est signalée libre aux autres.</span></div></div>' +
+      '<div class="st"><i>2</i><div><b>Tu te gares</b><span>Touche « Je me gare ici » : la place passe en occupée.</span></div></div>' +
+      '<div class="st"><i>3</i><div><b>Tu passes dans une rue</b><span>« Place libre ici » ou « Rue pleine » : une touche suffit.</span></div></div></div>' +
+      '<button class="btn primary" id="wcNext">' + (steps > 2 ? 'Continuer' : 'C’est parti') + '</button>';
+  }else{
+    body = '<h1>Mets PlaceLibre sur ton écran d’accueil</h1><div class="steps">' +
+      '<div class="st"><i>1</i><div><b>Dans Safari</b><span>Touche le bouton Partager, en bas de l’écran.</span></div></div>' +
+      '<div class="st"><i>2</i><div><b>« Sur l’écran d’accueil »</b><span>Puis Ajouter. L’appli s’ouvre en plein écran.</span></div></div></div>' +
+      '<button class="btn primary" id="wcNext">C’est parti</button>';
+  }
+  box.innerHTML = body + dots;
+  $('wcNext').addEventListener('click', () => {
+    if(step === 0){ const n = $('wcName').value.trim(); if(n){ S.me = n; save(); } }
+    if(step + 1 >= steps) closeWelcome(); else showWelcome(step + 1);
+  });
+  const sk = $('wcSkip'); if(sk) sk.addEventListener('click', closeWelcome);
+}
+$('btnWelcome').addEventListener('click', () => { $('settings').hidden = true; showWelcome(0); });
+if(!welcomeSeen()) showWelcome(0);
