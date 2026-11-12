@@ -108,7 +108,7 @@ function renderList(){
 function render(){
   renderMap();
   $('btnClearDest').hidden = !S.dest;
-  renderStatus(); checksKey = ''; renderChecks(); renderList();
+  renderStatus(); checksKey = ''; renderChecks(); renderList(); renderArrival();
 }
 
 /* ---------- Boutons dans les fenêtres de la carte et contrôles ---------- */
@@ -123,19 +123,68 @@ document.addEventListener('click', e => {
   if(popup){ popup.remove(); popup = null; }
 });
 
-/* ---------- Destination ---------- */
+/* ---------- Destination + prévision à l'arrivée ---------- */
+let ARR = {mode:'auto', eta:null, src:'', predId:null, key:''};
+async function geocode(q){
+  try{   // Géoplateforme IGN : adresses françaises, gratuit, sans clé
+    const ref = lastPos || {lat:CENTER[1], lng:CENTER[0]};
+    const r = await fetch('https://data.geopf.fr/geocodage/search?limit=1&lat=' + ref.lat + '&lon=' + ref.lng + '&q=' + encodeURIComponent(q));
+    const j = await r.json(), f = j.features && j.features[0];
+    if(f) return {lat:f.geometry.coordinates[1], lng:f.geometry.coordinates[0], label:f.properties.label};
+  }catch(e){}
+  const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=fr&q=' + encodeURIComponent(q), {headers:{'Accept-Language':'fr'}});
+  const j = await r.json(); if(!j.length) return null;
+  return {lat:+j[0].lat, lng:+j[0].lon, label:j[0].display_name.split(',').slice(0,2).join(',')};
+}
 $('searchForm').addEventListener('submit', async e => {
   e.preventDefault();
   const q = $('q').value.trim(); if(!q) return;
   try{
-    const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=fr&bounded=1&viewbox=7.06,43.61,7.16,43.53&q=' + encodeURIComponent(q), {headers:{'Accept-Language':'fr'}});
-    const j = await r.json();
-    if(!j.length){ toast('Adresse introuvable à Juan-les-Pins / Antibes.'); return; }
-    S.dest = {lat:+j[0].lat, lng:+j[0].lon, label:j[0].display_name.split(',').slice(0,2).join(',')}; save();
+    const d = await geocode(q);
+    if(!d){ toast('Adresse introuvable.'); return; }
+    S.dest = d; ARR = {mode:'auto', eta:null, src:'', predId:null, key:''}; save();
     fly(S.dest, 18); render(); $('q').blur();
   }catch(err){ toast('Recherche impossible (réseau).'); }
 });
-$('btnClearDest').addEventListener('click', () => { S.dest = null; save(); render(); });
+$('btnClearDest').addEventListener('click', () => { S.dest = null; ARR.key = ''; save(); render(); });
+
+async function resolveEta(){
+  if(ARR.mode !== 'auto'){ ARR.eta = ARR.mode; ARR.src = 'choisi'; return; }
+  if(lastPos){ const r = await routeEta(lastPos, S.dest); ARR.eta = Math.max(1, Math.round(r.min)); ARR.src = r.src; }
+  else{ ARR.eta = 10; ARR.src = 'position inconnue : 10 min par défaut'; }
+}
+async function renderArrival(){
+  const el = $('arrival');
+  if(!S.dest || !SLOTS.length){ el.hidden = true; return; }
+  const key = S.dest.lat + '|' + S.dest.lng + '|' + ARR.mode;
+  if(key === ARR.key && !el.hidden) { updateArrivalNums(); return; }
+  ARR.key = key; el.hidden = false;
+  await resolveEta();
+  if(key !== ARR.key) return;
+  ARR.predId = null; drawArrival(true);
+}
+function updateArrivalNums(){ if(ARR.eta != null) drawArrival(false); }
+function drawArrival(log){
+  const el = $('arrival'), pr = predictArrival(S.dest, ARR.eta);
+  if(log && !ARR.predId && !ARR.answered) ARR.predId = logPred(S.dest, pr);
+  const chip = (m, t) => '<button data-eta="' + m + '" class="' + (ARR.mode === m ? 'on' : '') + '">' + t + '</button>';
+  const pend = (S.preds || []).find(x => x.id === ARR.predId);
+  const arrived = pend && pend.out == null && Date.now() >= pend.arr && lastPos && dist(lastPos, S.dest) < 250;
+  el.innerHTML = '<h3>' + esc(S.dest.label) + '</h3>' +
+    '<p class="sub">Arrivée dans ~' + pr.eta + ' min (' + hhmm(pr.arr) + ') · ' + esc(ARR.src) + '</p>' +
+    '<div class="etas">' + chip('auto', 'Mon trajet') + chip(5, '5 min') + chip(10, '10 min') + chip(20, '20 min') + chip(30, '30 min') + '</div>' +
+    '<div class="rr">' + pr.rows.map(x => '<div><b style="color:' + chanceColor(x.p) + '">' + (Math.round(x.p*20)*5) + ' %</b><span>à moins de ' + x.r + ' m</span></div>').join('') + '</div>' +
+    '<p class="note">' + (pr.d50 ? 'Une place libre est plus probable que non à moins de ' + pr.d50 + ' m. ' : 'Moins d’une chance sur deux d’avoir une place à moins de 300 m. ') +
+    (pr.liveN ? pr.liveN + ' place' + (pr.liveN > 1 ? 's' : '') + ' signalée' + (pr.liveN > 1 ? 's' : '') + ' libre' + (pr.liveN > 1 ? 's' : '') + ' en ce moment. ' : 'Aucune place signalée libre en ce moment. ') +
+    esc(qualityText(pr.quality)) + '</p>' +
+    (arrived ? '<div class="ask">Place trouvée à moins de 100 m ? <button class="btn ok" data-pred="1">Oui</button><button class="btn ko" data-pred="0">Non</button></div>' : '');
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('#arrival [data-eta]');
+  if(b){ ARR.mode = b.dataset.eta === 'auto' ? 'auto' : +b.dataset.eta; ARR.key = ''; renderArrival(); return; }
+  const a = e.target.closest('#arrival [data-pred]');
+  if(a && ARR.predId){ answerPred(ARR.predId, a.dataset.pred === '1'); ARR.predId = null; ARR.answered = true; ARR.key = ''; }
+});
 
 /* ---------- Boutons du bas ---------- */
 $('btnPark').addEventListener('click', () => doArrive('manuel'));
@@ -157,6 +206,13 @@ function buildMe(){
 function renderSettings(){
   buildMe();
   const m = S.model;
+  (function(){
+    const c = calibration(), rho = fitRho(S.preds);
+    $('calKv').innerHTML = !c.n ? '<div><span>Réponses reçues</span><b>0 (réponds « place trouvée ? » à l’arrivée)</b></div>' :
+      '<div><span>Réponses reçues</span><b>' + c.n + '</b></div><div><span>Erreur moyenne (Brier, 0 = parfait)</span><b>' + c.brier.toFixed(2) + '</b></div>' +
+      c.bins.filter(b => b.n).map(b => '<div><span>Annoncé ~' + Math.round(b.pred*100) + ' %</span><b>réel ' + Math.round(b.real*100) + ' % (' + b.n + ')</b></div>').join('') +
+      '<div><span>Calcul ajusté</span><b>' + (rho == null ? 'pas encore (30 réponses)' : 'oui') + '</b></div>';
+  })();
   $('modelKv').innerHTML =
     '<span>Délai Bluetooth → départ</span><span>' + Math.round(m.delay) + ' s</span>' +
     '<span>Départs mesurés</span><span>' + m.delayN + '</span>' +

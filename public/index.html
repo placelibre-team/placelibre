@@ -61,6 +61,7 @@
       <button class="btn ok" id="btnPassFree">Place libre ici</button>
       <button class="btn ko" id="btnPassFull">Rue pleine</button>
     </div>
+    <div class="arrival" id="arrival" hidden></div>
     <div class="list-head"><h2 id="listTitle">Rues autour de toi</h2><button id="btnClearDest" hidden>Effacer la destination</button></div>
     <ul id="list"></ul>
   </section>
@@ -129,6 +130,12 @@
     </div>
 
     <div class="card">
+      <h2>Fiabilité des pourcentages à l’arrivée</h2>
+      <p>Chaque prévision « à ton arrivée » est comparée à ta réponse (« place trouvée ? »). Ces mesures servent à corriger le calcul.</p>
+      <div class="kv" id="calKv"></div>
+    </div>
+
+    <div class="card">
       <h2>Combien de temps une place reste libre</h2>
       <p>Mesuré après chaque départ grâce aux contrôles à 5, 10 et 30 min et aux arrivées signalées. Tant qu'il y a moins de 5 mesures, c'est une estimation de départ.</p>
       <table class="tbl" id="survTbl"></table>
@@ -177,6 +184,7 @@
 <script src="js/geometry.js"></script>
 <script src="js/model.js"></script>
 <script src="js/journal.js"></script>
+<script src="js/predict.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/events.js"></script>
 <script src="js/map.js"></script>
