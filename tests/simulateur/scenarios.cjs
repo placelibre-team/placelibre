@@ -19,19 +19,19 @@ module.exports = [
       dire('État de la place : ' + e.texte);
       verifier(e.k === 'soon' && e.secs > 0 && e.secs <= 45, 'la place passe en « voiture qui part » (≤ 45 s)');
 
-      h.secondes(60);
+      await h.secondes(60);
       e = tel.etatPlace(PLACE_TEST);
       dire('+1 min · ' + e.texte);
       verifier(e.k === 'high', 'après le départ la place est « libre » avec une chance élevée');
 
-      h.minutes(4);
+      await h.minutes(4);
       let c = tel.controlesEnAttente();
       dire('+5 min · contrôles demandés : ' + (c.map(x => x.h + ' min').join(', ') || 'aucun'));
       verifier(c.length === 1 && c[0].h === 5, 'le contrôle à 5 min apparaît');
       tel.repondreControle(c[0].dep, 5, 'libre');
       dire('Contrôle à 5 min : place vue LIBRE.');
 
-      h.minutes(5);
+      await h.minutes(5);
       c = tel.controlesEnAttente();
       verifier(c.length === 1 && c[0].h === 10, 'le contrôle à 10 min apparaît');
       tel.repondreControle(c[0].dep, 10, 'occupee');
@@ -39,12 +39,12 @@ module.exports = [
       dire('+10 min · contrôle à 10 min : place vue OCCUPÉE → ' + e.texte);
       verifier(e.k === 'occ', 'la place est maintenant « occupée »');
 
-      h.minutes(20);
+      await h.minutes(20);
       c = tel.controlesEnAttente();
       verifier(c.length === 1 && c[0].h === 30, 'le contrôle à 30 min apparaît');
       dire('+30 min · contrôle à 30 min : personne ne répond.');
 
-      h.minutes(7);
+      await h.minutes(7);
       verifier(tel.controlesEnAttente().length === 0, 'sans réponse, le contrôle disparaît après 5 min');
       const controles = tel.journal().filter(x => x.type === 'controle').sort((a, b) => a.t - b.t).map(x => x.etat);
       dire('+37 min · journal des contrôles : ' + controles.join(', '));
@@ -62,7 +62,7 @@ module.exports = [
     async executer({tel, h, dire, verifier}) {
       await tel.partir(PLACE_TEST);
       dire('Départ annoncé sur ' + PLACE_TEST + '.');
-      h.minutes(3);
+      await h.minutes(3);
       const avant = tel.modele().tauN;
       dire('+3 min · un conducteur se gare sur la même place (« Je me gare »).');
       await tel.arriver(PLACE_TEST);
@@ -128,7 +128,7 @@ module.exports = [
     async executer({tel, h, bus, dire, verifier, nouveauBus}) {
       await tel.partir(PLACE_TEST);
       tel.signaler('b04-7', true);
-      h.minutes(2);
+      await h.minutes(2);
       await tel.arriver('b04-8');
       dire(bus.envois.length + ' messages envoyés par le téléphone virtuel.');
       verifier(bus.envois.length >= 3, 'les actions sont bien diffusées sur le faux réseau');
