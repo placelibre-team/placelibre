@@ -29,6 +29,15 @@ Ouvrir http://localhost:8000 dans le navigateur.
 
 La carte, la recherche et le service de signalements utilisent des services externes : une connexion Internet est nécessaire. La géolocalisation demande l'autorisation du navigateur. Sur téléphone, utiliser une adresse HTTPS ; `localhost` sur le téléphone ne désigne pas l'ordinateur.
 
+## Lancer les tests
+
+Depuis la racine du dépôt, avec Python 3 et Node.js :
+
+```bash
+python3 -m unittest tests/test_pilot_data.py
+node tests/pilot-rules.test.cjs
+```
+
 ## Attention pendant les essais
 
 Le code importé conserve le canal de signalements du prototype en ligne. Les boutons de signalement peuvent donc écrire dans ce canal : ne pas envoyer de fausses données. Isoler un canal de test avant les essais automatisés ou les simulations.
@@ -40,6 +49,7 @@ Les pourcentages sont expérimentaux. La cartographie et les règles doivent êt
 - `public/index.html`, `public/js/` : interface et modules de l’application.
 - `public/donnees-pilote/` : explorateur des inventaires municipaux.
 - `scripts/import_pilot_data.py`, `data/sources/` : import reproductible et sources publiques datées.
+- `docs/demande-mairie.md` : brouillon de demande à la mairie, conservé hors du site déployé. Le dépôt GitHub étant public, ce fichier reste consultable sur GitHub.
 - `CONTRIBUTING.md` : méthode de collaboration.
 - `docs/ROADMAP.md` : prochaines tâches techniques.
 - `netlify.toml` : préparation d'un déploiement statique depuis `main`.
