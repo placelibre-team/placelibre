@@ -15,6 +15,7 @@ Toutes les simulations se font sur ce canal (voir CONTRIBUTING).
 | Fichier | Rôle |
 |---|---|
 | `js/config.js` | Constantes, canal, places de base, règles de la Ville |
+| `js/places.js` | Registre des places partagées du pilote, identifiants stables (voir `format-evenements.md`) |
 | `js/state.js` | Stockage du téléphone, outils |
 | `js/geometry.js` | Découpe des files en places, rues OpenStreetMap |
 | `js/model.js` | Délai Bluetooth, état des places, prévision par rue, durée de disponibilité |

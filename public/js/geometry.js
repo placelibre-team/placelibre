@@ -22,10 +22,29 @@ function slotsForLine(pts, segId, offset){
   }
   return out;
 }
+/* Place du registre (places.js) → rectangle dessiné, même forme que slotsForLine */
+function slotFromPlace(p){
+  const ref = [p.lng, p.lat], a = p.cap*Math.PI/180, ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux;
+  const hl = p.l*0.42, hw = 0.95;
+  const ring = [[-hl,-hw],[hl,-hw],[hl,hw],[-hl,hw]].map(([s,w]) => toLL(ux*s + px*w, uy*s + py*w, ref));
+  ring.push(ring[0]);
+  return {id:p.id, ring, lng:p.lng, lat:p.lat};
+}
+const BASE_IDS = new Set(BASE_SEGS.map(b => b.id));
+/* Les files du pilote (b01…b18) prennent leurs places dans le registre figé : identifiants stables.
+   Les files dessinées sur le téléphone et celles d'OpenStreetMap restent découpées automatiquement. */
 function rebuildSlots(){
   SLOTS = []; SLOT_BY_ID = {};
   const all = S.segments.concat(OSM_SEGS);
   all.forEach(seg => {
+    if(BASE_IDS.has(seg.id)){
+      PLACES.filter(p => p.seg === seg.id).forEach(p => {
+        const s = slotFromPlace(p);
+        s.segId = seg.id; s.type = p.type || seg.type; s.name = p.rue; s.src = 'base';
+        SLOTS.push(s); SLOT_BY_ID[s.id] = s;
+      });
+      return;
+    }
     const off = seg.src === 'osm' ? seg.side*4 : 0;
     slotsForLine(seg.pts, seg.id, off).forEach(s => {
       s.segId = seg.id; s.type = seg.type; s.name = seg.name || ''; s.src = seg.src;

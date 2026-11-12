@@ -20,7 +20,7 @@
 ## V1 — Structurer le code et les données
 
 - [ ] Séparer carte, interface, signalements, stockage et prédictions.
-- [ ] Définir des identifiants stables de places et un format d'événements horodatés.
+- [x] Définir des identifiants stables de places et un format d'événements horodatés (`public/js/places.js`, `docs/format-evenements.md`).
 - [ ] Traiter doublons, contradictions et observations incomplètes.
 - [ ] Importer les inventaires d'horodateurs vérifiés.
 - [ ] Confirmer l'accès aux historiques de tickets locaux, sans assimiler fin de ticket et départ.
