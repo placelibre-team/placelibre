@@ -65,8 +65,22 @@ function sparkSVG(street){
 function liveText(b){
   const who = b.by || 'quelqu’un', how = b.src === 'bluetooth' ? ' (Bluetooth)' : '';
   const what = b.src === 'signalement' || b.src === 'controle' ? 'Vue libre' : 'Départ signalé';
-  return what + ' par ' + who + ' il y a ' + fmtAge(b.age*60) + how + ' · ' + Math.round(b.p*100) + ' % encore libre à ton arrivée' +
-    (b.eta >= 0.5 ? ' (~' + Math.round(b.eta) + ' min)' : '');
+  return what + ' par ' + who + ' il y a ' + fmtAge(b.age*60) + how + (b.age > 20 ? ' (ancien, moins fiable)' : '') + ' · ' +
+    Math.round(b.p*100) + ' % encore libre à ton arrivée' +
+    (b.eta >= 0.5 ? ' (~' + Math.round(b.eta) + ' min, vers ' + hhmm(Date.now() + b.eta*60e3) + ')' : '');
+}
+/* Mesures réelles (signalements et contrôles) enregistrées dans cette rue sur ce téléphone */
+function streetSamples(street){
+  return S.journal.filter(e => e.street === street && (e.type === 'libre' || e.type === 'occupee' || e.type === 'controle')).length;
+}
+/* D'où vient le pourcentage affiché pour une rue */
+function originText(g){
+  const n = streetSamples(g.name);
+  if(g.live >= 0.3) return 'Origine : signalements en direct' + (n ? ' + ' + n + ' mesure' + (n > 1 ? 's' : '') + ' passée' + (n > 1 ? 's' : '') : '');
+  if(g.live > 0.05) return 'Origine : prévision + un signalement récent';
+  return n >= 5 ? 'Origine : ' + n + ' mesures passées à cette heure, aucun signalement en direct'
+    : n ? 'Origine : prévision, seulement ' + n + ' mesure' + (n > 1 ? 's' : '') + ' réelle' + (n > 1 ? 's' : '') + ' (estimation prudente)'
+    : 'Données manquantes : estimation par l’heure et les règles, jamais vérifiée ici';
 }
 function renderList(){
   const ref = S.dest || lastPos || {lat:CENTER[1], lng:CENTER[0]};
@@ -89,10 +103,11 @@ function renderList(){
   list.forEach(g => {
     const li = document.createElement('li'), open = openStreet === g.name;
     li.innerHTML = '<span class="pct" style="color:' + chanceColor(g.p) + '">' + Math.round(g.p*100) + '<small>%</small></span>' +
-      '<div class="li-main"><b></b><span class="l1"></span><span class="l2"></span></div><span class="li-dist">' + fmtDist(g.d) + '</span>';
+      '<div class="li-main"><b></b><span class="l1"></span><span class="l2"></span><span class="l3"></span></div><span class="li-dist">' + fmtDist(g.d) + '</span>';
     li.querySelector('b').textContent = g.name;
     li.querySelector('.l1').textContent = 'de chances de trouver en 5 min · ' + (g.n ? (g.n + ' places') : '') + (g.pmr ? ' + ' + g.pmr + ' PMR' : '');
     li.querySelector('.l2').textContent = (g.best ? liveText(g.best) + ' · ' : '') + (ruleText(g.name, nowD) || '');
+    li.querySelector('.l3').textContent = originText(g);
     if(open){
       const rule = RULES[g.name], det = document.createElement('div'); det.className = 'detail';
       det.innerHTML = '<div class="det-row"><span>Prévision (heure, jour, saison, règles)</span><b>' + Math.round(g.prior*100) + ' %</b></div>' +
@@ -178,7 +193,7 @@ function drawArrival(log){
     '<div class="rr">' + pr.rows.map(x => '<div><b style="color:' + chanceColor(x.p) + '">' + (Math.round(x.p*20)*5) + ' %</b><span>à moins de ' + x.r + ' m</span></div>').join('') + '</div>' +
     '<p class="note">' + (pr.d50 ? 'Une place libre est plus probable que non à moins de ' + pr.d50 + ' m. ' : 'Moins d’une chance sur deux d’avoir une place à moins de 300 m. ') +
     (pr.liveN ? pr.liveN + ' place' + (pr.liveN > 1 ? 's' : '') + ' signalée' + (pr.liveN > 1 ? 's' : '') + ' libre' + (pr.liveN > 1 ? 's' : '') + ' en ce moment. ' : 'Aucune place signalée libre en ce moment. ') +
-    esc(qualityText(pr.quality)) + '</p>' +
+    '<b>Origine :</b> ' + esc(qualityText(pr.quality)) + '</p>' +
     (arrived ? '<div class="ask">Place trouvée à moins de 100 m ? <button class="btn ok" data-pred="1">Oui</button><button class="btn ko" data-pred="0">Non</button></div>' : '');
 }
 document.addEventListener('click', e => {
@@ -189,8 +204,8 @@ document.addEventListener('click', e => {
 });
 
 /* ---------- Boutons du bas ---------- */
-$('btnPark').addEventListener('click', () => doArrive('manuel'));
-$('btnLeave').addEventListener('click', () => startDepart('manuel'));
+$('btnPark').addEventListener('click', () => askSlot('arrive'));
+$('btnLeave').addEventListener('click', () => askSlot('depart'));
 
 
 /* ---------- Réglages ---------- */
