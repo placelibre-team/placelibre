@@ -1,0 +1,2 @@
+# Preserve the exact municipal snapshots (CRLF and fixed-width padding).
+data/sources/* -text -whitespace

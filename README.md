@@ -2,24 +2,30 @@
 
 Prototype collaboratif de recherche de stationnement, avec un pilote autour des rues Bricka et Saint-Honorat à Juan-les-Pins.
 
+## Données du pilote
+
+Le dossier [Bricka / Saint-Honorat et alentours](docs/donnees-pilote.md) décrit les inventaires municipaux importés, leurs limites et les prochaines demandes de données. Ouvrir `/donnees-pilote/` après lancement local, ou suivre le lien dans les réglages de l’application.
+
+![Explorateur des données du quartier](docs/rendus/donnees-bricka.jpg)
+
 ## Point de départ
 
-`public/index.html` est une copie du HTML publié sur le site Netlify, récupérée le 11 novembre 2026. Elle contient le style et la logique JavaScript du prototype. Ce dépôt ne contient pas l'historique de développement ni les éventuels fichiers non publiés de Shad. Comparer cette base avec son dossier source avant les prochaines modifications.
+La base a été importée depuis le HTML publié sur Netlify le 11 novembre 2026. Les PR suivantes ont séparé le JavaScript, ajouté un mode liste, un journal et des contrôles de disponibilité, puis modifié le design et l’accueil. L’historique antérieur à l’import et les éventuels fichiers non publiés ne sont pas inclus.
 
-Le prototype existant est conservé sans changement fonctionnel. Les prochaines versions et le modèle local ne sont pas encore développés.
+Le modèle local est expérimental : la présence du code ne démontre pas la fiabilité des prédictions.
 
 ## Lancer sur son ordinateur
 
-Prérequis : Python 3 et un navigateur prenant en charge WebGL.
+Prérequis : Python 3 et un navigateur récent. WebGL est nécessaire pour la carte 3D ; un mode liste est disponible.
 
 ```bash
-git clone https://github.com/TomMakhlouf/placelibre.git
+git clone https://github.com/placelibre-team/placelibre.git
 cd placelibre
 python3 -m http.server 8000 --bind 127.0.0.1 --directory public
 ```
 
 Sous Windows, utiliser `py -m http.server 8000 --bind 127.0.0.1 --directory public` si nécessaire.
-Ouvrir http://localhost:8000 dans le navigateur. L'accès au dépôt privé nécessite un compte GitHub autorisé.
+Ouvrir http://localhost:8000 dans le navigateur.
 
 La carte, la recherche et le service de signalements utilisent des services externes : une connexion Internet est nécessaire. La géolocalisation demande l'autorisation du navigateur. Sur téléphone, utiliser une adresse HTTPS ; `localhost` sur le téléphone ne désigne pas l'ordinateur.
 
@@ -27,20 +33,21 @@ La carte, la recherche et le service de signalements utilisent des services exte
 
 Le code importé conserve le canal de signalements du prototype en ligne. Les boutons de signalement peuvent donc écrire dans ce canal : ne pas envoyer de fausses données. Isoler un canal de test avant les essais automatisés ou les simulations.
 
-Les pourcentages sont expérimentaux. La cartographie et les règles doivent être vérifiées sur le terrain. Un échec WebGL peut empêcher le démarrage du prototype ; prévoir un affichage de secours est une tâche à réaliser.
+Les pourcentages sont expérimentaux. La cartographie et les règles doivent être vérifiées sur le terrain. Sans WebGL, vérifier le fonctionnement du mode liste.
 
 ## Organisation
 
-- `public/index.html` : application existante, HTML/CSS/JavaScript réunis.
+- `public/index.html`, `public/js/` : interface et modules de l’application.
+- `public/donnees-pilote/` : explorateur des inventaires municipaux.
+- `scripts/import_pilot_data.py`, `data/sources/` : import reproductible et sources publiques datées.
 - `CONTRIBUTING.md` : méthode de collaboration.
 - `docs/ROADMAP.md` : prochaines tâches techniques.
 - `netlify.toml` : préparation d'un déploiement statique depuis `main`.
 - `.github/pull_request_template.md` : modèle de demande de relecture.
 
-Le document de travail reste la référence pour la stratégie : [Plan d'action PlaceLibre](https://docs.google.com/document/d/1pcwOm-5wa35VTFGdWqv8p20sZWXWpRAEfRnts1RXQss/edit).
 
 ## Publication
 
-Le dépôt est privé. La présence de `netlify.toml` ne connecte pas le site Netlify à GitHub : cette connexion reste à configurer depuis le compte qui possède le site. Vérifier la confidentialité des aperçus avant de les diffuser.
+Les changements passent par une branche et une pull request, puis une relecture avant fusion. Consulter les contrôles Netlify de la pull request pour connaître le résultat du déploiement de son aperçu. La présence du code sur une branche ne signifie pas qu’il est intégré à `main`.
 
 Les données personnelles, historiques GPS et clés ne doivent pas être déposés dans Git. Le dépôt contient le code, pas une base de données partagée des utilisateurs.

@@ -55,6 +55,7 @@ function paidAt(rule, d){
 }
 function ruleText(street, d){
   const rule = RULES[street]; if(!rule) return '';
+  if(rule.paid == null) return 'Tarif à confirmer';
   if(!rule.paid) return 'Gratuit';
   const h = d.getHours() + d.getMinutes()/60;
   if(paidAt(rule, d)){ const end = rule.hours.find(([a,b]) => h >= a && h < b)[1]; return 'Payant jusqu’à ' + end + ' h' + (rule.firstHourFree ? ' · 1re heure gratuite' : ''); }
