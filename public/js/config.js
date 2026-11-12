@@ -35,7 +35,7 @@ const SURV_PSEUDO = 3;                     // poids de l'estimation de départ (
 const SURV_MIN_N = 5;                      // en dessous : « données insuffisantes »
 const DRIVE_KMH = 25, DETOUR = 1.4;        // trajet en ville pour estimer l'heure d'arrivée
 
-const DEF = {me:'', segments:[], removedBase:[], slotState:{}, loose:[], history:[], journal:[], parked:null, dest:null,
+const DEF = {me:'', segments:[], removedBase:[], slotState:{}, slotLog:{}, outbox:[], loose:[], history:[], journal:[], parked:null, dest:null,
   model:{delay:45, delayN:0, tau:180, tauN:0}};
 
 /* ---------- Données de la Ville d'Antibes ---------- */

@@ -19,6 +19,9 @@ function mergeBase(s){
   });
   s.obs = s.obs || {};
   s.journal = Array.isArray(s.journal) ? s.journal : [];
+  s.slotLog = s.slotLog && typeof s.slotLog === 'object' ? s.slotLog : {};
+  s.outbox = Array.isArray(s.outbox) ? s.outbox : [];
+  if(typeof s.dev !== 'string' || !s.dev) s.dev = Math.random().toString(36).slice(2, 12);   // identifiant aléatoire de ce téléphone
   return s;
 }
 let S = load();
@@ -29,6 +32,8 @@ function save(){try{localStorage.setItem(KEY, JSON.stringify(S));}catch(e){}}
   S.history = S.history.filter(h => now - h.t < 60*864e5).slice(-3000);
   S.journal = S.journal.filter(e => now - e.t < 30*864e5).slice(-5000);
   Object.keys(S.slotState).forEach(k => { const st = S.slotState[k]; if(Math.max(st.free||0, st.occ||0) < now - 7*864e5) delete S.slotState[k]; });
+  Object.keys(S.slotLog).forEach(k => { S.slotLog[k] = S.slotLog[k].filter(e => now - e.ts < 48*3600e3); if(!S.slotLog[k].length) delete S.slotLog[k]; });
+  S.outbox = S.outbox.filter(e => now - e.ts < 24*3600e3).slice(-300);
   save();
 })();
 
