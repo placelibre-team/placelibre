@@ -109,6 +109,7 @@ function render(){
   renderMap();
   $('btnClearDest').hidden = !S.dest;
   renderStatus(); checksKey = ''; renderChecks(); renderList(); renderArrival();
+  (function(){ const sp = $('pass') && $('pass').querySelector('span'); if(sp){ const n = helpCount(); sp.textContent = 'En passant dans une rue :' + (n ? ' · tu as aidé ' + n + ' fois' : ''); } })();
 }
 
 /* ---------- Boutons dans les fenêtres de la carte et contrôles ---------- */
@@ -170,7 +171,8 @@ function drawArrival(log){
   const chip = (m, t) => '<button data-eta="' + m + '" class="' + (ARR.mode === m ? 'on' : '') + '">' + t + '</button>';
   const pend = (S.preds || []).find(x => x.id === ARR.predId);
   const arrived = pend && pend.out == null && Date.now() >= pend.arr && lastPos && dist(lastPos, S.dest) < 250;
-  el.innerHTML = '<h3>' + esc(S.dest.label) + '</h3>' +
+  const df = difficulty(pr);
+  el.innerHTML = '<h3>' + esc(S.dest.label) + '<span class="pill ' + df.cls + '">' + df.t + '</span></h3>' +
     '<p class="sub">Arrivée dans ~' + pr.eta + ' min (' + hhmm(pr.arr) + ') · ' + esc(ARR.src) + '</p>' +
     '<div class="etas">' + chip('auto', 'Mon trajet') + chip(5, '5 min') + chip(10, '10 min') + chip(20, '20 min') + chip(30, '30 min') + '</div>' +
     '<div class="rr">' + pr.rows.map(x => '<div><b style="color:' + chanceColor(x.p) + '">' + (Math.round(x.p*20)*5) + ' %</b><span>à moins de ' + x.r + ' m</span></div>').join('') + '</div>' +

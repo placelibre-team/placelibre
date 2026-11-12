@@ -49,6 +49,9 @@ function initMap(){
 
     map.addLayer({id:'segs-line', type:'line', source:'segs',
       paint:{'line-color':['get','color'], 'line-width':['interpolate',['linear'],['zoom'],15,1,19,3], 'line-opacity':0.55, 'line-dasharray':[2,1]}});
+    map.addLayer({id:'segs-chance', type:'line', source:'segs', minzoom:15.5,
+      layout:{'line-cap':'round'},
+      paint:{'line-color':['get','ch'], 'line-width':['interpolate',['linear'],['zoom'],16,8,19,26], 'line-opacity':0.42, 'line-blur':4}});
     map.addLayer({id:'slots-fill', type:'fill', source:'slots',
       paint:{'fill-color':['get','tcolor'], 'fill-opacity':['match',['get','k'],'occ',0.55,'unk',0.7,0.85],
         'fill-outline-color':'#ffffff'}});
@@ -140,9 +143,12 @@ function segLblFC(){
     return {type:'Feature', properties:{sym:t.sym, color:t.color}, geometry:{type:'Point', coordinates:[(a[0]+b[0])/2,(a[1]+b[1])/2]}};
   })};
 }
+const CH_COL = p => p >= .5 ? '#22b35e' : p >= .25 ? '#e0a43a' : '#e5484d';
 function segsFC(){
+  const M = survModel(), cache = {};
+  const ch = name => name ? (name in cache ? cache[name] : (cache[name] = CH_COL(chanceNow(name, lastPos, M).p))) : 'rgba(0,0,0,0)';
   return {type:'FeatureCollection', features:S.segments.concat(OSM_SEGS).map(seg => ({type:'Feature',
-    properties:{id:seg.id, color:(TYPES[seg.type]||TYPES.unk).color}, geometry:{type:'LineString', coordinates:seg.pts}}))};
+    properties:{id:seg.id, color:(TYPES[seg.type]||TYPES.unk).color, ch:ch(seg.type === 'pmr' ? '' : seg.name)}, geometry:{type:'LineString', coordinates:seg.pts}}))};
 }
 function looseFC(){
   const now = Date.now();
@@ -175,7 +181,8 @@ function drawMe(){
   if(!meMarker){ const el = document.createElement('div'); el.className = 'me-dot'; meMarker = new maplibregl.Marker({element:el}).setLngLat([lastPos.lng, lastPos.lat]).addTo(map); }
   else meMarker.setLngLat([lastPos.lng, lastPos.lat]);
 }
-function renderMapData(){ setData('slots', slotsFC()); setData('spts', slotPtsFC()); setData('loose', looseFC()); }
+let segsT = 0;
+function renderMapData(){ if(Date.now() - segsT > 20000){ segsT = Date.now(); setData('segs', segsFC()); } setData('slots', slotsFC()); setData('spts', slotPtsFC()); setData('loose', looseFC()); }
 function renderMap(){
   if(!mapReady) return;
   setData('segs', segsFC()); setData('segl', segLblFC()); setData('draft', draftFC()); renderMapData(); drawPins();
@@ -251,6 +258,10 @@ function buildLegend(){
   const types = Object.entries(TYPES).filter(([k]) => k !== 'unk').map(([k,t]) =>
     '<div><i class="sw" style="background:' + t.color + '"></i><b>' + esc(t.sym || '') + '</b> ' + esc(t.label) + '</div>').join('');
   box.innerHTML = '<h3>Type de place</h3>' + types +
+    '<h3>Chance de trouver (halo autour des rues)</h3>' +
+    '<div><i class="dot" style="background:#22b35e"></i>Bonne (50 % ou plus)</div>' +
+    '<div><i class="dot" style="background:#e0a43a"></i>Moyenne (25 à 50 %)</div>' +
+    '<div><i class="dot" style="background:#e5484d"></i>Faible (moins de 25 %)</div>' +
     '<h3>Disponibilité</h3>' +
     '<div><i class="dot" style="background:#16c060"></i>Libre, très probable</div>' +
     '<div><i class="dot" style="background:#f0b429"></i>Libre, probable</div>' +
