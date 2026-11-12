@@ -56,10 +56,17 @@
       <button class="btn" id="btnPark">Je me gare ici</button>
       <button class="btn primary" id="btnLeave">Je pars</button>
     </div>
+    <div class="pass" id="pass">
+      <span>En passant dans une rue :</span>
+      <button class="btn ok" id="btnPassFree">Place libre ici</button>
+      <button class="btn ko" id="btnPassFull">Rue pleine</button>
+    </div>
     <div class="list-head"><h2 id="listTitle">Rues autour de toi</h2><button id="btnClearDest" hidden>Effacer la destination</button></div>
     <ul id="list"></ul>
   </section>
 </div>
+
+<div id="welcome" hidden role="dialog" aria-modal="true" aria-label="Bienvenue"><div class="wc" id="wcBody"></div></div>
 
 <div id="toast" role="status" hidden></div>
 
@@ -73,6 +80,12 @@
       <h2>Qui es-tu ?</h2>
       <p>Ton prénom s'affiche chez les autres quand tu libères ou signales une place.</p>
       <div class="chips" id="meChips"></div>
+    </div>
+
+    <div class="card">
+      <h2>Aide en 3 gestes</h2>
+      <p>Chaque signalement aide tout le monde, et rend les pourcentages plus fiables.</p>
+      <button class="btn" id="btnWelcome">Revoir l'accueil</button>
     </div>
 
     <div class="card">
