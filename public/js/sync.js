@@ -2,7 +2,19 @@
    Le canal dépend de ?canal=test (voir config.js). */
 'use strict';
 
-const isShared = id => /^b\d\d-/.test(id || '');
+/* Seules les places du registre (places.js) passent par le canal partagé */
+const SHARED_IDS = new Set(PLACES.map(p => p.id));
+const isShared = id => SHARED_IDS.has(id);
+
+/* Format des événements : voir docs/format-evenements.md */
+const EV_V = 1;
+const EV_KINDS = new Set(['soon', 'free', 'occ', 'ctl']);
+const EV_MAX_AHEAD = 10*60e3;   // tolérance d'horloge entre téléphones
+function validEv(ev){
+  return !!ev && typeof ev.slot === 'string' && isShared(ev.slot) && EV_KINDS.has(ev.k) &&
+    Number.isFinite(ev.ts) && ev.ts > 0 && ev.ts <= Date.now() + EV_MAX_AHEAD &&
+    (ev.v == null || ev.v <= EV_V);
+}
 let syncOk = false;
 
 // Applique un événement à l'état des places (le plus récent gagne)
@@ -26,21 +38,23 @@ function fromMsg(m){
   let ev; try{ ev = JSON.parse(m.message); }catch(e){ return null; }
   if(!ev || typeof ev !== 'object') return null;
   if(!ev.ts) ev.ts = (m.time || 0)*1000;
+  ev.ts = Number(ev.ts);
   if(!ev.id) ev.id = m.id;
   if(ev.k === 'depart' || ev.k === 'arrive'){
     const p = {lat:num(ev.lat), lng:num(ev.lng)};
     if(isNaN(p.lat) || isNaN(p.lng)) return null;
     const sl = nearestSlot(p, 35); if(!sl) return null;
     const base = {id:ev.id, slot:sl.id, ts:ev.ts, by:ev.by || '', src:'bluetooth', acc:num(ev.acc)};
-    return ev.k === 'depart' ? Object.assign(base, {k:'soon', eta:ev.ts + S.model.delay*1000}) : Object.assign(base, {k:'occ'});
+    const conv = ev.k === 'depart' ? Object.assign(base, {k:'soon', eta:ev.ts + S.model.delay*1000}) : Object.assign(base, {k:'occ'});
+    return validEv(conv) ? conv : null;   // même contrôle (place du registre, date) que les autres événements
   }
-  return ev;
+  return validEv(ev) ? ev : null;
 }
 function post(ev){
   if(isShared(ev.slot)) fetch(BUS, {method:'POST', body:JSON.stringify(ev)}).catch(() => {});
 }
 function share(slotId, k, extra){
-  const ev = Object.assign({id:uid(), slot:slotId, k, ts:Date.now(), eta:null, by:S.me || '', src:''}, extra || {});
+  const ev = Object.assign({v:EV_V, id:uid(), slot:slotId, k, ts:Date.now(), eta:null, by:S.me || '', src:''}, extra || {});
   logEv(ev, null); applyEv(ev); post(ev);
   return ev;
 }
