@@ -1,0 +1,198 @@
+COLL_NOM,COLL_SIRET,ZONE_STATIONNEMENT,TYPE_STATIONNEMENT,N° HORODATEUR,MODELE,PAYANT,PERIODE,HORAIRES,GRATUIT PAR JOUR - H,"GRATUIT SAMEDI, DIMANCHE & JOURS FERIES",ZONE RESIDENTS TARIF,ZONE RESIDENTS PAIEMENT,OBSERVATIONS,LOCALISATION,CLAVIER CB,PAIEMENT SANS CONTACT
+ANTIBES,21060004500392,ANTIBES,Voirie,1,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Cours Massena,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,11,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,14 avenue Frédéric Mistral,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,15,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Place Amiral Barnaud,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,16,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,41  Rue Vauban,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,18,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face n° 8 avenue  Fréderic Mistral,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,20,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 avenue Pasteur,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,21,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,9 avenue Pasteur,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,22,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,2 avenue Tourre,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,23,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,4 avenue Pasteur,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,24,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,19 avenue Pasteur,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,25,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,22 avenue Thiers,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,26,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,16 avenue Pasteur,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,27,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,35 avenue Pasteur,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,28,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 35 avenue Pasteur,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,29,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 5 avenue Libération,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,30,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,6 avenue de la Liberation,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,31,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,7 avenue de la Liberation,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,32,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,48 boulevard  Robert Soleau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,33,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Avenue Robert Soleau Prolongée,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,34,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 6 rue Honoré Ferrare,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,35,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,2 rue Honoré  Ferrare,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,36,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Avenue Robert Soleau Prolongée Face Marionnaud,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,37,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,9 Rue Sadi Carnot,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,38,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,19 Rue Sadi Carnot,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,39,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,19 avenue Mirabeau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,40,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Parking Criée,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,41,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 5 rue Sadi Carnot,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,42,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,25 avenue Robert Soleau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,43,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,30 avenue Robert Soleau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,44,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,22 avenue  Robert Soleau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,45,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,13 avenue Robert Soleau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,46,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,4 Rue Vauban,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,47,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 2 rue Macé,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,48,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 4 bis Macé,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,49,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 avenue Tourre,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,50,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,21 avenue Thiers,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,51,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,13 avenue Thiers,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,52,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,7 avenue Thiers,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,53,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,10 avenue Thiers,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,54,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,10 boulevard Tournelli,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,55,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 boulevard Tournelli,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,56,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 avenue du Grand cavalier,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,57,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,17 avenue du  Grand cavalier,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,58,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,12 avenue Gambetta,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,60,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,6 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,61,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,9 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,62,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,14 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,63,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,13 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,65,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,13 avenue Niquet,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,66,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,13 avenue Guillabert,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,67,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,12 avenue Guillabert,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,68,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,7 avenue Lemeray,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,69,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,4 avenue Lemeray,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,70,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,3 boulevard Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,71,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,16 boulevard  Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,72,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,18 boulevard Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,73,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,27 boulevard Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,74,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,30 boulevard Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,75,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,22 boulevard du  Président Wilson,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,76,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,34 boulevard  MaréchalFoch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,77,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,8 place Général De Gaulle,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,78,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,21 boulevard  Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,79,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,15 avenue des Frères Olivier,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,80,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,avenue 24 Aout - angle avenue Gazan,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,81,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,8 avenue Maréchal Reille,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,82,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,14 avenue Maréchal Reille,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,83,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,6 avenue Meissonier,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,84,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face n°8 avenue Meissonier,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,85,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,16 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,86,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,17 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,87,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,25 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,88,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,8 avenue Barquier,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,89,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,6 avenue du Général Maizière,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,90,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face n° 7 avenue Saint-Roch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,91,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,9 avenue Saint-Roch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,92,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,14 avenue Mirabeau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,93,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,15 avenue Mirabeau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,94,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,10 avenue Mirabeau,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,95,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,3 Rue Macé,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,96,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,1 Rue Macé,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,98,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 6 avenue de Verdun,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,99,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,8 avenue de Verdun,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,102,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 13 avenue du 11 Novembre,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,105,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,7 avenue du 11 Novembre,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,106,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,13 avenue du 11 Novembre,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,107,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,17 avenue de Verdun,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,113,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,,Avenue Jules Grec,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,114,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,,Avenue Jules Grec,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,117,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,,Parking Chaudon,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,118,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,Installation 1er octobre 2018,Parking Chataignier,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,119,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,Installation 1er octobre 2018,Zone Roi Soleil,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,120,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,,3 avenue Philippe Rochat,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,121,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,,Face 3 avenue Philippe Rochat,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,122,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,,21 avenue. Philippe Rochat,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,123,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,,25 avenue. Philippe Rochat,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,124,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,non,,,54 avenue. Philippe Rochat,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,150,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,38 boulevard Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,151,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,38 boulevard Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,152,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,41 boulevard Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,153,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,44 boulevard Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,154,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,43 boulevard Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,155,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,54 boulevard Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,156,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,55 boulevard Maréchal Foch,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,157,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,42 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,158,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,39 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,159,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,37 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,160,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,34 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,161,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,32 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,162,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,22 boulevard Albert 1er,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,163,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,15 avenue Gazan,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,164,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face n°2 boulevard Maréchal Leclerc,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,165,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 avenue Barquier,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,166,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,7 avenue Maizière,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie,167,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face n°8 avenue Maréchal Reille,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,320,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n°2 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,321,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,4 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,322,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n° 8 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,323,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,16 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,324,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n° 30 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,325,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,34 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,326,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,38 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,327,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n°38 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,328,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,329,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,46 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,330,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n° 46 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,331,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,50 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,332,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n°60 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Voirie saisonnière,333,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,60 boulevard James Wyllie,oui,oui
+ANTIBES,21060004500392,ANTIBES,Parking Saisonnier,300,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Ponteil ,oui,oui
+ANTIBES,21060004500392,ANTIBES,Parking Saisonnier,301,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Ponteil ,oui,oui
+ANTIBES,21060004500392,ANTIBES,Parking Saisonnier,302,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Ponteil ,oui,oui
+ANTIBES,21060004500392,ANTIBES,Parking Saisonnier,303,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Ponteil ,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,200,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,26 avenue Courbet,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,201,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,31 avenue Courbet,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,202,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,14 avenue Courbet,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,204,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,8 avenue Courbet,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,205,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 avenue Courbet,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,211,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,1 avenue de l'Esterel,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,212,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,6 avenue de l'Esterel,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,214,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,15 avenue de l'Esterel,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,215,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,27 avenue de l'Esterel,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,216,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,, 28 avenue de l'esterel,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,217,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,, 27 avenue de l'Esterel,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,220,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,23 avenue Louis Gallet,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,222,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,8 avenue Louis Gallet,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,223,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,Face 12 avenue Louis Gallet,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,230,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,14 avenue Maréchal Joffre,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,231,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,21 avenue Maréchal Joffre,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,232,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,8 avenue Maréchal Joffre,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,233,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 avenue Maréchal Joffre,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,240,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,3 boulevard Alexandre III,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,241,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,2 avenue Alexandre III,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,250,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,3 Rue Bricka,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,251,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 Rue Bricka,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,252,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,5 rue Bricka,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,253,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,16 rue Bricka,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,254,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,18 rue Bricka,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,255,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,21 rue Bricka,oui,oui
+ANTIBES,21060004500392,JUAN-LES-PINS,Voirie,256,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,22 rue Bricka,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie,257,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,33 rue Bricka,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie,258,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,43 rue Bricka,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie,259,Parkeon STRADA M1000 - 3G,O,Annuel,"""09:00-12:00,14:00-18:00""",1,oui,oui,20€/mois ou 60 € / trimestre,,49 rue Bricka,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,340,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n° 43 boulevard Edouard Baudoin,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,341,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,43 boulevard Edouard Baudoin,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,342,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,30 boulevard Edouard Baudoin,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,343,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,35 boulevard Edouard Baudoin,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,344,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-12:0014:00-18:00,1,oui,non,,gratuit le reste de l'année,28 boulevard Edouard Baudoin,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,345,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,face n° 25 boulevard Edouard Baudoin,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,346,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,20 boulevard Edouard Baudoin (pinède),oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,347,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,21 boulevard Edouard Baudoin (pinède),oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,348,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,face n° 17 boulevard Edoaurd Baudoin (pinède),oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,349,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,15 avenue Guy de Maupassant,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,350,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année, 10 avenue  Guy de Maupassant,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,351,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,14 avenue  Guy de Maupassant,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,352,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n° 16 avenue  Guy de Maupassant,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,353,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,22 avenue  Guy de Maupassant,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,354,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,43 boulevard Charles Guillaumont,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,355,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n° 43 boulevard Charles Guillaumont,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,356,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n° 37 boulevard Charles Guillaumont,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,357,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n° 29 boulevard Charles Guillaumont,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,358,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,23 boulevard Charles Guillaumont,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,359,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face n°23 boulevard Charles Guillaumont,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,360,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,11 boulevard Charles Guillaumont,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,361,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Face 7 boulevard Charles Guillaumont,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,362,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,1 boulevard du Littoral,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Voirie saisonnière,363,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,3 boulevard du Littoral,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,306,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Graillon ,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,307,Parkeon STRADA M1000 - 3G,O,01/07 au 31/08,9h00-19h15,0,non,non,,gratuit le reste de l'année,Parking Pointe Crouton ,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,308,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Palmiers,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,309,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Esterel,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,310,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Parking Courbet,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,311,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Dulys 1 Est,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,312,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Dulys P1 Ouest,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,313,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking P1 Dulys Extension,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,316,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Dulys P2 Est,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,317,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,09:00-19:00,0,non,non,,gratuit le reste de l'année,Parking Dulys P2 Ouest,oui,oui
+Antibes,21060004500392,JUAN-LES-PINS,Parking Saisonnier,318,Parkeon STRADA M1000 - 3G,O,01/06 au 30/09,"""09:00-12:00,14:00-18:00""",1,oui,non,,gratuit le reste de l'année,Parking Courbet,oui,oui
