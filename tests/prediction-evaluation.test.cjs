@@ -1,0 +1,33 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {evaluate,demo}=require('../scripts/evaluate_predictions.cjs');
+const {rows,cutoff}=demo();
+const original=JSON.stringify(rows), report=evaluate(rows,cutoff);
+assert.equal(report.status,'evaluated');
+assert.equal(report.counts.training,40); assert.equal(report.counts.test,20);
+assert.equal(JSON.stringify(rows),original,'ne pas modifier les observations');
+const reversed=evaluate([...rows].reverse(),cutoff);
+assert.deepEqual(reversed,report,'tri chronologique indépendant de l’ordre du fichier');
+// Modifier toutes les réponses futures ne doit pas changer le rho appris.
+const changed=rows.map(p=>({...p,out:p.t>=cutoff ? 1-p.out : p.out}));
+assert.equal(evaluate(changed,cutoff).learned.rho,report.learned.rho);
+assert.notEqual(evaluate(changed,cutoff).learned.brier,report.learned.brier);
+const missing={...rows[0],id:'legacy'}; delete missing.answeredAt;
+const late={...rows[1],id:'late',answeredAt:cutoff+1000};
+const early={...rows[2],id:'early',answeredAt:rows[2].t};
+const extra=evaluate([...rows,missing,late,early],cutoff);
+assert.equal(extra.counts.excludedInvalidOrUndated,2);
+assert.equal(extra.counts.excludedLateAnswers,1);
+assert.equal(extra.learned.rho,report.learned.rho);
+assert.equal(evaluate(rows.slice(15),cutoff).status,'insufficient_data');
+assert.equal(evaluate(rows.slice(0,40),cutoff).status,'insufficient_data');
+assert.equal(evaluate([],cutoff).status,'insufficient_data');
+assert.throws(()=>evaluate([...rows,rows[0]],cutoff),/dupliqué/);
+assert.throws(()=>evaluate(rows,NaN),/invalide/);
+const invalid={...rows[0],id:'invalid',rec:{qLive:2,grp:[]}};
+assert.equal(evaluate([...rows,invalid],cutoff).counts.excludedInvalidOrUndated,1);
+assert.deepEqual(evaluate({preds:rows},cutoff),report);
+// Baseline à rho fixe : résultat indépendant des réponses d'entraînement.
+const newTrain=rows.map(p=>({...p,out:p.t<cutoff?1-p.out:p.out}));
+assert.equal(evaluate(newTrain,cutoff).baseline.brier,report.baseline.brier);
+console.log('OK : séparation chronologique, absence de fuite, données invalides et minimum de mesures.');
