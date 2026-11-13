@@ -154,13 +154,21 @@ function survAt(min, M){
 // Temps de trajet estimé (min) en ville
 function etaMin(from, to){ return from ? dist(from, to)*DETOUR/(DRIVE_KMH/3.6)/60 : 0; }
 
+// Une annonce ne libère pas la place avant l'heure prévue. La survie démarre
+// à la libération (raw.free), pas à l'heure d'envoi du message (raw.ts).
+// Le facteur 0.9 existant reste une hypothèse tant que le départ n'est pas confirmé.
+function liveProbability(raw, arrivalMs, M){
+  if(!raw || !Number.isFinite(raw.free) || arrivalMs < raw.free) return 0;
+  return (raw.soon ? 0.9 : 1)*survAt((arrivalMs - raw.free)/60e3, M);
+}
+
 /* ---------- Chances par rue : prévision + places signalées, estimées à l'heure d'arrivée ---------- */
 function slotLive(s, now, M, from){
   const raw = S.slotState[s.id]; if(!raw || !raw.ts) return null;
   const st = slotState(s.id, now);
   if(st.k === 'unk' || st.k === 'occ') return null;
   const age = Math.max(0, (now - raw.ts)/60e3), eta = etaMin(from, s);
-  return {slot:s, p:survAt(age + eta, M), age, eta, by:raw.by || '', src:raw.src || '', k:st.k};
+  return {slot:s, p:liveProbability(raw, now + eta*60e3, M), age, eta, by:raw.by || '', src:raw.src || '', k:st.k};
 }
 function liveInfo(street, now, M, from){
   let q = 1, n = 0, best = null;

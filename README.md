@@ -61,3 +61,15 @@ Les pourcentages sont expérimentaux. La cartographie et les règles doivent êt
 Les changements passent par une branche et une pull request, puis une relecture avant fusion. Consulter les contrôles Netlify de la pull request pour connaître le résultat du déploiement de son aperçu. La présence du code sur une branche ne signifie pas qu’il est intégré à `main`.
 
 Les données personnelles, historiques GPS et clés ne doivent pas être déposés dans Git. Le dépôt contient le code, pas une base de données partagée des utilisateurs.
+
+## Prévisions : tests et évaluation locale
+
+```bash
+node tests/prediction-timing.test.cjs
+node tests/prediction-evaluation.test.cjs
+node scripts/evaluate_predictions.cjs --demo
+```
+
+La démonstration utilise uniquement des données synthétiques. Pour comparer l'apprentissage
+local à une estimation fixe sur une période ultérieure, suivre le [guide d'évaluation](docs/evaluation-predictions.md).
+Ces tests ne prouvent pas la fiabilité des probabilités sur le terrain.

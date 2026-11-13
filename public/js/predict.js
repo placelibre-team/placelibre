@@ -34,10 +34,8 @@ function lamSlot(street, d){
 // Probabilité par place et indicateurs de preuve
 function slotP(s, now, arrMs, M, eta){
   const st = slotState(s.id, now), arrD = new Date(arrMs);
-  if(st.k === 'soon') return {p:0.9*survAt(eta, M), kind:'live'};
-  if(st.k === 'high' || st.k === 'mid' || st.k === 'low'){
-    const raw = S.slotState[s.id], age = Math.max(0, (now - raw.ts)/60e3);
-    return {p:survAt(age + eta, M), kind:'live'};
+  if(st.k === 'soon' || st.k === 'high' || st.k === 'mid' || st.k === 'low'){
+    return {p:liveProbability(S.slotState[s.id], arrMs, M), kind:'live'};
   }
   if(st.k === 'occ'){
     const lam = lamSlot(s.name, arrD);
@@ -68,7 +66,7 @@ function predictArrival(dest, etaMin, now, rhoOverride){
       const qf = (sh.f + BETA_K*(1 - pr.occ)) / (sh.n + BETA_K);
       grp.push([n, qf]); q *= Math.pow(1 - qf, n/(1 + (n - 1)*rho));
     });
-    return {r, p:Math.min(0.95, Math.max(0.03, 1 - q)), live, nearest, rec:{qLive, grp}};
+    return {r, p:Math.min(0.95, Math.max(0, 1 - q)), live, nearest, rec:{qLive, grp}};
   };
   const rows = RADII.map(at);
   const names = {}; cand.forEach(x => names[x.s.name] = 1);
@@ -110,7 +108,7 @@ function logPred(dest, pr){
 }
 function answerPred(id, found){
   const p = (S.preds || []).find(x => x.id === id); if(!p) return;
-  p.out = found ? 1 : 0; save(); render();
+  p.out = found ? 1 : 0; p.answeredAt = Date.now(); save(); render();
   toast('Merci : ça sert à mesurer la fiabilité des pourcentages.');
 }
 /* Apprentissage de la corrélation entre places voisines (ρ) : avec ≥ 30 réponses réelles, on choisit le ρ
@@ -119,7 +117,7 @@ const FIT_MIN = 30;
 function pWithRho(rec, rho){
   let q = rec.qLive;
   rec.grp.forEach(([n, qf]) => { q *= Math.pow(1 - qf, n/(1 + (n - 1)*rho)); });
-  return Math.min(.95, Math.max(.03, 1 - q));
+  return Math.min(.95, Math.max(0, 1 - q));
 }
 function fitRho(preds){
   const P = (preds || []).filter(x => x.out != null && x.rec);
