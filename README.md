@@ -4,6 +4,11 @@ Prototype collaboratif de recherche de stationnement, avec un pilote autour des 
 
 ## Données du pilote
 
+Un [espace pilote pour les parkings de grandes surfaces](docs/parkings-grandes-surfaces.md)
+est disponible à `/parkings-pilotes/` : saisie locale de comptages datés, import/export
+JSON et exemple fictif isolé. Aucun flux en direct ni partenariat n'est connecté.
+Vérification : `node tests/parking-occupancy.test.cjs`.
+
 Le dossier [Bricka / Saint-Honorat et alentours](docs/donnees-pilote.md) décrit les inventaires municipaux importés, leurs limites et les prochaines demandes de données. Ouvrir `/donnees-pilote/` après lancement local, ou suivre le lien dans les réglages de l’application.
 
 ![Explorateur des données du quartier](docs/rendus/donnees-bricka.jpg)

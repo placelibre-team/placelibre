@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Parkings pilotes · PlaceLibre</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="occupancy.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+<header><a href="../">PlaceLibre <span>↗ Retour à la carte</span></a><span class="pill">Espace pilote · local</span></header>
+<main>
+  <section class="intro"><p class="eyebrow">GRANDES SURFACES & PARKINGS</p><h1>Un comptage utile.<br>Une source. Une date.</h1><p class="lead">Préparer un pilote à l’échelle d’un parking, avant de chercher la place exacte. Aucun gestionnaire ni flux en direct n’est connecté.</p></section>
+  <div class="toolbar"><div class="tabs" role="group" aria-label="Données affichées"><button id="mine" aria-pressed="true">Mes données</button><button id="demo" aria-pressed="false">Exemple fictif</button></div><div class="tools"><button id="export">Exporter JSON</button><label class="button" for="import">Importer JSON</label><input id="import" type="file" accept=".json,application/json"><button id="clear">Effacer mes données</button></div></div>
+  <p id="notice" class="notice">Les données restent dans ce navigateur. Aucun comptage n’est envoyé à d’autres utilisateurs.</p>
+  <p id="message" role="status" aria-live="polite"></p>
+  <section class="layout">
+    <div><div class="section-title"><h2>Les parkings du pilote</h2><span id="count"></span></div><div id="cards"></div></div>
+    <aside><form id="form"><p class="eyebrow">AJOUTER OU ACTUALISER</p><h2 id="formTitle">Un parking</h2><input type="hidden" id="id">
+      <label for="name">Nom du parking</label><input id="name" required maxlength="100" placeholder="Nom à renseigner">
+      <div class="pair"><div><label for="capacity">Capacité du périmètre</label><input id="capacity" type="number" min="1" max="100000" step="1" required></div><div><label for="occupied">Places occupées</label><input id="occupied" type="number" min="0" step="1" placeholder="Inconnu"></div></div>
+      <p class="hint">Compter sur le même périmètre. Un champ vide signifie « inconnu », pas zéro.</p>
+      <label for="observedAt">Date et heure du comptage (heure locale)</label><input id="observedAt" type="datetime-local"><button type="button" class="small" id="now">Utiliser l’heure actuelle</button>
+      <label for="kind">Type de source</label><select id="kind"><option value="manual">Comptage manuel</option><option value="operator">Donnée fournie par l’exploitant</option></select>
+      <label for="source">Source du comptage ou de la capacité</label><input id="source" required maxlength="160" placeholder="Ex. comptage manuel de l’équipe"><p class="hint">Pas de nom de personne, de plaque ou de coordonnées GPS.</p>
+      <label for="access">Conditions d’accès</label><select id="access"><option value="unknown">À confirmer</option><option value="customers">Réservé aux clients</option><option value="public">Ouvert au public</option></select>
+      <label for="maxAge">Masquer le résultat après (minutes)</label><input id="maxAge" type="number" min="1" max="60" step="1" value="15" required><p class="hint">Seuil choisi pour l’essai, à convenir avec l’exploitant. Ce n’est pas une garantie de fraîcheur.</p>
+      <button type="submit" class="primary">Enregistrer le parking</button><button type="button" id="cancel" hidden>Annuler la modification</button>
+    </form></aside>
+  </section>
+  <section class="method"><h2>Ce que ce chiffre signifie</h2><p>« Capacité − places occupées » décrit uniquement le dernier comptage. Des véhicules peuvent être arrivés depuis. Les places réservées, fermées ou inaccessibles doivent être traitées dans le périmètre : ce résultat ne garantit pas une place utilisable.</p><p>Quand le comptage manque ou dépasse le seuil choisi, la disponibilité devient <strong>inconnue</strong>. Pour un parking de grande surface, un pilote opérationnel reste à organiser avec son exploitant.</p></section>
+</main><footer>PlaceLibre · Prototype de suivi agrégé · Aucun flux en direct</footer>
+<noscript>JavaScript est nécessaire pour saisir et consulter les comptages locaux.</noscript>
+</body></html>
