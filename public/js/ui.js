@@ -236,7 +236,7 @@ function renderSettings(){
     '<span>Départs mesurés</span><span>' + m.delayN + '</span>' +
     '<span>Durée de vie d’une place libre</span><span>' + fmtAge(m.tau) + '</span>' +
     '<span>Signalements utilisés</span><span>' + m.tauN + '</span>';
-  $('survTbl').innerHTML = '<tr><th>Après</th><th>Encore libre</th><th>Mesures</th><th></th></tr>' +
+  $('survTbl').innerHTML = '<tr><th>Après</th><th>Encore libre</th><th>Mesures</th><th>Fiabilité</th></tr>' +
     survModel().map(r => '<tr><td>' + r.h + ' min</td><td>' + Math.round(r.p*100) + ' %</td><td>' + r.n + '</td><td>' +
       (r.enough ? 'mesuré' : 'données insuffisantes') + '</td></tr>').join('');
   const j = journalStats();

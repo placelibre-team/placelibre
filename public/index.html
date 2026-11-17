@@ -27,7 +27,7 @@
     <button class="icon-btn" id="btnMenu" aria-label="Réglages">⚙︎</button>
   </header>
 
-  <div class="map-wrap">
+  <div class="map-wrap" role="region" aria-label="Carte">
     <div id="map"></div>
     <div class="tools">
       <button class="tool" id="tDraw" aria-pressed="false"><span>✎</span>Carto</button>
@@ -48,7 +48,8 @@
     </div>
   </div>
 
-  <section class="sheet" aria-label="Rues">
+  <main class="sheet" aria-label="Rues">
+    <h1 class="sr-only">PlaceLibre : trouver une place à Juan-les-Pins</h1>
     <div class="test-banner" id="testBanner" hidden>Canal de test : tes signalements ne vont pas sur le canal réel.</div>
     <div class="status" id="status"><strong>Chargement…</strong><small></small></div>
     <div class="checks" id="checks" aria-live="polite"></div>
@@ -64,7 +65,7 @@
     <div class="arrival" id="arrival" hidden></div>
     <div class="list-head"><h2 id="listTitle">Rues autour de toi</h2><button id="btnClearDest" hidden>Effacer la destination</button></div>
     <ul id="list"></ul>
-  </section>
+  </main>
 </div>
 
 <div id="confirmSlot" hidden role="dialog" aria-modal="true" aria-label="Confirmer la place"><div class="wc" id="confBody"></div></div>
@@ -72,10 +73,10 @@
 
 <div id="toast" role="status" hidden></div>
 
-<div id="settings" hidden>
+<div id="settings" hidden role="dialog" aria-modal="true" aria-labelledby="setTitle">
   <div class="set-wrap">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <h1>Réglages</h1><button class="btn" id="btnCloseSet">Fermer</button>
+      <h1 id="setTitle">Réglages</h1><button class="btn" id="btnCloseSet">Fermer</button>
     </div>
 
     <div class="card">
@@ -108,7 +109,7 @@
         <li><b>Obtenir la position actuelle</b></li>
         <li><b>Obtenir le contenu de l'URL</b> : URL ci-dessous, Méthode <b>POST</b>, Corps de la requête <b>JSON</b> avec 4 champs : <b>k</b> = texte <code>depart</code>, <b>lat</b> = Latitude (de la position), <b>lng</b> = Longitude, <b>by</b> = ton prénom.</li>
       </ol>
-      <div class="url"><code id="busUrl"></code><button class="btn" data-copy="busUrl">Copier</button></div>
+      <div class="url"><code id="busUrl" tabindex="0" aria-label="Adresse du canal pour les Raccourcis"></code><button class="btn" data-copy="busUrl">Copier</button></div>
       <p><b>2. « Est déconnecté » (tu t'es garé)</b> : la même chose, avec <b>k</b> = <code>arrive</code>.</p>
       <p>L'appli n'a pas besoin d'être ouverte : tes amis voient la place changer en direct.</p>
     </div>
@@ -192,6 +193,7 @@
 <script src="js/events.js"></script>
 <script src="js/map.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/dialogues.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

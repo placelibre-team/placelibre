@@ -8,7 +8,7 @@
   <script src="app.js" defer></script>
 </head>
 <body>
-<header class="top"><a class="brand" href="../" aria-label="Retour à PlaceLibre"><span class="logo">P</span>Place<b>Libre</b><span class="label">LAB QUARTIER</span></a><a class="back" href="../">Retour à l’application ↗</a></header>
+<header class="top"><a class="brand" href="../" title="Retour à l’application"><span class="logo" aria-hidden="true">P</span>Place<b>Libre</b><span class="label">LAB QUARTIER</span></a><a class="back" href="../">Retour à l’application ↗</a></header>
 <main>
   <section class="hero"><div><p class="eyebrow">JUAN-LES-PINS · PILOTE DONNÉES</p><h1>Connaître le quartier.<br><span>Avant de prédire.</span></h1><p class="intro">Bricka, Saint-Honorat et les alentours : explorer les équipements recensés par la Ville et identifier les données qu’il reste à obtenir.</p></div><div class="hero-note"><span class="status-dot"></span> Inventaires officiels<p>Consultés le <strong>12 novembre 2026</strong><br>Horodateurs : 2023 · Stationnement : 2025</p><small>Pas de disponibilité en temps réel</small></div></section>
   <div class="notice"><b>Un horodateur n’est pas une place libre.</b> Ces données décrivent le quartier. Elles ne fournissent ni départs, ni tickets, ni taux d’occupation.</div>
@@ -28,7 +28,7 @@
       <div class="inventory"><div class="inventory-head"><div class="kind" role="group" aria-label="Type d’inventaire"><button data-kind="meters" aria-pressed="true">Horodateurs</button><button data-kind="parkings" aria-pressed="false">Parkings</button></div><button id="export" class="download">Exporter la sélection ↓</button></div>
         <div class="filters"><label>Rechercher une adresse<input id="search" type="search" placeholder="Bricka, Courbet, 250…"></label><label>Rue ou groupe<select id="group"><option value="all">Toutes les rues</option></select></label></div>
         <p id="resultCount" class="result-count" role="status" aria-live="polite"></p>
-        <div class="table-wrap"><table><caption class="sr-only">Inventaire municipal filtré</caption><thead id="tableHead"></thead><tbody id="rows"></tbody></table></div>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Inventaire municipal filtré (défilant)"><table><caption class="sr-only">Inventaire municipal filtré</caption><thead id="tableHead"></thead><tbody id="rows"></tbody></table></div>
         <div id="empty" class="empty" hidden><b>Aucune ligne dans cette sélection.</b><p id="emptyText"></p><button id="reset">Réinitialiser les filtres</button></div>
         <p class="table-note" id="tableNote"></p>
       </div>

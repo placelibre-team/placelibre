@@ -1,7 +1,8 @@
 /* PlaceLibre · identité : encre bleu-vert, vert « libre », beaucoup d'air, coins ronds, ombres douces */
 :root{
-  --bg:#f3f7f6; --surface:#ffffff; --fg:#0c2830; --muted:#5f777d; --line:#e2eaea;
+  --bg:#f3f7f6; --surface:#ffffff; --fg:#0c2830; --muted:#5a7177; --line:#e2eaea;
   --accent:#0d7c86; --accent-2:#14a27a; --accent-fg:#ffffff; --brand:linear-gradient(135deg,#0d7c86,#14a27a);
+  --free-ink:#107945; --accent-ink:#0b6e77;
   --free:#16a05c; --mid:#d9961a; --low:#8fa39a; --soon:#e0672b; --occ:#3d474b;
   --shadow:0 1px 2px rgba(12,40,48,.06),0 8px 24px rgba(12,40,48,.10); --shadow-up:0 -10px 30px rgba(12,40,48,.12);
   --r:16px;
@@ -11,12 +12,14 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0a1417; --surface:#122126; --fg:#e6f0f1; --muted:#8fa6ab; --line:#1f3338;
   --accent:#3fbdd0; --accent-2:#3fd0a0; --accent-fg:#04222a; --brand:linear-gradient(135deg,#3fbdd0,#3fd0a0);
+  --free-ink:#3fc37a; --accent-ink:#3fbdd0;
   --free:#3fc37a; --mid:#e8ac3a; --low:#7f938a; --soon:#f0844e; --occ:#9aa6aa;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); --shadow-up:0 -10px 30px rgba(0,0,0,.4);
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0a1417; --surface:#122126; --fg:#e6f0f1; --muted:#8fa6ab; --line:#1f3338;
   --accent:#3fbdd0; --accent-2:#3fd0a0; --accent-fg:#04222a; --brand:linear-gradient(135deg,#3fbdd0,#3fd0a0);
+  --free-ink:#3fc37a; --accent-ink:#3fbdd0;
   --free:#3fc37a; --mid:#e8ac3a; --low:#7f938a; --soon:#f0844e; --occ:#9aa6aa;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35); --shadow-up:0 -10px 30px rgba(0,0,0,.4);
   color-scheme:dark}
@@ -191,7 +194,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 /* Signalement rapide et accueil */
 .pass{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;margin:10px 0 2px}
 .pass span{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.02em}
-.btn.ok{background:color-mix(in srgb,var(--free) 14%,var(--surface));color:var(--free);border-color:color-mix(in srgb,var(--free) 40%,transparent);font-weight:600}
+.btn.ok{background:color-mix(in srgb,var(--free) 14%,var(--surface));color:var(--free-ink);border-color:color-mix(in srgb,var(--free) 40%,transparent);font-weight:600}
 .btn.ko{background:color-mix(in srgb,var(--occ) 10%,var(--surface));color:var(--fg);font-weight:600}
 #app.nomap .pass{margin-top:6px}
 #welcome{position:fixed;inset:0;z-index:4000;background:linear-gradient(160deg,#0d7c86,#14a27a);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom,0px))}
@@ -229,7 +232,9 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:1
 #confBody h2{margin:0;font-size:20px;line-height:1.2}
 .opts{display:grid;gap:8px}
 .opt{text-align:left;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);border-radius:14px;padding:11px 13px;display:grid;gap:2px;font:inherit}
-.opt b{font-size:14.5px}.opt b em{font-style:normal;font-weight:600;font-size:11.5px;color:var(--accent);margin-left:6px}
+.opt b{font-size:14.5px}.opt b em{font-style:normal;font-weight:600;font-size:11.5px;color:var(--accent-ink);margin-left:6px}
 .opt span{font-size:12.5px;color:var(--muted)}
 .opt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
 .li-main .l3{font-size:11.5px;color:var(--muted);font-style:italic}
+
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
