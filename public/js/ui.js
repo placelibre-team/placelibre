@@ -5,7 +5,7 @@ function bestStreet(){
   const names = {}, M = survModel(); SLOTS.forEach(s => { if(s.name && s.type !== 'pmr') names[s.name] = 1; });
   let best = null;
   Object.keys(names).forEach(n => { const c = chanceNow(n, lastPos, M); if(!best || c.p > best.p) best = {name:n, p:c.p}; });
-  return best;
+  return best && Number.isFinite(best.p) && Math.round(best.p*100) > 0 ? best : null;
 }
 function renderStatus(){
   const now = Date.now(); let main, sub;
@@ -17,14 +17,15 @@ function renderStatus(){
     main = 'Mode cartographie';
     sub = draft.length ? draft.length + ' point' + (draft.length > 1 ? 's' : '') + ' posé' + (draft.length > 1 ? 's' : '') : 'Touche le début de la file de places';
   }else{
-    let free = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid' || k === 'soon') free++; });
+    let free = 0, soon = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid') free++; else if(k === 'soon') soon++; });
     const bs = !free && SLOTS.length ? bestStreet() : null;
-    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' en ce moment' : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
-    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places sur la carte' : SLOTS.length + ' places sur la carte · touche Carto pour en ajouter';
+    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' signalée' + (free > 1 ? 's' : '') + ' en ce moment' : soon ? soon + ' départ' + (soon > 1 ? 's' : '') + ' annoncé' + (soon > 1 ? 's' : '') + ' · pas encore libre' + (soon > 1 ? 's' : '') : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
+    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places sur la carte' : SLOTS.length + ' places cartographiées' + (mapReady ? ' · touche Carto pour en ajouter' : ' · mode liste');
   }
   if(!S.me) sub = 'Choisis ton prénom dans ⚙︎ pour que les autres voient qui signale · ' + sub;
   const live = syncOk ? '<span style="color:var(--free);font-weight:600">● ' + (TEST ? 'Canal de test' : 'En direct') + '</span> · ' : '';
-  $('status').innerHTML = '<strong>' + esc(main) + '</strong><small>' + live + esc(sub) + '</small>';
+  const n = S.outbox.length, wait = n ? ' · ' + n + ' envoi' + (n > 1 ? 's' : '') + ' en attente (réseau)' : '';
+  $('status').innerHTML = '<strong>' + esc(main) + '</strong><small>' + live + esc(sub + wait) + '</small>';
 }
 
 /* Contrôles à 5, 10 et 30 min après un départ */
@@ -63,10 +64,29 @@ function sparkSVG(street){
     '</svg>';
 }
 function liveText(b){
+  if(b.waitMs > 0){
+    const seconds = Math.ceil(b.waitMs/1000);
+    const delay = seconds < 60 ? seconds + ' s' : Math.ceil(seconds/60) + ' min';
+    return 'Départ annoncé par ' + (b.by || 'quelqu’un') + ' · libération prévue ~' + delay + ' après ton arrivée (non confirmée)';
+  }
   const who = b.by || 'quelqu’un', how = b.src === 'bluetooth' ? ' (Bluetooth)' : '';
   const what = b.src === 'signalement' || b.src === 'controle' ? 'Vue libre' : 'Départ signalé';
-  return what + ' par ' + who + ' il y a ' + fmtAge(b.age*60) + how + ' · ' + Math.round(b.p*100) + ' % encore libre à ton arrivée' +
-    (b.eta >= 0.5 ? ' (~' + Math.round(b.eta) + ' min)' : '');
+  return what + ' par ' + who + ' il y a ' + fmtAge(b.age*60) + how + (b.age > 20 ? ' (ancien, moins fiable)' : '') + ' · ' +
+    Math.round(b.p*100) + ' % encore libre à ton arrivée' +
+    (b.eta >= 0.5 ? ' (~' + Math.round(b.eta) + ' min, vers ' + hhmm(Date.now() + b.eta*60e3) + ')' : '');
+}
+/* Mesures réelles (signalements et contrôles) enregistrées dans cette rue sur ce téléphone */
+function streetSamples(street){
+  return S.journal.filter(e => e.street === street && e.src !== 'auto' && (e.type === 'libre' || e.type === 'occupee' || (e.type === 'controle' && (e.etat === 'libre' || e.etat === 'occupee')))).length;
+}
+/* D'où vient le pourcentage affiché pour une rue */
+function originText(g){
+  const n = streetSamples(g.name);
+  if(g.live >= 0.3) return 'Origine : signalements en direct' + (n ? ' + ' + n + ' mesure' + (n > 1 ? 's' : '') + ' passée' + (n > 1 ? 's' : '') : '');
+  if(g.live > 0.05) return 'Origine : prévision + un signalement récent';
+  return n >= 5 ? 'Origine : ' + n + ' mesures passées dans cette rue, aucun signalement en direct'
+    : n ? 'Origine : prévision, seulement ' + n + ' mesure' + (n > 1 ? 's' : '') + ' réelle' + (n > 1 ? 's' : '') + ' (estimation prudente)'
+    : 'Données manquantes : estimation par l’heure et les règles, jamais vérifiée ici';
 }
 function renderList(){
   const ref = S.dest || lastPos || {lat:CENTER[1], lng:CENTER[0]};
@@ -83,16 +103,17 @@ function renderList(){
     .sort((a,b) => b.p - a.p || a.d - b.d).slice(0, 14);
   const ul = $('list'); ul.innerHTML = '';
   if(!list.length){
-    ul.innerHTML = '<li class="empty">Pas encore de places cartographiées près d’ici. Touche <b>Carto</b> à droite de la carte, puis dessine les files de places de ta rue sur la photo aérienne.</li>';
+    ul.innerHTML = '<li class="empty">Pas encore de places cartographiées près d’ici. ' + (mapReady ? 'Touche <b>Carto</b> à droite de la carte, puis dessine les files de places de ta rue sur la photo aérienne.' : 'La cartographie nécessite le mode carte ; réessaie lorsque la carte est disponible.') + '</li>';
     return;
   }
   list.forEach(g => {
     const li = document.createElement('li'), open = openStreet === g.name;
     li.innerHTML = '<span class="pct" style="color:' + chanceColor(g.p) + '">' + Math.round(g.p*100) + '<small>%</small></span>' +
-      '<div class="li-main"><b></b><span class="l1"></span><span class="l2"></span></div><span class="li-dist">' + fmtDist(g.d) + '</span>';
+      '<div class="li-main"><b></b><span class="l1"></span><span class="l2"></span><span class="l3"></span></div><span class="li-dist">' + fmtDist(g.d) + '</span>';
     li.querySelector('b').textContent = g.name;
     li.querySelector('.l1').textContent = 'de chances de trouver en 5 min · ' + (g.n ? (g.n + ' places') : '') + (g.pmr ? ' + ' + g.pmr + ' PMR' : '');
     li.querySelector('.l2').textContent = (g.best ? liveText(g.best) + ' · ' : '') + (ruleText(g.name, nowD) || '');
+    li.querySelector('.l3').textContent = originText(g);
     if(open){
       const rule = RULES[g.name], det = document.createElement('div'); det.className = 'detail';
       det.innerHTML = '<div class="det-row"><span>Prévision (heure, jour, saison, règles)</span><b>' + Math.round(g.prior*100) + ' %</b></div>' +
@@ -178,7 +199,7 @@ function drawArrival(log){
     '<div class="rr">' + pr.rows.map(x => '<div><b style="color:' + chanceColor(x.p) + '">' + (Math.round(x.p*20)*5) + ' %</b><span>à moins de ' + x.r + ' m</span></div>').join('') + '</div>' +
     '<p class="note">' + (pr.d50 ? 'Une place libre est plus probable que non à moins de ' + pr.d50 + ' m. ' : 'Moins d’une chance sur deux d’avoir une place à moins de 300 m. ') +
     (pr.liveN ? pr.liveN + ' place' + (pr.liveN > 1 ? 's' : '') + ' signalée' + (pr.liveN > 1 ? 's' : '') + ' libre' + (pr.liveN > 1 ? 's' : '') + ' en ce moment. ' : 'Aucune place signalée libre en ce moment. ') +
-    esc(qualityText(pr.quality)) + '</p>' +
+    '<b>Origine :</b> ' + esc(qualityText(pr.quality)) + '</p>' +
     (arrived ? '<div class="ask">Place trouvée à moins de 100 m ? <button class="btn ok" data-pred="1">Oui</button><button class="btn ko" data-pred="0">Non</button></div>' : '');
 }
 document.addEventListener('click', e => {
@@ -189,8 +210,8 @@ document.addEventListener('click', e => {
 });
 
 /* ---------- Boutons du bas ---------- */
-$('btnPark').addEventListener('click', () => doArrive('manuel'));
-$('btnLeave').addEventListener('click', () => startDepart('manuel'));
+$('btnPark').addEventListener('click', () => askSlot('arrive'));
+$('btnLeave').addEventListener('click', () => askSlot('depart'));
 
 
 /* ---------- Réglages ---------- */
@@ -327,18 +348,18 @@ $('btnWelcome').addEventListener('click', () => { $('settings').hidden = true; s
 if(!welcomeSeen()) showWelcome(0);
 
 /* Canal du groupe : public (nom dans le code) ou privé (clé reçue par lien d'invitation, voir config.js) */
-const CLE_CHARS = 'abcdefghijkmnpqrstuvwxyz23456789';
 function nouvelleCle(){
-  const b = new Uint8Array(24); crypto.getRandomValues(b);
-  return Array.from(b, x => CLE_CHARS[x % CLE_CHARS.length]).join('');
+  if(typeof crypto === 'undefined' || !crypto.getRandomValues) throw new Error('crypto');
+  const b = new Uint8Array(16); crypto.getRandomValues(b);
+  return Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
 }
-function lienInvitation(){ return location.origin + location.pathname + location.search + '#cle=' + CLE_CANAL; }
+function lienInvitation(){ return location.origin + location.pathname + (TEST ? '?canal=test' : '') + '#cle=' + CLE_CANAL; }
 function renderCanal(){
   $('canalEtat').innerHTML = CLE_CANAL
-    ? '<b>Canal privé.</b> Seules les personnes qui ont le lien d’invitation voient et envoient les signalements.'
+    ? '<b>Canal par invitation.</b> Toute personne qui connaît le lien ou le nom du canal peut lire et envoyer des signalements. Ce n’est pas une authentification.'
     : '<b>Canal public.</b> Son nom est dans le code de l’appli : n’importe qui peut lire les signalements (prénom, place, heure) et en envoyer de faux.';
   $('canalAide').textContent = CLE_CANAL
-    ? 'Envoie le lien seulement aux testeurs, en message privé. Pense à mettre à jour l’adresse de tes Raccourcis iPhone (ci-dessous).'
+    ? (CLE_PERSISTEE ? 'Envoie le lien seulement aux testeurs, en message privé. L’historique et les envois en attente restent séparés par canal. Mets à jour tes Raccourcis iPhone (ci-dessous).' : 'La clé n’a pas pu être conservée : garde le lien et rouvre-le à chaque visite. Ce canal est actif seulement pour cette session.')
     : 'Pour le pilote : une personne crée le canal privé, puis envoie le lien d’invitation aux autres. Les Raccourcis iPhone devront utiliser la nouvelle adresse.';
   $('btnInvite').hidden = !CLE_CANAL;
   $('btnNewCanal').textContent = CLE_CANAL ? 'Créer un autre canal privé' : 'Créer un canal privé';
@@ -357,7 +378,12 @@ $('btnNewCanal').addEventListener('click', () => {
     toast(CLE_CANAL ? 'Toucher encore : les autres devront recevoir le nouveau lien.' : 'Toucher encore pour créer le canal privé.');
     return;
   }
-  try{ localStorage.setItem('plj:cle', nouvelleCle()); }catch(e){ toast('Stockage bloqué : impossible de créer le canal.'); return; }
+  let cle;
+  try{ cle = nouvelleCle(); }catch(e){ toast('Générateur sécurisé indisponible : impossible de créer le canal.'); return; }
+  try{
+    localStorage.setItem(CLE_STORAGE, cle);
+    if(localStorage.getItem(CLE_STORAGE) !== cle) throw new Error('stockage');
+  }catch(e){ toast('Stockage bloqué : impossible de créer le canal.'); return; }
   location.reload();
 });
 renderCanal();

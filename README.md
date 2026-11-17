@@ -31,12 +31,26 @@ La carte, la recherche et le service de signalements utilisent des services exte
 
 ## Lancer les tests
 
-Depuis la racine du dépôt, avec Python 3 et Node.js :
+Pour tout lancer d'un coup (site publié, registre des places, tous les tests, simulateur s'il est présent) :
+
+```bash
+bash outils/tout-tester.sh
+```
+
+Les mêmes contrôles tournent automatiquement sur GitHub à chaque pull request et à chaque fusion dans `main` (onglet **Checks** de la PR, workflow `Tests`). Une PR dont les contrôles échouent ne doit pas être fusionnée : Netlify publierait la version cassée.
+
+Test par test, depuis la racine du dépôt, avec Python 3 et Node.js :
 
 ```bash
 python3 -m unittest tests/test_pilot_data.py
 node tests/pilot-rules.test.cjs
+node tests/sync-validation.test.cjs    # signalements refusés (place inconnue, date fausse)
+node tests/sync-convergence.test.cjs   # même état sur deux téléphones (ordre, doublons, contradictions)
+node tests/sync-coupure.test.cjs       # coupure réseau : file d'attente et heure d'origine
+node outils/verifier-places.js         # registre des places
 ```
+
+Les tests de signalements simulent des téléphones sans réseau : rien n'est envoyé, ni sur le canal réel ni sur le canal de test.
 
 ## Attention pendant les essais
 
@@ -61,3 +75,15 @@ Les pourcentages sont expérimentaux. La cartographie et les règles doivent êt
 Les changements passent par une branche et une pull request, puis une relecture avant fusion. Consulter les contrôles Netlify de la pull request pour connaître le résultat du déploiement de son aperçu. La présence du code sur une branche ne signifie pas qu’il est intégré à `main`.
 
 Les données personnelles, historiques GPS et clés ne doivent pas être déposés dans Git. Le dépôt contient le code, pas une base de données partagée des utilisateurs.
+
+## Prévisions : tests et évaluation locale
+
+```bash
+node tests/prediction-timing.test.cjs
+node tests/prediction-evaluation.test.cjs
+node scripts/evaluate_predictions.cjs --demo
+```
+
+La démonstration utilise uniquement des données synthétiques. Pour comparer l'apprentissage
+local à une estimation fixe sur une période ultérieure, suivre le [guide d'évaluation](docs/evaluation-predictions.md).
+Ces tests ne prouvent pas la fiabilité des probabilités sur le terrain.
