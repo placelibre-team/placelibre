@@ -22,7 +22,7 @@
 
 ## V1 — Structurer le code et les données
 
-- [ ] Séparer carte, interface, signalements, stockage et prédictions.
+- [x] Séparer carte, interface, signalements, stockage et prédictions : un fichier par rôle dans `public/js/` (`map.js`, `ui.js`, `sync.js` et `events.js`, `state.js`, `model.js` et `predict.js`). Les fichiers partagent encore des variables globales (`S`, `SLOTS`…), à réduire si le code grandit.
 - [x] Définir des identifiants stables de places et un format d'événements horodatés (`public/js/places.js`, `docs/format-evenements.md`).
 - [x] Traiter doublons, messages dans le désordre et contradictions : même état sur tous les téléphones, file d'attente hors réseau (#9, `docs/format-evenements.md`).
 - [ ] Traiter les observations incomplètes (contrôles non observés, départs sans suite) dans le futur jeu d'apprentissage. Déjà fait : les contrôles automatiques « non observé » ne comptent pas comme mesures (#10).
