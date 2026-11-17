@@ -10,7 +10,7 @@ Le dépôt est la base de code commune. Les collaborateurs doivent être invité
 6. Ouvrir une pull request vers `main`, avec les changements et les vérifications effectuées.
 7. Faire relire et tester par un autre membre avant de fusionner.
 
-Après l'import initial, ne pas développer directement sur `main`. Cette règle est une convention d'équipe ; aucune protection technique de branche n'a été activée lors de la création.
+Ne pas développer directement sur `main`. Depuis le 17 novembre 2026, la [protection de `main`](https://github.com/placelibre-team/placelibre/settings/rules/27469736) impose une PR, une approbation, le contrôle « Tous les contrôles » réussi sur une branche à jour avec `main`, et la résolution des discussions. Une modification après approbation demande une nouvelle relecture. La suppression et les poussées forcées sont bloquées, sans dérogation configurée.
 
 ## Tester
 

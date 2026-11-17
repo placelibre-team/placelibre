@@ -11,7 +11,7 @@
 - [x] Relier Netlify au dépôt pour les aperçus de PR : aperçu de #23 confirmé par Netlify.
 - [x] Contrôler les fichiers publiés et exécuter les tests sur GitHub (`outils/verifier-site.js`, workflow `Tests`). Ces contrôles ne bloquent pas automatiquement les déploiements Netlify.
 - [ ] Vérifier la publication du dernier `main` en production. Au contrôle HTTP du 17/11, le site sert encore `pl-v4-confirmation` dans `sw.js` et `/verification-terrain/verif.js` renvoie 404, alors que ces fichiers ont évolué dans `main`. Examiner le déploiement Netlify et son journal avant de relancer si nécessaire.
-- [ ] Configurer les protections de `main` décidées par l'équipe, notamment les contrôles requis avant fusion. Le workflow seul n'active pas cette protection.
+- [x] Protéger `main` : [règle active](https://github.com/placelibre-team/placelibre/settings/rules/27469736), PR avec une approbation, contrôle « Tous les contrôles » réussi sur une branche à jour, discussions résolues, suppression et poussées forcées interdites, aucune dérogation configurée.
 
 ## V0 — Fiabiliser le pilote
 
@@ -24,12 +24,24 @@
 - [x] Préparer le guide du testeur (`docs/guide-testeur.md`), à relire avant envoi.
 - [x] Faire fonctionner une liste de rues même si WebGL échoue. Stan rapporte dans #22 un contrôle Chrome avec WebGL désactivé et avec la carte bloquée ; le mode liste, les boutons et les signalements restent utilisables. Parcours à vérifier aussi sur les téléphones des testeurs.
 - [x] Améliorer les contrastes, les repères de page et la navigation des fenêtres au clavier (#22, `tests/dialogues.test.cjs`). La correction du focus et de Tab/Shift+Tab a été testée en DOM simulé ; un nouvel essai sur les navigateurs des testeurs reste à faire.
+- [x] Porter les cibles « Réglages » et « Aller » à au moins 44 × 44 px (#20). Sur les écrans de 480 px ou moins, la recherche occupe sa propre ligne. Cela ne remplace pas l'essai sur les téléphones des testeurs.
+
+### Suivi du guide de fusion (#17)
+
+Les PR #9 à #16, puis #18, #19, #21, #22 et #23 sont fusionnées. Les corrections du scénario `arrivee-avant-depart`, du décompte des contrôles réellement observés et du texte avant un départ annoncé sont intégrées. Le bandeau et la liste ne proposent plus « Carto » quand la carte est indisponible ; le message d'échec du chargement OpenStreetMap reste suivi dans la PR #25.
+
+L'issue #17 reste ouverte pour les validations réelles :
+
+- [ ] Vérifier les huit paires de files sur place, importer le relevé et faire relire la modification du registre selon `docs/verification-terrain.md`.
+- [ ] Effectuer l'essai à deux vrais téléphones sur la même version et `?canal=test`, puis analyser les journaux selon `docs/essai-deux-telephones.md`. Garder les exports hors du dépôt et consigner uniquement un bilan anonymisé.
+
+Les tests automatiques ne permettent pas de cocher ces deux points. Vérifier la version publiée avant le déplacement ; un aperçu Netlify de la version à tester peut servir si la production n'est pas encore à jour.
 
 ## V1 — Structurer le code et les données
 
 - [x] Séparer carte, interface, signalements, stockage et prédictions : un fichier par rôle dans `public/js/` (`map.js`, `ui.js`, `sync.js` et `events.js`, `state.js`, `model.js` et `predict.js`). Les fichiers partagent encore des variables globales (`S`, `SLOTS`…), à réduire si le code grandit.
 - [x] Définir des identifiants stables de places et un format d'événements horodatés (`public/js/places.js`, `docs/format-evenements.md`).
-- [x] Traiter doublons, messages dans le désordre et contradictions : convergence testée à partir des mêmes événements reçus, file d'attente et rattrapage hors réseau (#9, `docs/format-evenements.md`). Cela ne garantit pas la réception de chaque message en conditions réelles.
+- [x] Traiter doublons, messages dans le désordre et contradictions : convergence testée à partir des mêmes événements reçus, file d'attente hors réseau et rattrapage au retour de la connexion (#9, `docs/format-evenements.md`). Cela ne garantit pas la réception de chaque message en conditions réelles.
 - [ ] Traiter les observations incomplètes (contrôles non observés, départs sans suite) dans le futur jeu d'apprentissage. Déjà fait : les contrôles automatiques « non observé » ne comptent pas comme mesures (#10).
 - [x] Importer les inventaires municipaux : 46 horodateurs et 5 parkings sélectionnés, avec provenance et explorateur (#6, `docs/donnees-pilote.md`). Sources datées de 2023 et 2025 ; les capacités ne sont pas des disponibilités.
 - [ ] Vérifier l'actualité des inventaires et leurs correspondances sur place ; leur import ne constitue pas une validation terrain.
