@@ -10,11 +10,15 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const RACINE = path.resolve(__dirname, '..', '..');
+// Par défaut on teste le code de ce dépôt. Pour essayer une autre version (par exemple une branche
+// extraite dans /tmp/ma-branche/public) : PLACELIBRE_APP=/tmp/ma-branche node tests/simulateur/simulateur.cjs
+const RACINE_APP = process.env.PLACELIBRE_APP ? path.resolve(process.env.PLACELIBRE_APP) : RACINE;
 // Même ordre que public/index.html, sans la carte, l'interface et le démarrage (map.js, ui.js, main.js)
 const MODULES = ['config', 'places', 'state', 'geometry', 'model', 'journal', 'predict', 'sync', 'events'];
 const BASE_NTFY = 'https://ntfy.sh/';
 
 /* ---------- Horloge simulée ---------- */
+const ceder = () => new Promise(r => setImmediate(r));
 function creerHorloge(debut) {
   let maintenant = +debut, suite = 0;
   let minuteries = [];
@@ -28,8 +32,10 @@ function creerHorloge(debut) {
     setTimeout: (fn, ms) => ajouter(fn, ms, false),
     setInterval: (fn, ms) => ajouter(fn, ms, true),
     clear: id => { minuteries = minuteries.filter(m => m.id !== id); },
-    /* Avance le temps de `ms` millisecondes en déclenchant, dans l'ordre, les minuteries échues */
-    avancer(ms) {
+    /* Avance le temps de `ms` millisecondes en déclenchant, dans l'ordre, les minuteries échues.
+       Entre deux minuteries on laisse l'appli terminer ses opérations asynchrones (envois, relectures),
+       comme dans un vrai navigateur. À appeler avec `await`. */
+    async avancer(ms) {
       const cible = maintenant + ms;
       for (;;) {
         minuteries.sort((a, b) => a.t - b.t || a.id - b.id);
@@ -39,11 +45,13 @@ function creerHorloge(debut) {
         maintenant = Math.max(maintenant, prochaine.t);
         if (prochaine.repeter) { prochaine.t += prochaine.repeter; minuteries.push(prochaine); }
         prochaine.fn();
+        await ceder();
       }
       maintenant = cible;
+      await ceder();
     },
-    minutes(n) { this.avancer(n * 60e3); },
-    secondes(n) { this.avancer(n * 1e3); }
+    minutes(n) { return this.avancer(n * 60e3); },
+    secondes(n) { return this.avancer(n * 1e3); }
   };
 }
 
@@ -86,6 +94,7 @@ function creerTelephone({nom = 'Anthony', horloge, bus, canal = 'test'} = {}) {
     removeItem: k => { stockage.delete(k); }
   };
   const reseau = {actif: true};
+  const rien = () => {};
   const element = () => ({textContent: '', innerHTML: '', hidden: false, style: {}, classList: {add() {}, remove() {}, toggle() {}},
     setAttribute() {}, addEventListener() {}});
 
@@ -101,25 +110,31 @@ function creerTelephone({nom = 'Anthony', horloge, bus, canal = 'test'} = {}) {
     }
     if (options.method === 'POST') { bus.publier(url, options.body); return {ok: true, text: async () => '', json: async () => ({})}; }
     if (/poll=1/.test(url)) {
-      const lignes = bus.historique(url).map(m => JSON.stringify(m)).join('\n');
+      const depuis = (/since=([^&]+)/.exec(url) || [])[1];
+      const ms = bus.historique(url).filter(m => !depuis || depuis === 'all' || m.time >= Number(depuis));
+      const lignes = ms.map(m => JSON.stringify(m)).join('\n');
       return {ok: true, text: async () => lignes, json: async () => ({})};
     }
     return {ok: true, text: async () => '', json: async () => ({})};
   }
+  const flux = new Set();          // connexions temps réel ouvertes par l'appli
+  const ecouteurs = {};            // addEventListener('online', ...) de l'appli
   class EventSourceSim {
     constructor(url) {
       this.onopen = this.onerror = this.onmessage = null;
       this._stop = bus.abonner(url, m => { if (reseau.actif && this.onmessage) this.onmessage({data: JSON.stringify(m)}); });
+      flux.add(this);
       queueMicrotask(() => { if (this.onopen) this.onopen(); });
     }
-    close() { this._stop(); }
+    close() { this._stop(); flux.delete(this); }
   }
 
-  const rien = () => {};
   const bac = {
     console, URLSearchParams, queueMicrotask, JSON, Math,
     location: {search: canal === 'test' ? '?canal=test' : '', pathname: '/'},
-    localStorage, document: {getElementById: element, createElement: element},
+    localStorage,
+    document: {getElementById: element, createElement: element, visibilityState: 'visible', addEventListener: rien},
+    addEventListener: (type, fn) => { (ecouteurs[type] = ecouteurs[type] || []).push(fn); },
     navigator: {geolocation: {watchPosition: () => 1, clearWatch: rien, getCurrentPosition: (ok, ko) => ko(new Error('Simulation : pas de GPS'))}},
     fetch: fetchSim, EventSource: EventSourceSim, Date: DateSim,
     setTimeout: (fn, ms) => horloge.setTimeout(fn, ms), clearTimeout: id => horloge.clear(id),
@@ -130,7 +145,7 @@ function creerTelephone({nom = 'Anthony', horloge, bus, canal = 'test'} = {}) {
   };
   const ctx = vm.createContext(bac);
   for (const m of MODULES) {
-    const f = path.join(RACINE, 'public', 'js', m + '.js');
+    const f = path.join(RACINE_APP, 'public', 'js', m + '.js');
     new vm.Script(fs.readFileSync(f, 'utf8'), {filename: f}).runInContext(ctx);
   }
 
@@ -147,7 +162,18 @@ function creerTelephone({nom = 'Anthony', horloge, bus, canal = 'test'} = {}) {
       evalIn('S.me = ' + JSON.stringify(nom) + '; rebuildSlots();');
       await evalIn('syncStart()');
     },
-    couperReseau(coupe) { reseau.actif = !coupe; },
+    /* Coupe ou rétablit le réseau comme le ferait un navigateur : à la coupure la connexion temps réel
+       signale une erreur ; au retour elle se rouvre et l'événement « online » est envoyé à l'appli. */
+    couperReseau(coupe) {
+      if (!!coupe === !reseau.actif) return;
+      reseau.actif = !coupe;
+      for (const es of [...flux]) { const f = coupe ? es.onerror : es.onopen; if (f) f.call(es, {}); }
+      if (!coupe) (ecouteurs.online || []).forEach(f => f({}));
+    },
+    reseauActif: () => reseau.actif,
+    diagnostic: () => ({connexionsTempsReel: flux.size, ecouteursOnline: (ecouteurs.online || []).length}),
+    /* Laisse l'appli terminer ses envois asynchrones (file d'attente, relecture du canal) */
+    laisserFaire: () => new Promise(r => setImmediate(r)).then(() => new Promise(r => setImmediate(r))),
     centre,
     places: () => lire('SLOTS.map(s => ({id:s.id, name:s.name, type:s.type, lat:s.lat, lng:s.lng}))'),
     placesDeRue: rue => t.places().filter(p => p.name === rue),
@@ -163,7 +189,11 @@ function creerTelephone({nom = 'Anthony', horloge, bus, canal = 'test'} = {}) {
       passer('__id', idPlace);
       return lire('(function(){const st = slotState(__id, Date.now()); return Object.assign({}, st, {texte: stateText(st)});})()');
     },
+    etatBrut: idPlace => { passer('__id', idPlace); return lire('S.slotState[__id] || null'); },
     journal: () => lire('S.journal'),
+    /* Nombre d'envois en attente (file de la PR « signalements fiables »), ou null si l'appli n'en a pas */
+    envoisEnAttente: () => lire('typeof S.outbox === "undefined" ? null : S.outbox.length'),
+    possede: nomFonction => !!lire('typeof ' + nomFonction + ' === "function"'),
     modele: () => lire('S.model'),
     survie: () => lire('survModel()'),
     prevision(dest, minutesAvantArrivee) {
@@ -179,4 +209,4 @@ function creerTelephone({nom = 'Anthony', horloge, bus, canal = 'test'} = {}) {
   return t;
 }
 
-module.exports = {creerHorloge, creerBus, creerTelephone, RACINE};
+module.exports = {creerHorloge, creerBus, creerTelephone, RACINE, RACINE_APP};
