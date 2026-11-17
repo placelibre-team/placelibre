@@ -7,7 +7,7 @@
 - [ ] Comparer le fichier importé au dossier source de Shad.
 - [ ] Inviter les comptes GitHub de l'équipe.
 - [ ] Vérifier que chaque membre peut lancer l'application.
-- [ ] Isoler les données et le canal de signalements de test.
+- [x] Isoler les données et le canal de signalements de test : `?canal=test` utilise un canal ntfy et un stockage du téléphone séparés (`config.js`, `KEY` et `BUS`) ; vérifié le 17/11 (les signalements et la file d'attente de test ne peuvent pas partir sur le canal réel).
 - [x] Relier le site Netlify au dépôt, avec validation de la configuration avant publication (`outils/verifier-site.js`, workflow `Tests` sur chaque PR).
 
 ## V0 — Fiabiliser le pilote
@@ -15,7 +15,7 @@
 - [ ] Vérifier les emplacements et règles de Bricka / Saint-Honorat.
 - [ ] Tester les arrivées et départs entre deux appareils.
 - [ ] Mesurer le délai de réception et les erreurs de localisation.
-- [ ] Faire fonctionner une liste de rues même si WebGL échoue.
+- [x] Faire fonctionner une liste de rues même si WebGL échoue : vérifié le 17/11 dans Chrome avec WebGL désactivé, puis avec la bibliothèque de carte bloquée. Mode liste affiché, chances par rue, Je pars / Je me gare et signalements fonctionnels.
 
 ## V1 — Structurer le code et les données
 
