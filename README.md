@@ -31,7 +31,15 @@ La carte, la recherche et le service de signalements utilisent des services exte
 
 ## Lancer les tests
 
-Depuis la racine du dépôt, avec Python 3 et Node.js :
+Pour tout lancer d'un coup (site publié, registre des places, tous les tests, simulateur s'il est présent) :
+
+```bash
+bash outils/tout-tester.sh
+```
+
+Les mêmes contrôles tournent automatiquement sur GitHub à chaque pull request et à chaque fusion dans `main` (onglet **Checks** de la PR, workflow `Tests`). Une PR dont les contrôles échouent ne doit pas être fusionnée : Netlify publierait la version cassée.
+
+Test par test, depuis la racine du dépôt, avec Python 3 et Node.js :
 
 ```bash
 python3 -m unittest tests/test_pilot_data.py
