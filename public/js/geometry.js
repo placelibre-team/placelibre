@@ -59,6 +59,10 @@ function nearestSlot(p, max){
   SLOTS.forEach(s => { const d = dist(p, s); if(d < bd){ bd = d; best = s; } });
   return best;
 }
+/* Les n places les plus proches (dans max m), de la plus proche à la plus lointaine */
+function nearSlots(p, max, n){
+  return SLOTS.map(s => ({s, d:dist(p, s)})).filter(x => x.d <= max).sort((a, b) => a.d - b.d).slice(0, n || 4);
+}
 
 async function overpass(q){
   const r = await fetch(OVERPASS, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data=' + encodeURIComponent(q)});
