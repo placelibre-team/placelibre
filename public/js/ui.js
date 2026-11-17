@@ -5,7 +5,7 @@ function bestStreet(){
   const names = {}, M = survModel(); SLOTS.forEach(s => { if(s.name && s.type !== 'pmr') names[s.name] = 1; });
   let best = null;
   Object.keys(names).forEach(n => { const c = chanceNow(n, lastPos, M); if(!best || c.p > best.p) best = {name:n, p:c.p}; });
-  return best;
+  return best && Number.isFinite(best.p) && Math.round(best.p*100) > 0 ? best : null;
 }
 function renderStatus(){
   const now = Date.now(); let main, sub;
@@ -17,9 +17,9 @@ function renderStatus(){
     main = 'Mode cartographie';
     sub = draft.length ? draft.length + ' point' + (draft.length > 1 ? 's' : '') + ' posé' + (draft.length > 1 ? 's' : '') : 'Touche le début de la file de places';
   }else{
-    let free = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid' || k === 'soon') free++; });
+    let free = 0, soon = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid') free++; else if(k === 'soon') soon++; });
     const bs = !free && SLOTS.length ? bestStreet() : null;
-    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' en ce moment' : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
+    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' signalée' + (free > 1 ? 's' : '') + ' en ce moment' : soon ? soon + ' départ' + (soon > 1 ? 's' : '') + ' annoncé' + (soon > 1 ? 's' : '') + ' · pas encore libre' + (soon > 1 ? 's' : '') : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
     sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places sur la carte' : SLOTS.length + ' places cartographiées' + (mapReady ? ' · touche Carto pour en ajouter' : ' · mode liste');
   }
   if(!S.me) sub = 'Choisis ton prénom dans ⚙︎ pour que les autres voient qui signale · ' + sub;
@@ -64,6 +64,11 @@ function sparkSVG(street){
     '</svg>';
 }
 function liveText(b){
+  if(b.waitMs > 0){
+    const seconds = Math.ceil(b.waitMs/1000);
+    const delay = seconds < 60 ? seconds + ' s' : Math.ceil(seconds/60) + ' min';
+    return 'Départ annoncé par ' + (b.by || 'quelqu’un') + ' · libération prévue ~' + delay + ' après ton arrivée (non confirmée)';
+  }
   const who = b.by || 'quelqu’un', how = b.src === 'bluetooth' ? ' (Bluetooth)' : '';
   const what = b.src === 'signalement' || b.src === 'controle' ? 'Vue libre' : 'Départ signalé';
   return what + ' par ' + who + ' il y a ' + fmtAge(b.age*60) + how + (b.age > 20 ? ' (ancien, moins fiable)' : '') + ' · ' +
