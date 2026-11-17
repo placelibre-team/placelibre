@@ -15,12 +15,15 @@ async function startDepart(src, paramPos, forcedId){
   if(pendingDepart && now - pendingDepart.t < 60000){ toast('Départ déjà en cours.'); return; }
   let cur = paramPos || null;
   if(!cur){ try{ cur = await getPos(8000); }catch(e){} }
-  let spot = null;
-  if(S.parked && (!cur || dist(S.parked, cur) < 300)) spot = {lat:S.parked.lat, lng:S.parked.lng};
+  let spot = null, rememberedId = null;
+  if(S.parked && (!cur || dist(S.parked, cur) < 300)){
+    spot = {lat:S.parked.lat, lng:S.parked.lng};
+    rememberedId = S.parked.slotId && SLOT_BY_ID[S.parked.slotId] ? S.parked.slotId : null;
+  }
   else if(cur) spot = {lat:cur.lat, lng:cur.lng};
   if(!spot){ toast('Position introuvable : autorise la localisation pour ce site.'); return; }
   const eta = now + S.model.delay*1000;
-  const ref = markFree(spot, eta, eta, {src, acc:cur && cur.acc != null ? cur.acc : null}, forcedId);
+  const ref = markFree(spot, eta, eta, {src, acc:cur && cur.acc != null ? cur.acc : null}, forcedId || rememberedId);
   S.history.push({type:'depart', lat:spot.lat, lng:spot.lng, t:now});
   S.parked = null; save();
   pendingDepart = Object.assign({spot, t:now}, ref);
@@ -52,10 +55,10 @@ async function doArrive(src, paramPos, forcedId){
     share(slot.id, 'occ', {src, acc:cur.acc != null ? cur.acc : null});
   }
   S.loose.forEach(l => { if(dist(l, cur) < LINK_M) l.done = true; });
-  S.parked = {lat:cur.lat, lng:cur.lng, t:now};
+  S.parked = {lat:slot ? slot.lat : cur.lat, lng:slot ? slot.lng : cur.lng, t:now, slotId:slot ? slot.id : null};
   S.history.push({type:'arrive', lat:cur.lat, lng:cur.lng, t:now});
   save(); render();
-  toast('Voiture garée' + (slot ? ' sur une place cartographiée.' : '. Aucune place cartographiée ici : dessine-la avec Carto.'));
+  toast('Voiture garée' + (slot ? ' sur une place cartographiée.' : (mapReady ? '. Aucune place cartographiée ici : dessine-la avec Carto.' : '. Aucune place cartographiée ici ; la cartographie nécessite le mode carte.')));
 }
 function report(slotId, isFree){
   const now = Date.now(), st = S.slotState[slotId] || (S.slotState[slotId] = {});
@@ -90,20 +93,29 @@ function bearingWord(a, b){
 }
 let CONF = null;
 function slotStateWord(id){
-  const k = slotState(id, Date.now()).k;
-  return k === 'occ' ? 'occupée' : (k === 'high' || k === 'mid' || k === 'low' || k === 'soon') ? 'signalée libre' : 'état inconnu';
+  const state = slotState(id, Date.now()), k = state.k;
+  if(k === 'soon') return 'départ annoncé dans ~' + state.secs + ' s';
+  return k === 'occ' ? 'occupée' : (k === 'high' || k === 'mid' || k === 'low') ? 'signalée libre' : 'état inconnu';
 }
 async function askSlot(kind){
   if(CONF) return;
   let cur = null; try{ cur = await getPos(8000); lastPos = cur; }catch(e){}
   if(!cur){ toast('Position introuvable : autorise la localisation pour ce site.'); return; }
-  let ref = cur;
-  if(kind === 'depart' && S.parked && dist(S.parked, cur) < 300) ref = {lat:S.parked.lat, lng:S.parked.lng};
+  let ref = cur, remembered = null;
+  if(kind === 'depart' && S.parked && dist(S.parked, cur) < 300){
+    ref = {lat:S.parked.lat, lng:S.parked.lng};
+    remembered = S.parked.slotId && SLOT_BY_ID[S.parked.slotId];
+  }
   const near = nearSlots(ref, 30, 4);
+  if(remembered && dist(ref, remembered) <= 30 && !near.some(x => x.s.id === remembered.id)){
+    near.push({s:remembered, d:dist(ref, remembered)});
+    near.sort((a,b) => a.d - b.d);
+  }
   if(!near.length){ kind === 'depart' ? startDepart('manuel', cur) : doArrive('manuel', cur); return; }
-  CONF = {kind, cur, ref, near, pick:near[0].s.id};
+  const pick = remembered && near.some(x => x.s.id === remembered.id) ? remembered.id : near[0].s.id;
+  CONF = {kind, cur, ref, near, pick};
   drawConfirm();
-  fly(near[0].s, 19);
+  fly(SLOT_BY_ID[pick], 19);
 }
 function drawConfirm(){
   const c = CONF, box = $('confBody'); if(!c) return;
@@ -111,12 +123,13 @@ function drawConfirm(){
   box.innerHTML = '<h2>' + (leave ? 'Tu pars de quelle place ?' : 'Tu te gares sur quelle place ?') + '</h2>' +
     '<p>Le GPS peut se tromper de quelques mètres. Choisis la bonne place.</p>' +
     '<div class="opts">' + c.near.map((x, i) => '<button class="opt' + (x.s.id === c.pick ? ' on' : '') + '" data-slot="' + esc(x.s.id) + '">' +
-      '<b>' + esc(x.s.name || 'Place') + (x.s.type === 'pmr' ? ' · PMR' : '') + (i === 0 ? ' <em>la plus proche</em>' : '') + '</b>' +
-      '<span>à ' + Math.max(1, Math.round(x.d)) + ' m vers ' + bearingWord(c.ref, x.s) + ' · ' + slotStateWord(x.s.id) + '</span></button>').join('') + '</div>' +
+      '<b>' + esc(x.s.name || 'Place') + ' · ' + esc(x.s.id) + (x.s.type === 'pmr' ? ' · PMR' : '') + (i === 0 ? ' <em>la plus proche</em>' : '') + '</b>' +
+      '<span>' + (x.d < 3 ? 'ici' : 'à ' + Math.round(x.d) + ' m vers ' + bearingWord(c.ref, x.s)) + ' · ' + slotStateWord(x.s.id) + '</span></button>').join('') + '</div>' +
     '<div class="row2"><button class="btn" id="confNo">Annuler</button><button class="btn primary" id="confOk">' + (leave ? 'Je pars de cette place' : 'Je me gare ici') + '</button></div>';
   $('confirmSlot').hidden = false;
 }
 function closeConfirm(){ CONF = null; $('confirmSlot').hidden = true; }
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && CONF) closeConfirm(); });
 document.addEventListener('click', e => {
   if(!CONF) return;
   const o = e.target.closest('#confBody [data-slot]');

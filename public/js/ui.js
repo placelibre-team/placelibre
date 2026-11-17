@@ -20,7 +20,7 @@ function renderStatus(){
     let free = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid' || k === 'soon') free++; });
     const bs = !free && SLOTS.length ? bestStreet() : null;
     main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' en ce moment' : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
-    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places sur la carte' : SLOTS.length + ' places sur la carte · touche Carto pour en ajouter';
+    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places sur la carte' : SLOTS.length + ' places cartographiées' + (mapReady ? ' · touche Carto pour en ajouter' : ' · mode liste');
   }
   if(!S.me) sub = 'Choisis ton prénom dans ⚙︎ pour que les autres voient qui signale · ' + sub;
   const live = syncOk ? '<span style="color:var(--free);font-weight:600">● ' + (TEST ? 'Canal de test' : 'En direct') + '</span> · ' : '';
@@ -71,14 +71,14 @@ function liveText(b){
 }
 /* Mesures réelles (signalements et contrôles) enregistrées dans cette rue sur ce téléphone */
 function streetSamples(street){
-  return S.journal.filter(e => e.street === street && (e.type === 'libre' || e.type === 'occupee' || e.type === 'controle')).length;
+  return S.journal.filter(e => e.street === street && e.src !== 'auto' && (e.type === 'libre' || e.type === 'occupee' || (e.type === 'controle' && (e.etat === 'libre' || e.etat === 'occupee')))).length;
 }
 /* D'où vient le pourcentage affiché pour une rue */
 function originText(g){
   const n = streetSamples(g.name);
   if(g.live >= 0.3) return 'Origine : signalements en direct' + (n ? ' + ' + n + ' mesure' + (n > 1 ? 's' : '') + ' passée' + (n > 1 ? 's' : '') : '');
   if(g.live > 0.05) return 'Origine : prévision + un signalement récent';
-  return n >= 5 ? 'Origine : ' + n + ' mesures passées à cette heure, aucun signalement en direct'
+  return n >= 5 ? 'Origine : ' + n + ' mesures passées dans cette rue, aucun signalement en direct'
     : n ? 'Origine : prévision, seulement ' + n + ' mesure' + (n > 1 ? 's' : '') + ' réelle' + (n > 1 ? 's' : '') + ' (estimation prudente)'
     : 'Données manquantes : estimation par l’heure et les règles, jamais vérifiée ici';
 }
@@ -97,7 +97,7 @@ function renderList(){
     .sort((a,b) => b.p - a.p || a.d - b.d).slice(0, 14);
   const ul = $('list'); ul.innerHTML = '';
   if(!list.length){
-    ul.innerHTML = '<li class="empty">Pas encore de places cartographiées près d’ici. Touche <b>Carto</b> à droite de la carte, puis dessine les files de places de ta rue sur la photo aérienne.</li>';
+    ul.innerHTML = '<li class="empty">Pas encore de places cartographiées près d’ici. ' + (mapReady ? 'Touche <b>Carto</b> à droite de la carte, puis dessine les files de places de ta rue sur la photo aérienne.' : 'La cartographie nécessite le mode carte ; réessaie lorsque la carte est disponible.') + '</li>';
     return;
   }
   list.forEach(g => {
