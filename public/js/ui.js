@@ -325,3 +325,39 @@ function showWelcome(step){
 }
 $('btnWelcome').addEventListener('click', () => { $('settings').hidden = true; showWelcome(0); });
 if(!welcomeSeen()) showWelcome(0);
+
+/* Canal du groupe : public (nom dans le code) ou privé (clé reçue par lien d'invitation, voir config.js) */
+const CLE_CHARS = 'abcdefghijkmnpqrstuvwxyz23456789';
+function nouvelleCle(){
+  const b = new Uint8Array(24); crypto.getRandomValues(b);
+  return Array.from(b, x => CLE_CHARS[x % CLE_CHARS.length]).join('');
+}
+function lienInvitation(){ return location.origin + location.pathname + location.search + '#cle=' + CLE_CANAL; }
+function renderCanal(){
+  $('canalEtat').innerHTML = CLE_CANAL
+    ? '<b>Canal privé.</b> Seules les personnes qui ont le lien d’invitation voient et envoient les signalements.'
+    : '<b>Canal public.</b> Son nom est dans le code de l’appli : n’importe qui peut lire les signalements (prénom, place, heure) et en envoyer de faux.';
+  $('canalAide').textContent = CLE_CANAL
+    ? 'Envoie le lien seulement aux testeurs, en message privé. Pense à mettre à jour l’adresse de tes Raccourcis iPhone (ci-dessous).'
+    : 'Pour le pilote : une personne crée le canal privé, puis envoie le lien d’invitation aux autres. Les Raccourcis iPhone devront utiliser la nouvelle adresse.';
+  $('btnInvite').hidden = !CLE_CANAL;
+  $('btnNewCanal').textContent = CLE_CANAL ? 'Créer un autre canal privé' : 'Créer un canal privé';
+}
+$('btnInvite').addEventListener('click', async () => {
+  const url = lienInvitation();
+  try{
+    if(navigator.share) await navigator.share({title:'PlaceLibre', text:'Lien du groupe PlaceLibre (ne pas le publier)', url});
+    else { await navigator.clipboard.writeText(url); toast('Lien d’invitation copié : envoie-le en message privé.'); }
+  }catch(e){ if(e && e.name !== 'AbortError') toast('Copie impossible : ' + url); }
+});
+let canalArme = 0;
+$('btnNewCanal').addEventListener('click', () => {
+  if(Date.now() - canalArme > 5000){
+    canalArme = Date.now();
+    toast(CLE_CANAL ? 'Toucher encore : les autres devront recevoir le nouveau lien.' : 'Toucher encore pour créer le canal privé.');
+    return;
+  }
+  try{ localStorage.setItem('plj:cle', nouvelleCle()); }catch(e){ toast('Stockage bloqué : impossible de créer le canal.'); return; }
+  location.reload();
+});
+renderCanal();

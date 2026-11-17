@@ -5,7 +5,24 @@
 const URLP = new URLSearchParams(location.search);
 const TEST = URLP.get('canal') === 'test';
 const KEY = TEST ? 'plj:v2:test' : 'plj:v2';
-const BUS = 'https://ntfy.sh/placelibre-juan-q7m2x9k4' + (TEST ? '-test' : '');
+/* Canal privé du groupe (lien d'invitation) : sur ntfy.sh, connaître le nom d'un canal suffit pour lire et
+   envoyer des signalements. Le nom du canal public est dans ce fichier, donc sur GitHub et dans le site publié.
+   Avec un lien https://…/#cle=XXXX, la clé est gardée dans le téléphone et le canal devient
+   « pl-<clé> », absent du code. Sans clé : ancien canal public. Voir docs/canal-prive.md. */
+const CLE_CANAL = (function(){
+  const m = String(location.hash || '').match(/[#&]cle=([a-z0-9]{20,40})(?=&|$)/i);
+  let c = '';
+  try{
+    if(m){
+      localStorage.setItem('plj:cle', m[1].toLowerCase());
+      history.replaceState(null, '', location.pathname + location.search);   // la clé ne reste pas dans l'adresse
+    }
+    c = localStorage.getItem('plj:cle') || '';
+  }catch(e){ c = m ? m[1].toLowerCase() : ''; }
+  return /^[a-z0-9]{20,40}$/.test(c) ? c : '';
+})();
+const BUS_PUBLIC = 'https://ntfy.sh/placelibre-juan-q7m2x9k4';
+const BUS = (CLE_CANAL ? 'https://ntfy.sh/pl-' + CLE_CANAL : BUS_PUBLIC) + (TEST ? '-test' : '');
 
 const BBOX = [43.552, 7.090, 43.582, 7.135];          // Juan-les-Pins (S, O, N, E)
 const CENTER = [7.1056, 43.5712];                      // [lng, lat]
