@@ -10,6 +10,9 @@ Ouvrir `/verification-terrain/` sur le site (aperçu Netlify ou site publié), p
 `https://<site>/verification-terrain/`. Rien n'est envoyé : le relevé reste dans le téléphone jusqu'à l'export.
 Il est conservé si on ferme la page.
 
+**Avant de partir**, ouvrir la page une fois avec du réseau : elle se rouvre ensuite **hors réseau**
+(le service worker du site en garde une copie). Le GPS fonctionne sans réseau.
+
 1. **Me localiser** : les places sont rangées de la plus proche à la plus éloignée. La précision GPS
    s'affiche ; au-delà de ±8 m, l'outil refuse de déplacer une place.
 2. **Files en double ou deux côtés de la rue** : 8 paires de files parallèles, à 5-7 m l'une de l'autre

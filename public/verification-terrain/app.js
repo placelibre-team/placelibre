@@ -162,3 +162,18 @@ $('resetBtn').addEventListener('click', () => {
 });
 
 rendre();
+
+/* Hors réseau : la page s'utilise dans la rue, parfois sans réseau. On enregistre le service worker du site
+   (il garde une copie de chaque fichier servi) puis on précharge les fichiers de cette page. Après une
+   première ouverture avec réseau, la page se rouvre hors ligne. */
+const FICHIERS_PAGE = ['./', 'index.html', 'style.css', 'verif.js', 'app.js', '../js/config.js', '../js/places.js'];
+const local = ['localhost', '127.0.0.1'].includes(location.hostname);
+if('serviceWorker' in navigator && (location.protocol === 'https:' || local)){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js', {scope:'../'}).then(() => navigator.serviceWorker.ready)
+      .then(() => navigator.serviceWorker.controller ? null : new Promise(r => navigator.serviceWorker.addEventListener('controllerchange', r, {once:true})))
+      .then(() => Promise.all(FICHIERS_PAGE.map(u => fetch(u, {cache:'no-cache'}).catch(() => {}))))
+      .then(() => { document.body.dataset.horsLigne = 'pret'; })
+      .catch(() => {});
+  });
+}
