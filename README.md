@@ -38,6 +38,14 @@ python3 -m unittest tests/test_pilot_data.py
 node tests/pilot-rules.test.cjs
 ```
 
+Pour tout lancer d'un coup (site publié, registre des places, tous les tests, simulateur s'il est présent) :
+
+```bash
+bash outils/tout-tester.sh
+```
+
+Les mêmes contrôles tournent automatiquement sur GitHub à chaque pull request et à chaque fusion dans `main` (onglet **Checks** de la PR, workflow `Tests`). Une PR dont les contrôles échouent ne doit pas être fusionnée : Netlify publierait la version cassée.
+
 ## Attention pendant les essais
 
 Le code importé conserve le canal de signalements du prototype en ligne. Les boutons de signalement peuvent donc écrire dans ce canal : ne pas envoyer de fausses données. Isoler un canal de test avant les essais automatisés ou les simulations.

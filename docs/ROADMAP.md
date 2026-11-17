@@ -8,7 +8,7 @@
 - [ ] Inviter les comptes GitHub de l'équipe.
 - [ ] Vérifier que chaque membre peut lancer l'application.
 - [ ] Isoler les données et le canal de signalements de test.
-- [ ] Relier le site Netlify au dépôt, avec validation de la configuration avant publication.
+- [x] Relier le site Netlify au dépôt, avec validation de la configuration avant publication (`outils/verifier-site.js`, workflow `Tests` sur chaque PR).
 
 ## V0 — Fiabiliser le pilote
 
