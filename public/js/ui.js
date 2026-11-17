@@ -346,3 +346,44 @@ function showWelcome(step){
 }
 $('btnWelcome').addEventListener('click', () => { $('settings').hidden = true; showWelcome(0); });
 if(!welcomeSeen()) showWelcome(0);
+
+/* Canal du groupe : public (nom dans le code) ou privé (clé reçue par lien d'invitation, voir config.js) */
+function nouvelleCle(){
+  if(typeof crypto === 'undefined' || !crypto.getRandomValues) throw new Error('crypto');
+  const b = new Uint8Array(16); crypto.getRandomValues(b);
+  return Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+}
+function lienInvitation(){ return location.origin + location.pathname + (TEST ? '?canal=test' : '') + '#cle=' + CLE_CANAL; }
+function renderCanal(){
+  $('canalEtat').innerHTML = CLE_CANAL
+    ? '<b>Canal par invitation.</b> Toute personne qui connaît le lien ou le nom du canal peut lire et envoyer des signalements. Ce n’est pas une authentification.'
+    : '<b>Canal public.</b> Son nom est dans le code de l’appli : n’importe qui peut lire les signalements (prénom, place, heure) et en envoyer de faux.';
+  $('canalAide').textContent = CLE_CANAL
+    ? (CLE_PERSISTEE ? 'Envoie le lien seulement aux testeurs, en message privé. L’historique et les envois en attente restent séparés par canal. Mets à jour tes Raccourcis iPhone (ci-dessous).' : 'La clé n’a pas pu être conservée : garde le lien et rouvre-le à chaque visite. Ce canal est actif seulement pour cette session.')
+    : 'Pour le pilote : une personne crée le canal privé, puis envoie le lien d’invitation aux autres. Les Raccourcis iPhone devront utiliser la nouvelle adresse.';
+  $('btnInvite').hidden = !CLE_CANAL;
+  $('btnNewCanal').textContent = CLE_CANAL ? 'Créer un autre canal privé' : 'Créer un canal privé';
+}
+$('btnInvite').addEventListener('click', async () => {
+  const url = lienInvitation();
+  try{
+    if(navigator.share) await navigator.share({title:'PlaceLibre', text:'Lien du groupe PlaceLibre (ne pas le publier)', url});
+    else { await navigator.clipboard.writeText(url); toast('Lien d’invitation copié : envoie-le en message privé.'); }
+  }catch(e){ if(e && e.name !== 'AbortError') toast('Copie impossible : ' + url); }
+});
+let canalArme = 0;
+$('btnNewCanal').addEventListener('click', () => {
+  if(Date.now() - canalArme > 5000){
+    canalArme = Date.now();
+    toast(CLE_CANAL ? 'Toucher encore : les autres devront recevoir le nouveau lien.' : 'Toucher encore pour créer le canal privé.');
+    return;
+  }
+  let cle;
+  try{ cle = nouvelleCle(); }catch(e){ toast('Générateur sécurisé indisponible : impossible de créer le canal.'); return; }
+  try{
+    localStorage.setItem(CLE_STORAGE, cle);
+    if(localStorage.getItem(CLE_STORAGE) !== cle) throw new Error('stockage');
+  }catch(e){ toast('Stockage bloqué : impossible de créer le canal.'); return; }
+  location.reload();
+});
+renderCanal();
