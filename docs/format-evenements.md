@@ -61,14 +61,15 @@ Un événement est un message JSON envoyé sur le canal temps réel (ntfy). Vers
 
 Aucune coordonnée GPS n'est envoyée pour les places du registre : la place suffit.
 Le Raccourci iPhone envoie un format court `{k:'depart'|'arrive', lat, lng, by}`, converti à la réception
-en événement `soon` ou `occ` sur la place la plus proche (35 m au plus), puis validé
-comme les autres événements. Sans `ts`, l'heure est celle du serveur ntfy à la réception.
+en événement `soon` ou `occ` sur la place du registre partagé la plus proche (moins de 35 m), puis validé
+comme les autres événements, en conservant `v` et `dev` s'ils sont présents. Une place locale Carto
+ou OpenStreetMap ne masque pas une place partagée. Sans `ts`, l'heure est celle du serveur ntfy à la réception.
 
 ### Événements refusés à la réception
 
 - `k` inconnu, `slot` absent ou `ts` non numérique ;
 - `ts` plus de 10 minutes dans le futur (horloge du téléphone déréglée) ;
-- `v` supérieur à la version connue (téléphone avec une version plus ancienne de l'appli) ;
+- `v` présent mais non entier, inférieur à 1 ou supérieur à la version connue ;
 - place absente du registre ou retirée.
 
 ## Même état sur tous les téléphones
@@ -86,7 +87,9 @@ Le résultat ne dépend donc ni de l'ordre d'arrivée, ni des retards, ni des re
   (ou à la même heure) par une autre personne, reste occupée : on évite d'envoyer quelqu'un vers une
   place prise. L'état porte `conflict: true` et la fiche de la place affiche « signalements
   contradictoires ». Un signalement net plus d'une minute après lève la contradiction.
-  La même personne (même prénom ou même téléphone `dev`) qui se corrige n'est pas une contradiction.
+  Un même téléphone `dev` qui se corrige ne crée pas de contradiction, même si le prénom change.
+  Deux `dev` différents restent distincts malgré un prénom identique. Le prénom sert seulement de
+  recours lorsqu'au moins un des messages anciens ne contient pas de `dev`.
   Une place libérée puis reprise par une autre voiture est un enchaînement normal.
 
 ## Coupures réseau
@@ -101,4 +104,8 @@ Chaque signalement partagé passe par une file d'attente (`S.outbox`) gardée da
 - le bandeau d'état indique « N envois en attente (réseau) ».
 
 Après une coupure de la réception, le téléphone relit le canal depuis le dernier message reçu
-(avec 2 min de marge) : les signalements publiés pendant l'absence ne sont pas perdus.
+(avec 2 min de marge). Cette borne reste figée jusqu'au succès de la relecture, même si de nouveaux
+messages arrivent en direct. En cas d'échec, le rattrapage repart à la reconnexion, au retour du réseau,
+au retour dans l'appli et toutes les 30 s, sans lancer plusieurs relectures simultanées. Le bandeau
+ne déclare la synchronisation rétablie que lorsque le canal est ouvert et le rattrapage terminé.
+La récupération reste limitée à l'historique encore conservé par le serveur ntfy.

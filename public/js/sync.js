@@ -13,7 +13,7 @@ const EV_MAX_AHEAD = 10*60e3;   // tolérance d'horloge entre téléphones
 function validEv(ev){
   return !!ev && typeof ev.slot === 'string' && isShared(ev.slot) && EV_KINDS.has(ev.k) &&
     Number.isFinite(ev.ts) && ev.ts > 0 && ev.ts <= Date.now() + EV_MAX_AHEAD &&
-    (ev.v == null || ev.v <= EV_V);
+    (ev.v == null || (Number.isInteger(ev.v) && ev.v >= 1 && ev.v <= EV_V));
 }
 let syncOk = false;
 
@@ -29,8 +29,8 @@ const LOG_AGE = 48*3600e3;          // et pas plus vieux que 48 h
 const CONFLICT_MS = 60e3;           // fenêtre où deux signalements opposés se contredisent
 const evKind = e => e.k !== 'ctl' ? e.k : e.etat === 'libre' ? 'free' : e.etat === 'occupee' ? 'occ' : null;
 const evOrder = (a, b) => a.ts - b.ts || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
-// Même personne : même téléphone (dev, identifiant aléatoire sans donnée personnelle) ou même prénom
-const samePerson = (a, b) => (!!a.dev && a.dev === b.dev) || (!!a.by && a.by === b.by);
+// Le téléphone prime sur le prénom ; le prénom reste un recours pour les anciens messages sans dev.
+const samePerson = (a, b) => a.dev && b.dev ? a.dev === b.dev : !!a.by && a.by === b.by;
 
 function foldSlot(log){
   const st = {}; let lastOcc = null;
@@ -80,9 +80,12 @@ function fromMsg(m){
   if(!ev.id) ev.id = m.id;
   if(ev.k === 'depart' || ev.k === 'arrive'){
     const p = {lat:num(ev.lat), lng:num(ev.lng)};
-    if(isNaN(p.lat) || isNaN(p.lng)) return null;
-    const sl = nearestSlot(p, 35); if(!sl) return null;
-    const base = {id:ev.id, slot:sl.id, ts:ev.ts, by:ev.by || '', src:'bluetooth', acc:num(ev.acc)};
+    if(!Number.isFinite(p.lat) || !Number.isFinite(p.lng) || Math.abs(p.lat) > 90 || Math.abs(p.lng) > 180) return null;
+    // La recherche porte sur le registre commun : une place locale plus proche ne doit pas masquer le pilote.
+    let sl = null, distance = 35;
+    PLACES.forEach(place => { const d = dist(p, place); if(d < distance){ sl = place; distance = d; } });
+    if(!sl) return null;
+    const base = {v:ev.v, id:ev.id, slot:sl.id, ts:ev.ts, by:ev.by || '', dev:ev.dev, src:'bluetooth', acc:num(ev.acc)};
     const conv = ev.k === 'depart' ? Object.assign(base, {k:'soon', eta:ev.ts + S.model.delay*1000}) : Object.assign(base, {k:'occ'});
     return validEv(conv) ? conv : null;   // même contrôle (place du registre, date) que les autres événements
   }
@@ -134,8 +137,8 @@ function receive(m, live){
    ce qui a été publié pendant l'absence (depuis le dernier message reçu, avec une marge). */
 let lastMsgSec = 0;
 function track(m){ if(m && m.time > lastMsgSec) lastMsgSec = m.time; }
-async function pollBus(){
-  const since = lastMsgSec ? String(Math.max(0, lastMsgSec - 120)) : 'all';
+async function pollBus(fromSec = lastMsgSec){
+  const since = fromSec ? String(Math.max(0, fromSec - 120)) : 'all';
   const r = await fetch(BUS + '/json?poll=1&since=' + since);
   if(!r.ok) throw new Error('poll ' + r.status);
   const txt = await r.text(); let ch = false;
@@ -146,16 +149,38 @@ async function pollBus(){
   return ch;
 }
 async function syncStart(){
-  let lost = false;   // vrai si une partie du canal n'a pas pu être lue : on relira à la reconnexion
-  try{ const ch = await pollBus(); syncOk = true; if(ch) save(); render(); }catch(e){ lost = true; }
+  // La borne de coupure reste figée jusqu'à une relecture réussie, même si le direct reçoit du nouveau.
+  let missingSince = lastMsgSec, generation = 0, recovering = null, streamOpen = false;
+  function markGap(){
+    if(missingSince === null) missingSince = lastMsgSec;
+    generation++;
+    syncOk = false;
+  }
+  function recover(){
+    if(recovering) return recovering;
+    if(missingSince === null) return Promise.resolve();
+    const started = generation, fromSec = missingSince;
+    recovering = (async () => {
+      try{
+        const ch = await pollBus(fromSec);
+        // Une autre coupure pendant la requête exige sa propre relecture.
+        if(generation === started) missingSince = null;
+        if(ch){ save(); render(); }
+      }catch(e){ /* La borne est gardée pour le prochain essai. */ }
+      syncOk = streamOpen && missingSince === null;
+      renderStatus();
+    })().finally(() => { recovering = null; });
+    return recovering;
+  }
+  await recover();
   flushOutbox();
   try{
     const es = new EventSource(BUS + '/sse');
     es.onopen = () => {
-      syncOk = true; renderStatus(); flushOutbox();
-      if(lost){ lost = false; pollBus().then(ch => { if(ch){ save(); render(); } }).catch(() => {}); }
+      streamOpen = true; syncOk = missingSince === null;
+      renderStatus(); flushOutbox(); recover();
     };
-    es.onerror = () => { syncOk = false; lost = true; renderStatus(); };
+    es.onerror = () => { streamOpen = false; markGap(); renderStatus(); };
     es.onmessage = e => {
       try{
         const m = JSON.parse(e.data); track(m);
@@ -169,7 +194,9 @@ async function syncStart(){
       }catch(err){}
     };
   }catch(e){}
-  addEventListener('online', () => flushOutbox());
-  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') flushOutbox(); });
-  setInterval(() => { if(S.outbox.length) flushOutbox(); }, RETRY_MS);
+  addEventListener('online', () => { flushOutbox(); recover(); });
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible'){ flushOutbox(); recover(); }
+  });
+  setInterval(() => { if(S.outbox.length) flushOutbox(); recover(); }, RETRY_MS);
 }

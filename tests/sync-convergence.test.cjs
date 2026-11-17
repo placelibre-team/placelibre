@@ -64,6 +64,17 @@ for(let essai = 0; essai < 200; essai++){
   d.applyEv({v:1, id:'u1', slot:p2, k:'occ', ts:T0, by:'', dev:'tel-a'});
   d.applyEv({v:1, id:'u2', slot:p2, k:'free', ts:T0 + 30e3, by:'', dev:'tel-b'});
   assert.equal(d.S.slotState[p2].conflict, true);
+  // Deux téléphones avec le même prénom restent distincts.
+  const e = telephone().app;
+  e.applyEv({v:1, id:'v1', slot:p2, k:'occ', ts:T0, by:'Tom', dev:'tel-a'});
+  e.applyEv({v:1, id:'v2', slot:p2, k:'free', ts:T0 + 30e3, by:'Tom', dev:'tel-b'});
+  assert.equal(e.S.slotState[p2].conflict, true, 'deux téléphones confondus par leur prénom');
+  assert.equal(e.S.slotState[p2].free, undefined, 'un autre téléphone a levé l’occupation');
+  // Un prénom modifié sur le même téléphone reste une correction de son signalement.
+  const f = telephone().app;
+  f.applyEv({v:1, id:'w1', slot:p2, k:'occ', ts:T0, by:'Tom', dev:'tel-a'});
+  f.applyEv({v:1, id:'w2', slot:p2, k:'free', ts:T0 + 30e3, by:'Thomas', dev:'tel-a'});
+  assert.ok(f.S.slotState[p2].free > f.S.slotState[p2].occ && !f.S.slotState[p2].conflict);
   // Un signalement net 10 min plus tard lève la contradiction.
   a.applyEv({v:1, id:'c3', slot:p2, k:'free', ts:T0 + 600e3, by:'Anthony'});
   assert.ok(a.S.slotState[p2].free === T0 + 600e3 && !a.S.slotState[p2].conflict);
