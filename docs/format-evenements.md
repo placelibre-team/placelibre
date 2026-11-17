@@ -54,20 +54,58 @@ Un événement est un message JSON envoyé sur le canal temps réel (ntfy). Vers
 | `ts` | oui | `1794494429132` | Heure de l'événement, en millisecondes depuis 1970 (heure du téléphone émetteur) |
 | `eta` | non | `1794494474132` | Pour `soon` : heure prévue de libération |
 | `by` | non | `"Tom"` | Prénom choisi dans Réglages |
+| `dev` | non | `"k3j9x0q2ab"` | Identifiant aléatoire du téléphone (aucune donnée personnelle), pour reconnaître qu'un même téléphone se corrige |
 | `src` | non | `"bluetooth"` | Origine : `bluetooth`, `manuel`, `signalement`, `confirmation`, `controle` |
 | `acc` | non | `12` | Précision GPS au moment du signalement, en mètres |
 | `dep`, `h`, `etat` | pour `ctl` | `"…"`, `10`, `"libre"` | Départ contrôlé, horizon en minutes, résultat (`libre`, `occupee`, `non_observe`) |
 
 Aucune coordonnée GPS n'est envoyée pour les places du registre : la place suffit.
 Le Raccourci iPhone envoie un format court `{k:'depart'|'arrive', lat, lng, by}`, converti à la réception
-en événement `soon` ou `occ` sur la place la plus proche (35 m au plus), puis validé
-comme les autres événements. Sans `ts`, l'heure est celle du serveur ntfy à la réception.
+en événement `soon` ou `occ` sur la place du registre partagé la plus proche (moins de 35 m), puis validé
+comme les autres événements, en conservant `v` et `dev` s'ils sont présents. Une place locale Carto
+ou OpenStreetMap ne masque pas une place partagée. Sans `ts`, l'heure est celle du serveur ntfy à la réception.
 
 ### Événements refusés à la réception
 
 - `k` inconnu, `slot` absent ou `ts` non numérique ;
 - `ts` plus de 10 minutes dans le futur (horloge du téléphone déréglée) ;
-- `v` supérieur à la version connue (téléphone avec une version plus ancienne de l'appli) ;
+- `v` présent mais non entier, inférieur à 1 ou supérieur à la version connue ;
 - place absente du registre ou retirée.
 
-Pour une même place, l'événement le plus récent (`ts`) l'emporte.
+## Même état sur tous les téléphones
+
+Chaque téléphone garde, pour chaque place, ses derniers événements (`S.slotLog` : 40 au plus, 48 h au plus).
+L'état affiché est recalculé à partir de cette liste, triée par heure d'origine (`ts`) puis par `id`.
+Le résultat ne dépend donc ni de l'ordre d'arrivée, ni des retards, ni des renvois :
+
+- **Doublon** : un événement déjà reçu (même `id`) est ignoré. C'est le cas de l'écho de ses propres
+  messages, de la relecture du canal au démarrage et d'un renvoi après une coupure.
+- **Message en retard** : un événement plus ancien que l'état actuel est replacé à sa date. Le résultat
+  est le même que s'il était arrivé à l'heure.
+- **Même heure** : l'ordre est fixé par l'`id`, identique sur tous les téléphones.
+- **Contradiction** : une place signalée occupée, puis libre ou « je pars » moins de 60 s après
+  (ou à la même heure) par une autre personne, reste occupée : on évite d'envoyer quelqu'un vers une
+  place prise. L'état porte `conflict: true` et la fiche de la place affiche « signalements
+  contradictoires ». Un signalement net plus d'une minute après lève la contradiction.
+  Un même téléphone `dev` qui se corrige ne crée pas de contradiction, même si le prénom change.
+  Deux `dev` différents restent distincts malgré un prénom identique. Le prénom sert seulement de
+  recours lorsqu'au moins un des messages anciens ne contient pas de `dev`.
+  Une place libérée puis reprise par une autre voiture est un enchaînement normal.
+
+## Coupures réseau
+
+Chaque signalement partagé passe par une file d'attente (`S.outbox`) gardée dans le téléphone :
+
+- en cas d'échec (pas de réseau, erreur du serveur), il reste dans la file, même si l'appli est fermée ;
+- la file repart dans l'ordre au retour du réseau, au retour dans l'appli, à la reconnexion au canal,
+  et toutes les 30 s ;
+- l'heure d'origine (`ts`) ne change pas : les autres téléphones placent le signalement à sa vraie date ;
+- un signalement de plus de 24 h est abandonné ; la file est limitée à 300 envois ;
+- le bandeau d'état indique « N envois en attente (réseau) ».
+
+Après une coupure de la réception, le téléphone relit le canal depuis le dernier message reçu
+(avec 2 min de marge). Cette borne reste figée jusqu'au succès de la relecture, même si de nouveaux
+messages arrivent en direct. En cas d'échec, le rattrapage repart à la reconnexion, au retour du réseau,
+au retour dans l'appli et toutes les 30 s, sans lancer plusieurs relectures simultanées. Le bandeau
+ne déclare la synchronisation rétablie que lorsque le canal est ouvert et le rattrapage terminé.
+La récupération reste limitée à l'historique encore conservé par le serveur ntfy.

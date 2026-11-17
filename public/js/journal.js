@@ -52,7 +52,7 @@ function pendingChecks(now){
 }
 function answerCheck(depId, h, etat){
   const d = S.journal.find(e => e.id === depId && e.type === 'depart'); if(!d) return;
-  const ev = {v:EV_V, id:uid(), k:'ctl', slot:d.slot, ts:Date.now(), by:S.me || '', src:'controle', dep:depId, h:+h, etat};
+  const ev = {v:EV_V, id:uid(), dev:S.dev, k:'ctl', slot:d.slot, ts:Date.now(), by:S.me || '', src:'controle', dep:depId, h:+h, etat};
   logEv(ev, null); applyEv(ev);
   post(ev);
   save(); render();

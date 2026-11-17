@@ -35,4 +35,22 @@ assert.equal(fromMsg(msg({k:'arrive', lat:place.lat, lng:place.lng, ts:future}))
 // et date non numérique : refusée (Number('demain') = NaN).
 assert.equal(fromMsg(msg({k:'depart', lat:place.lat, lng:place.lng, ts:'demain'})), null, 'depart avec date non numérique accepté');
 
-console.log('OK : places inconnues et dates fausses refusées, Bluetooth valide accepté.');
+// 3. La conversion Bluetooth garde la version et l'identifiant du téléphone.
+for(const k of ['depart', 'arrive']){
+  const converted = fromMsg(msg({v:1, k, lat:place.lat, lng:place.lng, dev:'tel-bt'}));
+  assert.equal(converted.v, 1); assert.equal(converted.dev, 'tel-bt');
+  for(const v of [2, -1, 0, 1.5, '1']){
+    assert.equal(fromMsg(msg({v, k, lat:place.lat, lng:place.lng})), null, 'version Bluetooth invalide acceptée : ' + v);
+    assert.equal(fromMsg(msg({v, k:'free', slot:place.id, ts:now})), null, 'version normale invalide acceptée : ' + v);
+  }
+}
+
+// 4. Une place Carto plus proche ne masque pas la place partagée (ni ne devient la cible).
+ctx.near = {lat:place.lat + 0.000001, lng:place.lng};
+vm.runInContext("SLOTS.push({id:'u-local-0', lat:near.lat, lng:near.lng});", ctx);
+const near = fromMsg(msg({k:'arrive', lat:ctx.near.lat, lng:ctx.near.lng}));
+assert.equal(near.slot, place.id, 'la place locale a masqué une place du registre');
+assert.equal(fromMsg(msg({k:'arrive', lat:0, lng:0})), null, 'point hors pilote accepté');
+assert.equal(fromMsg(msg({k:'arrive', lat:'Infinity', lng:place.lng})), null, 'coordonnée infinie acceptée');
+
+console.log('OK : versions, dates et places validées ; Bluetooth garde dev et cherche dans le registre partagé.');
