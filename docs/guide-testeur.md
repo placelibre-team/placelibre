@@ -22,12 +22,13 @@ rue Saint-Honorat, à Juan-les-Pins, grâce aux conducteurs qui partent. Ce guid
 
 | Quand | Geste | Effet |
 |---|---|---|
-| Tu **pars** de ta place | **Je pars** | Ta place est annoncée « libre dans ~45 s » aux autres |
+| Tu **pars** de ta place | **Je pars** | Ta place est annoncée bientôt libre, avec un délai affiché (45 s au départ, puis ajusté) |
 | Tu **te gares** | **Je me gare ici** | La place passe en occupée |
 | Tu **passes** à pied ou en passager | **Place libre ici** ou **Rue pleine** | Une touche suffit |
 
 Après « Je pars » ou « Je me gare », l'appli peut proposer **les places les plus proches** : choisis celle
-où tu es vraiment, surtout si le GPS hésite entre deux places voisines.
+où tu es vraiment, surtout si le GPS hésite entre deux places voisines, puis confirme.
+« Rue pleine » concerne les places cartographiées à proximité : utilise-le seulement si tu les vois occupées.
 
 ## 3. Les contrôles à 5, 10 et 30 min
 
@@ -46,20 +47,24 @@ déconnecte de la voiture : ⚙ Réglages → **Bluetooth automatique**, suivre 
 Copie l'adresse affichée **dans Réglages** (elle dépend du lien du groupe). Si l'équipe envoie un nouveau
 lien, mets aussi à jour cette adresse dans tes deux automatisations.
 
-À savoir : le Raccourci envoie la **position GPS de la voiture** (latitude, longitude) au moment du départ et
+À savoir : le Raccourci envoie la **position GPS du téléphone** (latitude, longitude) au moment du départ et
 de l'arrivée ; l'appli la transforme en place. Les autres testeurs voient la place, mais la position passe par le canal.
 
 ## 5. Ce qui est partagé, et avec qui
 
 - À chaque geste, les autres testeurs reçoivent : **ton prénom ou pseudo, la place, l'heure**, et parfois la
-  précision du GPS. Avec le Raccourci Bluetooth, la position GPS de la voiture au départ et à l'arrivée.
-  Pas ton numéro, pas de suivi continu de ta position.
-- Les messages passent par le service ntfy.sh, sur le canal du groupe, et y restent quelques heures.
-  Toute personne qui connaît le nom du canal peut les lire : c'est pourquoi l'équipe passe à un canal
-  privé par lien d'invitation. Ne transmets pas ce lien.
+  précision du GPS. Avec le Raccourci Bluetooth, la position GPS du téléphone au départ et à l'arrivée.
+  Pas ton numéro ; aucun flux continu de positions n’est envoyé aux autres testeurs.
+- Les messages passent par le service ntfy.sh, sur le canal du groupe. Le lien d’invitation donne accès
+  à un canal distinct : toute personne qui connaît ce lien ou le nom du canal peut lire **et envoyer**
+  des signalements. Ce n’est pas une authentification des membres. Ne transmets pas ce lien.
 - Sur ton téléphone, l'appli garde un journal (heures, places, réponses aux contrôles),
   **sans coordonnées GPS**. Tu peux l'exporter (Réglages → Exporter le journal) pour l'envoyer à l'équipe.
-- Pour tout effacer de ton téléphone : Réglages → **Tout effacer**.
+- L’état local de l’appli conserve aussi des positions liées à tes actions (par exemple ton dernier
+  stationnement et l’historique des départs et arrivées), distinctes du journal CSV.
+- Réglages → **Tout effacer**, puis confirme, réinitialise les données de l’appli pour le canal actif
+  sur ce navigateur. Cela ne retire pas les messages déjà envoyés, les copies sur les autres téléphones,
+  les fichiers exportés ni les données des autres canaux. Le lien d’accès au groupe reste mémorisé.
 - Attention : signaler ta place tous les jours au même endroit et à la même heure révèle tes habitudes
   aux autres testeurs. Utilise un pseudo si tu préfères.
 
@@ -68,7 +73,8 @@ de l'arrivée ; l'appli la transforme en place. Les autres testeurs voient la pl
 - Les pourcentages sont des **estimations expérimentales** : une place annoncée peut être déjà prise.
 - Les places et règles de stationnement (payant, horaires) sont en cours de vérification sur place :
   respecte toujours les panneaux.
-- Si la carte ne s'affiche pas, l'appli passe en **mode liste** : tout fonctionne quand même.
+- Si la carte ne s'affiche pas, le **mode liste** permet encore de consulter les rues et de signaler.
+  L’affichage de la carte et le dessin de places avec Carto restent indisponibles.
 
 ## 7. Un problème ?
 
