@@ -36,6 +36,7 @@ Depuis la racine du dépôt, avec Python 3 et Node.js :
 ```bash
 python3 -m unittest tests/test_pilot_data.py
 node tests/pilot-rules.test.cjs
+node tests/verification-terrain.test.cjs
 ```
 
 ## Attention pendant les essais
@@ -48,6 +49,7 @@ Les pourcentages sont expérimentaux. La cartographie et les règles doivent êt
 
 - `public/index.html`, `public/js/` : interface et modules de l’application.
 - `public/donnees-pilote/` : explorateur des inventaires municipaux.
+- `public/verification-terrain/` : outil de vérification des places sur place, et `outils/appliquer-verification.js` pour mettre à jour le registre (voir `docs/verification-terrain.md`).
 - `scripts/import_pilot_data.py`, `data/sources/` : import reproductible et sources publiques datées.
 - `docs/demande-mairie.md` : brouillon de demande à la mairie, conservé hors du site déployé. Le dépôt GitHub étant public, ce fichier reste consultable sur GitHub.
 - `CONTRIBUTING.md` : méthode de collaboration.
