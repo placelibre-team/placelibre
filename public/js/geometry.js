@@ -94,7 +94,7 @@ async function loadOsmStreets(force){
         });
       });
       writeCache('plj:osmst', segs);
-    }catch(e){ segs = []; toast('Les rues OpenStreetMap n’ont pas pu être chargées. Tu peux cartographier toi-même avec Carto.'); }
+    }catch(e){ segs = []; toast('Les rues OpenStreetMap n’ont pas pu être chargées (réseau). Les places du pilote restent disponibles' + (typeof mapReady !== 'undefined' && mapReady ? ' ; tu peux aussi en dessiner avec Carto.' : '.')); }
   }
   OSM_SEGS = segs; rebuildSlots(); render(); renderSettings();
 }

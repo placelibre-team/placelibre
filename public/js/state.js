@@ -25,7 +25,28 @@ function mergeBase(s){
   return s;
 }
 let S = load();
-function save(){try{localStorage.setItem(KEY, JSON.stringify(S));}catch(e){}}
+/* Enregistrement dans le téléphone. Si le stockage est plein, on allège d'abord ce qui ne sert qu'à l'affichage
+   (historique ancien, places perdues, anciens événements par place), jamais la file d'envoi ni le journal
+   des observations ; si cela ne suffit pas, on prévient (sans répéter le message plus d'une fois par minute). */
+const alertesStockage = {};
+function avertirStockage(msg){
+  if(Date.now() - (alertesStockage[msg] || 0) < 60e3) return;   // chaque message au plus une fois par minute
+  alertesStockage[msg] = Date.now();
+  try{ if(typeof toast === 'function' && document.getElementById('toast')) toast(msg, 9000); }catch(e){}
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }catch(e){}
+  try{
+    S.history = S.history.slice(-300); S.loose = [];
+    Object.keys(S.slotLog || {}).forEach(k => { S.slotLog[k] = S.slotLog[k].slice(-10); });
+    localStorage.setItem(KEY, JSON.stringify(S));
+    avertirStockage('Stockage du téléphone presque plein : l’historique le plus ancien a été allégé.');
+    return true;
+  }catch(e){
+    avertirStockage('Stockage du téléphone plein : tes derniers signalements ne sont pas enregistrés. Exporte ton journal (⚙ Réglages) et libère de la place.');
+    return false;
+  }
+}
 (function prune(){
   const now = Date.now();
   S.loose = S.loose.filter(s => now - s.t < 2*3600e3);
