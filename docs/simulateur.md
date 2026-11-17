@@ -20,7 +20,7 @@ node tests/simulateur/simulateur.cjs --liste         # liste des scénarios
 node tests/simulateur/simulateur.cjs arrivee-prend-la-place   # un seul scénario
 ```
 
-Le code de sortie est 0 si tout est conforme et 1 si un scénario échoue. Un « échec connu » n'est pas une erreur (voir plus bas).
+Le code de sortie est 0 si tout est conforme et 1 si un scénario échoue, y compris lorsqu'une fonction requise manque. Tous les scénarios sont bloquants.
 
 ### Essayer une autre version de l'appli sans la fusionner
 
@@ -53,7 +53,7 @@ Les téléphones sont **A** (Anthony) et **B** (Camille). Les places utilisées 
 | `depart-et-controles` | Un départ, puis les contrôles à 5, 10 et 30 min (libre, occupée, sans réponse → « non observé »), et le modèle de durée. |
 | `arrivee-prend-la-place` | Quelqu'un se gare sur la place libérée : état « occupée » et apprentissage de la durée. |
 | `prevision-avec-depart` | Un départ annoncé rend la prévision « en direct » sans l'abaisser. Les pourcentages restent entre 3 % et 95 % et croissent avec le rayon. |
-| `arrivee-avant-depart` | **Échec connu.** Voir ci-dessous. |
+| `arrivee-avant-depart` | Une arrivée avant le départ annoncé donne moins de 10 % de chances et moins qu’une arrivée après ce départ. Régression corrigée par la PR #13. |
 | `journal-sans-gps` | Aucune coordonnée GPS dans le journal ni dans l'export CSV. |
 | `canal-reel-jamais-touche` | Tous les messages vont sur un canal `-test`. Le garde-fou refuse le canal réel. |
 | `deux-telephones-meme-etat` | A annonce un départ, B se gare : les deux téléphones affichent le même état à chaque étape. |
@@ -61,22 +61,14 @@ Les téléphones sont **A** (Anthony) et **B** (Camille). Les places utilisées 
 | `coupure-reception` | B perd le réseau pendant que A signale un départ ; à son retour B rattrape le signalement. |
 | `coupure-envoi` | A signale un départ sans réseau ; l'envoi reste en attente, repart au retour du réseau **avec l'heure d'origine**, et B le reçoit. |
 | `coupure-des-deux-cotes` | A et B signalent chacun pendant une coupure ; au retour du réseau, les deux affichent le même état pour les deux places. |
+| `correction-meme-telephone` | Une correction occupée → libre 20 s après, sur le même téléphone, est acceptée sans contradiction même si le prénom a changé. |
 | `signalements-contradictoires` | « Occupée » (B) puis « libre » (A) 20 s après : la place reste « occupée » par prudence, avec l'indication de contradiction. |
 
-## Échec connu : arriver avant le départ
+## Dépendances des scénarios
 
-`arrivee-avant-depart` montre un défaut déjà identifié : quand une voiture annonce son départ (« libre dans ~45 s »), une personne qui arrive **6 secondes plus tard** se voit attribuer environ 89 % de chances, comme si la place était déjà libre. Arriver 2 minutes plus tard donne moins (environ 61 %). C'est la tâche de Tom « corriger les prévisions avant un départ annoncé ».
+Les scénarios de coupure et de contradiction nécessitent la synchronisation de la PR #9 (`flushOutbox`, `pollBus`, `foldSlot`). Le scénario `arrivee-avant-depart` nécessite la correction de la PR #13. Pour tester cette branche avant leur intégration, utiliser `PLACELIBRE_APP` avec un checkout qui contient ces corrections.
 
-Le scénario porte le drapeau `connu` : il s'affiche en « ÉCHEC CONNU » sans faire échouer la commande. Quand le défaut sera corrigé, le simulateur affichera « CORRIGÉ » : il suffira alors de retirer le drapeau `connu` dans `tests/simulateur/scenarios.cjs`, et le scénario deviendra un test normal.
-
-## Scénarios qui dépendent d'une fonction pas encore fusionnée
-
-Les scénarios de coupure et de contradiction dépendent du travail de Stan (pull request « signalements fiables » : file d'attente des envois, relecture du canal, état identique sur tous les téléphones). Ils déclarent `necessite: {fonction: ...}` :
-
-- **tant que la fonction n'existe pas dans l'appli**, leur échec est « connu » : sur l'ancienne version, B ne rattrape jamais un signalement manqué et l'envoi de A est perdu ;
-- **dès que la fonction existe**, ils deviennent de vrais tests : un échec fait échouer la commande.
-
-Aucune modification n'est nécessaire après la fusion de cette pull request.
+Une fonction déclarée dans `necessite` mais absente fait échouer le scénario et la commande. Il n'existe plus d'exception « échec connu » qui pourrait masquer une régression. Les scénarios de coupure vérifient explicitement la présence d'envois en attente, leur publication et la vidange de la file ; une file absente ne peut pas valider le test.
 
 ## Ajouter un scénario
 

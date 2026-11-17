@@ -2,8 +2,7 @@
    Chaque scénario reçoit un « monde » neuf : {tel, h, bus, dire, verifier, nouveauBus}.
    - dire(texte)           : ajoute une ligne à la chronologie (avec l'heure simulée) ;
    - verifier(ok, texte)   : une vérification ; si elle échoue, le scénario échoue.
-   `connu` : défaut déjà identifié, pas encore corrigé (« échec connu », n'empêche pas de continuer).
-   Quand le défaut est corrigé, le simulateur le signale : retirer alors `connu`. */
+   Chaque vérification est bloquante : une régression fait échouer la commande. */
 'use strict';
 
 const PLACE_TEST = 'b04-5';   // une place de la rue Bricka (registre figé de public/js/places.js)
@@ -95,7 +94,6 @@ module.exports = [
   {
     id: 'arrivee-avant-depart',
     titre: 'Arriver AVANT que la voiture parte',
-    connu: 'tâche 1 de Tom : la place est comptée libre alors que la voiture n’est pas encore partie',
     async executer({tel, dire, verifier}) {
       await tel.partir(PLACE_TEST);
       dire('Départ annoncé : la voiture part dans ~45 s.');

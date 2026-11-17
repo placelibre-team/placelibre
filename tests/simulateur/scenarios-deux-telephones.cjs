@@ -3,8 +3,8 @@
    On vérifie qu'ils affichent la même chose, y compris après une coupure réseau.
    Contexte reçu : {a, b, tel (= a), h, bus, dire, verifier}.
    `necessite` : fonction de l'appli dont dépend le scénario (PR « signalements fiables » de Stan).
-   Tant qu'elle n'existe pas dans l'appli, un échec est « connu » ; dès qu'elle existe, il devient une
-   vraie erreur. Rien à modifier après la fusion de cette PR. */
+   Si une fonction requise manque, le scénario échoue : les tests de régression ne peuvent pas
+   réussir en silence sur une version privée de la synchronisation. */
 'use strict';
 
 const PLACE = 'b04-5';    // rue Bricka
@@ -106,6 +106,8 @@ module.exports = [
       dire(decrire('B', b, PLACE));
       verifier(b.etatPlace(PLACE).k !== 'unk', 'B reçoit le signalement');
       verifier(memeEtat(a, b, PLACE), 'A et B affichent le même état, calé sur l’heure d’origine');
+      await h.minutes(1);
+      verifier(bus.envois.length === 1, 'les nouvelles tentatives ne republient pas le signalement déjà envoyé');
     }
   },
   {
@@ -113,7 +115,7 @@ module.exports = [
     titre: 'A et B signalent chacun de leur côté pendant une coupure',
     deux: true,
     necessite: FILE_ATTENTE,
-    async executer({a, b, h, dire, verifier}) {
+    async executer({a, b, h, bus, dire, verifier}) {
       a.couperReseau(true); b.couperReseau(true);
       dire('A et B perdent le réseau.');
       await a.partir(PLACE);
@@ -121,6 +123,10 @@ module.exports = [
       await h.secondes(30);
       await b.arriver(AUTRE);
       dire('B : « Je me gare » sur ' + AUTRE + '.');
+      await a.laisserFaire();
+      await b.laisserFaire();
+      verifier(bus.envois.length === 0, 'aucun message publié pendant la coupure');
+      verifier(a.envoisEnAttente() === 1 && b.envoisEnAttente() === 1, 'chaque téléphone garde son envoi en attente');
 
       await h.minutes(2);
       a.couperReseau(false);
@@ -136,6 +142,26 @@ module.exports = [
       verifier(a.etatPlace(AUTRE).k === 'occ', 'A voit ' + AUTRE + ' occupée');
       verifier(b.etatPlace(PLACE).k !== 'unk', 'B voit le départ de A');
       verifier(a.envoisEnAttente() === 0 && b.envoisEnAttente() === 0, 'plus aucun envoi en attente');
+      verifier(bus.envois.length === 2, 'les deux signalements ont été publiés une seule fois');
+    }
+  },
+  {
+    id: 'correction-meme-telephone',
+    titre: 'Une personne corrige son signalement sur le même téléphone',
+    deux: true,
+    necessite: FUSION,
+    async executer({a, b, h, dire, verifier}) {
+      a.signaler(PLACE, false);
+      await a.laisserFaire();
+      verifier(a.etatPlace(PLACE).k === 'occ' && b.etatPlace(PLACE).k === 'occ', 'les deux téléphones voient le premier signalement occupé');
+      await h.secondes(20);
+      a.evalIn('S.me = "Anthony corrigé"');
+      a.signaler(PLACE, true);
+      await a.laisserFaire();
+      dire('+20 s · A corrige son signalement en LIBRE, après avoir changé son prénom.');
+      verifier(a.etatPlace(PLACE).k === 'high' && b.etatPlace(PLACE).k === 'high', 'le même téléphone peut corriger en libre sans attendre une minute');
+      verifier(memeEtat(a, b, PLACE), 'A et B affichent la même correction');
+      verifier(a.etatBrut(PLACE).conflict === false && b.etatBrut(PLACE).conflict === false, 'la correction du même téléphone ne crée pas de contradiction');
     }
   },
   {
