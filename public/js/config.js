@@ -4,8 +4,36 @@
 /* Canal : ?canal=test sépare tout (temps réel ntfy et stockage du téléphone) pour les simulations */
 const URLP = new URLSearchParams(location.search);
 const TEST = URLP.get('canal') === 'test';
-const KEY = TEST ? 'plj:v2:test' : 'plj:v2';
-const BUS = 'https://ntfy.sh/placelibre-juan-q7m2x9k4' + (TEST ? '-test' : '');
+/* Canal privé du groupe (lien d'invitation) : sur ntfy.sh, connaître le nom d'un canal suffit pour lire et
+   envoyer des signalements. Le nom du canal public est dans ce fichier, donc sur GitHub et dans le site publié.
+   Avec un lien https://…/#cle=XXXX, la clé est gardée dans le téléphone et le canal devient
+   « pl-<clé> », absent du code. Sans clé : ancien canal public. Voir docs/canal-prive.md. */
+// Les invitations de test ne doivent jamais remplacer la clé du canal réel.
+const CLE_STORAGE = TEST ? 'plj:cle:test' : 'plj:cle';
+let CLE_PERSISTEE = true;
+const CLE_CANAL = (function(){
+  const m = String(location.hash || '').match(/[#&]cle=([a-z0-9]{20,40})(?=&|$)/i);
+  let c = '';
+  if(m){
+    c = m[1].toLowerCase();
+    try{
+      localStorage.setItem(CLE_STORAGE, c);
+      CLE_PERSISTEE = localStorage.getItem(CLE_STORAGE) === c;
+    }catch(e){ CLE_PERSISTEE = false; }
+    // Même sans stockage, utiliser cette invitation en mémoire, jamais une ancienne clé.
+    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  }else{
+    try{
+      c = localStorage.getItem(CLE_STORAGE) || (TEST ? localStorage.getItem('plj:cle') : '') || '';
+    }catch(e){ CLE_PERSISTEE = false; }
+  }
+  return /^[a-z0-9]{20,40}$/.test(c) ? c : '';
+})();
+// Journal, état des places, apprentissage et file d'envoi restent dans leur canal d'origine.
+// Le canal public conserve sa clé historique : aucune migration de données entre groupes.
+const KEY = 'plj:v2' + (CLE_CANAL ? ':canal:' + CLE_CANAL : '') + (TEST ? ':test' : '');
+const BUS_PUBLIC = 'https://ntfy.sh/placelibre-juan-q7m2x9k4';
+const BUS = (CLE_CANAL ? 'https://ntfy.sh/pl-' + CLE_CANAL : BUS_PUBLIC) + (TEST ? '-test' : '');
 
 const BBOX = [43.552, 7.090, 43.582, 7.135];          // Juan-les-Pins (S, O, N, E)
 const CENTER = [7.1056, 43.5712];                      // [lng, lat]

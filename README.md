@@ -4,6 +4,11 @@ Prototype collaboratif de recherche de stationnement, avec un pilote autour des 
 
 ## Données du pilote
 
+Un [espace pilote pour les parkings de grandes surfaces](docs/parkings-grandes-surfaces.md)
+est disponible à `/parkings-pilotes/` : saisie locale de comptages datés, import/export
+JSON et exemple fictif isolé. Aucun flux en direct ni partenariat n'est connecté.
+Vérification : `node tests/parking-occupancy.test.cjs`.
+
 Le dossier [Bricka / Saint-Honorat et alentours](docs/donnees-pilote.md) décrit les inventaires municipaux importés, leurs limites et les prochaines demandes de données. Ouvrir `/donnees-pilote/` après lancement local, ou suivre le lien dans les réglages de l’application.
 
 ![Explorateur des données du quartier](docs/rendus/donnees-bricka.jpg)
@@ -62,6 +67,7 @@ Les pourcentages sont expérimentaux. La cartographie et les règles doivent êt
 
 - `public/index.html`, `public/js/` : interface et modules de l’application.
 - `public/donnees-pilote/` : explorateur des inventaires municipaux.
+- `public/verification-terrain/` : outil de vérification des places sur place, et `outils/appliquer-verification.js` pour mettre à jour le registre (voir `docs/verification-terrain.md`).
 - `scripts/import_pilot_data.py`, `data/sources/` : import reproductible et sources publiques datées.
 - `docs/demande-mairie.md` : brouillon de demande à la mairie, conservé hors du site déployé. Le dépôt GitHub étant public, ce fichier reste consultable sur GitHub.
 - `CONTRIBUTING.md` : méthode de collaboration.
@@ -75,3 +81,15 @@ Les pourcentages sont expérimentaux. La cartographie et les règles doivent êt
 Les changements passent par une branche et une pull request, puis une relecture avant fusion. Consulter les contrôles Netlify de la pull request pour connaître le résultat du déploiement de son aperçu. La présence du code sur une branche ne signifie pas qu’il est intégré à `main`.
 
 Les données personnelles, historiques GPS et clés ne doivent pas être déposés dans Git. Le dépôt contient le code, pas une base de données partagée des utilisateurs.
+
+## Prévisions : tests et évaluation locale
+
+```bash
+node tests/prediction-timing.test.cjs
+node tests/prediction-evaluation.test.cjs
+node scripts/evaluate_predictions.cjs --demo
+```
+
+La démonstration utilise uniquement des données synthétiques. Pour comparer l'apprentissage
+local à une estimation fixe sur une période ultérieure, suivre le [guide d'évaluation](docs/evaluation-predictions.md).
+Ces tests ne prouvent pas la fiabilité des probabilités sur le terrain.

@@ -9,7 +9,7 @@ Travail porté par **Tom**, réalisé avec l’aide de ChatGPT le **12 novembre 
 - **5 parkings** : Courbet (141 places dont 6 PMR), Dulys 1 (81 dont 5 PMR), Dulys 2 (71 dont 4 PMR), gare de Juan-les-Pins (17), Nation (24). Pour les deux derniers, le nombre PMR est non renseigné. Ce sont des capacités déclarées en 2025, jamais des disponibilités.
 - Écran `public/donnees-pilote/index.html` : filtres cœur / alentours, recherche, groupes, distinction horodateurs / parkings, export CSV de la sélection, téléchargement JSON et liens vers les sources. Accessible depuis les réglages de l’application.
 - Correction ciblée : Saint-Honorat n’est plus étiquetée gratuite par défaut ; « Tarif à confirmer ». Les segments préconfigurés passent au type inconnu. Les identifiants des places sont conservés.
-- Demande de données préparée dans `public/donnees-pilote/demande-donnees.txt`. **Aucun envoi effectué.**
+- Demande de données préparée dans `docs/demande-mairie.md`. **Aucun envoi effectué.**
 
 ## Sources vérifiées et accès
 
@@ -50,7 +50,7 @@ Le cœur est constitué de Bricka et Saint-Honorat. La sélection des alentours 
 4. La page municipale cite Flowbird pour le paiement mobile : faire confirmer par la Ville l’interlocuteur compétent et les droits d’accès avant une démarche technique. Ne pas supposer une API ouverte.
 5. Faire vérifier les adresses et restrictions sur place lorsque quelqu’un est disponible.
 
-Le brouillon est téléchargeable depuis l’explorateur. Il reste à relire et envoyer par l’équipe. Aucun contact, compte, partenariat ou accès aux tickets n’a été créé.
+Le brouillon est conservé dans `docs/demande-mairie.md`, hors du site déployé (mais consultable dans le dépôt public). Il reste à relire et envoyer par l’équipe. Aucun contact, compte, partenariat ou accès aux tickets n’a été créé.
 
 ## Reproduire et vérifier
 
