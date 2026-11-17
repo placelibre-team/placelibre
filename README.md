@@ -36,7 +36,6 @@ Depuis la racine du dépôt, avec Python 3 et Node.js :
 ```bash
 python3 -m unittest tests/test_pilot_data.py
 node tests/pilot-rules.test.cjs
-node tests/verification-terrain.test.cjs
 ```
 
 ## Attention pendant les essais
