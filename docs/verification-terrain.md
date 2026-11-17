@@ -19,8 +19,9 @@ Il est conservé si on ferme la page.
    sur la carte (b04 le long de b01 à b03, b11 le long de b09 et b10, et b12/b13, b14/b15, b17/b18 à
    Saint-Honorat). Sur place, regarder s'il y a des places des deux côtés ou une seule rangée :
    - « Deux côtés de la rue » : on garde tout ;
-   - « Doublon : garder … » : toutes les places de l'autre file sont marquées « Pas une place », motif
-     « doublon ». Changer d'avis annule ce retrait.
+   - « Doublon : garder … » : les places de l'autre file sans réponse individuelle sont marquées « Pas une place », motif
+     « doublon ». Les observations individuelles sont conservées et restent prioritaires. Changer d'avis
+     annule le retrait automatique seulement si aucune autre paire ne le demande.
 3. **Place par place** : toucher une place, puis
    - « Elle existe ici » ;
    - « Pas une place » (entrée de garage, arrêt de bus, livraison…) : écrire le motif dans la remarque ;
@@ -60,3 +61,7 @@ Appliquer deux fois le même relevé ne retire rien deux fois.
 - Les places de l'appli n'ont pas de numéro peint sur la chaussée : s'aider de la carte de l'appli et
   des numéros de rue.
 - Le relevé ne contient aucune donnée personnelle, sauf le prénom facultatif du releveur.
+
+Les imports refusent avant écriture les versions inconnues, identifiants répétés, dates ou structures invalides,
+ainsi que les coordonnées hors pilote et les précisions GPS absentes ou négatives. `--forcer` permet seulement
+de dépasser le seuil de précision de 8 m ; il ne contourne pas ces contrôles.

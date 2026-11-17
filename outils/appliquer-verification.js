@@ -25,7 +25,7 @@ function chargerRegistre(){
   const ctx = {URLSearchParams, location:{search:''}};
   vm.createContext(ctx);
   vm.runInContext(fs.readFileSync(path.join(ROOT, 'public', 'js', 'config.js'), 'utf8') + '\n' + fs.readFileSync(PLACES_JS, 'utf8') +
-    '\nthis.R = {PLACES, PLACES_RETIREES, BASE_SEGS, TYPES};', ctx);
+    '\nthis.R = {PLACES, PLACES_RETIREES, BASE_SEGS, TYPES, BBOX};', ctx);
   return JSON.parse(JSON.stringify(ctx.R));
 }
 
@@ -34,11 +34,11 @@ try{ ex = JSON.parse(fs.readFileSync(fichier, 'utf8')); }
 catch(e){ console.error('Lecture impossible de ' + fichier + ' : ' + e.message); process.exit(2); }
 
 const R = chargerRegistre();
-const problemes = VERIF.verifierExport(ex, R.PLACES.concat(R.PLACES_RETIREES));
+const problemes = VERIF.verifierExport(ex, R.PLACES.concat(R.PLACES_RETIREES), R.BBOX);
 const dejaRetirees = new Set(R.PLACES_RETIREES.map(p => p.id));
 if(problemes.length){ console.error('Relevé refusé :\n- ' + problemes.join('\n- ')); process.exit(1); }
 
-const jour = t => new Date(t || Date.now()).toISOString().slice(0, 10);
+const jour = t => new Date(t ?? Date.now()).toISOString().slice(0, 10);
 const actions = {type:[], deplacee:[], retiree:[], ignoree:[]};
 const parId = Object.fromEntries(R.PLACES.map(p => [p.id, p]));
 const SEG_TYPE = Object.fromEntries(R.BASE_SEGS.map(b => [b.id, b.type]));

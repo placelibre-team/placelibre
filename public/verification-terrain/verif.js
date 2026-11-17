@@ -44,11 +44,24 @@
   function deciderFiles(rel, paire, decision, places){
     const cle = paire.a + '|' + paire.b;
     rel.files[cle] = {decision, t:Date.now()};
-    const retiree = decision === 'garder-a' ? paire.b : decision === 'garder-b' ? paire.a : null;
-    places.filter(p => p.seg === paire.a || p.seg === paire.b).forEach(p => {
+    // Recalculer l'ensemble des décisions : une file peut participer à plusieurs paires.
+    // Les observations individuelles restent prioritaires sur les décisions groupées.
+    const retraits = new Map();
+    Object.entries(rel.files).forEach(([k, f]) => {
+      const [a, b] = k.split('|');
+      const retiree = f.decision === 'garder-a' ? b : f.decision === 'garder-b' ? a : null;
+      if(!retiree) return;
+      if(!retraits.has(retiree)) retraits.set(retiree, []);
+      retraits.get(retiree).push({cle:k, gardee:retiree === a ? b : a, t:f.t});
+    });
+    places.forEach(p => {
       const cur = rel.places[p.id];
-      if(p.seg === retiree) rel.places[p.id] = {etat:'absente', motif:'doublon de la file ' + (retiree === paire.a ? paire.b : paire.a), auto:cle, t:Date.now()};
-      else if(cur && cur.auto === cle) delete rel.places[p.id];   // décision changée : on annule le retrait automatique
+      if(cur && !cur.auto) return;
+      const causes = retraits.get(p.seg);
+      if(causes) rel.places[p.id] = Object.assign({}, cur, {etat:'absente',
+        motif:'doublon de la file ' + causes.map(c => c.gardee).join(', '),
+        auto:causes.map(c => c.cle).sort().join(','), t:Math.max(...causes.map(c => c.t))});
+      else if(cur && cur.auto) delete rel.places[p.id];
     });
     return rel;
   }
@@ -73,16 +86,73 @@
   }
 
   // Contrôle d'un export (avant de l'appliquer au registre). Renvoie la liste des problèmes.
-  function verifierExport(ex, places){
-    const pb = [], ids = new Set(places.map(p => p.id));
-    if(!ex || ex.format !== FORMAT) return ['ce fichier n’est pas un export de vérification PlaceLibre'];
-    if(ex.v > VERSION) pb.push('export d’une version plus récente de l’outil (v' + ex.v + ')');
-    (ex.places || []).forEach(v => {
-      if(!ids.has(v.id)) pb.push(v.id + ' : place inconnue du registre');
-      if(!ETATS.includes(v.etat)) pb.push(v.id + ' : état inconnu « ' + v.etat + ' »');
-      if(v.type != null && !TYPES_PLACE.includes(v.type)) pb.push(v.id + ' : type inconnu « ' + v.type + ' »');
-      if(v.etat === 'deplacee' && !(Number.isFinite(v.lat) && Number.isFinite(v.lng))) pb.push(v.id + ' : déplacée sans position');
-      if(v.etat === 'absente' && !v.motif) pb.push(v.id + ' : retirée sans motif');
+  function verifierExport(ex, places, bbox){
+    const pb = [], ids = new Set(places.map(p => p.id)), segs = new Set(places.map(p => p.seg));
+    const rues = new Set(places.map(p => p.rue));
+    const objet = x => x !== null && typeof x === 'object' && !Array.isArray(x);
+    if(!objet(ex) || ex.format !== FORMAT) return ['ce fichier n’est pas un export de vérification PlaceLibre'];
+    if(ex.v !== VERSION) pb.push('version d’export non prise en charge : attendu v' + VERSION);
+    const dateISO = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(v) &&
+      Number.isFinite(Date.parse(v)) && new Date(v).toISOString() === v;
+    for(const k of ['debut', 'exporte']) if(!dateISO(ex[k])) pb.push(k + ' : date ISO invalide');
+    if(!Number.isSafeInteger(ex.nbPlacesRegistre) || ex.nbPlacesRegistre < 1) pb.push('nombre de places du registre invalide');
+    const texte = (v, k, at, obligatoire = false) => {
+      if(v[k] == null && !obligatoire) return;
+      if(typeof v[k] !== 'string' || (obligatoire && !v[k].trim())) pb.push(at + ' : ' + k + ' doit être un texte' + (obligatoire ? ' non vide' : ''));
+    };
+    texte(ex, 'releveur', 'relevé');
+    const horodatage = (v, at) => {
+      if(!Number.isSafeInteger(v.t) || v.t < 0 || v.t > 8640000000000000) pb.push(at + ' : horodatage invalide');
+    };
+    const position = (v, at) => {
+      if(!Number.isFinite(v.lat) || !Number.isFinite(v.lng) || v.lat <= -90 || v.lat >= 90 || v.lng < -180 || v.lng > 180)
+        pb.push(at + ' : coordonnées invalides');
+      else if(bbox && !(+v.lat.toFixed(7) > bbox[0] && +v.lat.toFixed(7) < bbox[2] && +v.lng.toFixed(7) > bbox[1] && +v.lng.toFixed(7) < bbox[3]))
+        pb.push(at + ' : coordonnées hors de la zone du pilote');
+      if(!Number.isFinite(v.acc) || v.acc < 0) pb.push(at + ' : précision GPS absente ou invalide');
+    };
+    const tableau = k => {
+      if(!Array.isArray(ex[k])){ pb.push(k + ' : tableau attendu'); return []; }
+      return ex[k].filter((v, i) => {
+        if(objet(v)) return true;
+        pb.push(k + '[' + i + '] : objet attendu'); return false;
+      });
+    };
+    const vus = new Set();
+    tableau('places').forEach(v => {
+      const at = typeof v.id === 'string' ? v.id : 'place sans identifiant';
+      if(!ids.has(v.id)) pb.push(at + ' : place inconnue du registre');
+      if(vus.has(v.id)) pb.push(at + ' : identifiant répété');
+      vus.add(v.id);
+      if(!ETATS.includes(v.etat)) pb.push(at + ' : état inconnu');
+      if(v.type != null && !TYPES_PLACE.includes(v.type)) pb.push(at + ' : type inconnu');
+      if(v.etat === 'deplacee') position(v, at);
+      texte(v, 'motif', at, v.etat === 'absente'); texte(v, 'note', at); texte(v, 'auto', at);
+      horodatage(v, at);
+    });
+    const pairesVues = new Set();
+    tableau('files').forEach(f => {
+      const paire = typeof f.paire === 'string' ? f.paire.split('|') : [];
+      if(paire.length !== 2 || paire[0] === paire[1] || paire.some(s => !segs.has(s))) pb.push('files : paire inconnue');
+      const cle = paire.slice().sort().join('|');
+      if(pairesVues.has(cle)) pb.push('files : paire répétée');
+      pairesVues.add(cle);
+      if(!['deux-cotes', 'garder-a', 'garder-b'].includes(f.decision)) pb.push('files : décision inconnue');
+      horodatage(f, 'files');
+    });
+    tableau('ajouts').forEach((a, i) => {
+      const at = 'ajout ' + (i + 1);
+      if(!rues.has(a.rue)) pb.push(at + ' : rue inconnue');
+      if(!TYPES_PLACE.includes(a.type)) pb.push(at + ' : type inconnu');
+      position(a, at); horodatage(a, at); texte(a, 'note', at);
+    });
+    tableau('regles').forEach((r, i) => {
+      const at = 'panneau ' + (i + 1);
+      if(!rues.has(r.rue)) pb.push(at + ' : rue inconnue');
+      texte(r, 'regle', at, true);
+      for(const k of ['troncon', 'horaires', 'tarif']) texte(r, k, at);
+      if(r.saison != null && typeof r.saison !== 'boolean') pb.push(at + ' : saison doit être un booléen');
+      horodatage(r, at);
     });
     return pb;
   }
