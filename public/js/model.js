@@ -168,7 +168,7 @@ function slotLive(s, now, M, from){
   const st = slotState(s.id, now);
   if(st.k === 'unk' || st.k === 'occ') return null;
   const age = Math.max(0, (now - raw.ts)/60e3), eta = etaMin(from, s);
-  return {slot:s, p:liveProbability(raw, now + eta*60e3, M), age, eta, by:raw.by || '', src:raw.src || '', k:st.k};
+  return {slot:s, p:liveProbability(raw, now + eta*60e3, M), waitMs:Math.max(0, raw.free - (now + eta*60e3)), age, eta, by:raw.by || '', src:raw.src || '', k:st.k};
 }
 function liveInfo(street, now, M, from){
   let q = 1, n = 0, best = null;

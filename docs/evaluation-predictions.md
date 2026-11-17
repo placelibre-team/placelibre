@@ -89,6 +89,7 @@ modifie pas automatiquement le modèle de l'application.
 
 ```bash
 node tests/prediction-timing.test.cjs
+node tests/prediction-ui.test.cjs
 node tests/prediction-evaluation.test.cjs
 ```
 
@@ -97,3 +98,14 @@ peut cibler cette branche avec `PLACELIBRE_APP=/chemin/vers/ce/depot`.
 Son scénario `arrivee-avant-depart` passe alors de « ÉCHEC CONNU » à « CORRIGÉ ».
 Le drapeau `connu` reste dans sa PR ; notre test de régression échoue normalement
 si ce défaut revient. Les scénarios de coupure nécessitent aussi la PR #9 de Stan.
+
+## Relecture du 17 novembre 2026
+
+Les départs annoncés ne sont plus comptés comme des places libres dans le bandeau.
+Si le départ est prévu après l’arrivée, la liste affiche le délai restant et précise
+que la libération n’est pas confirmée. Le bandeau ne propose aucune « meilleure
+chance » si toutes les probabilités s’arrondissent à 0 %.
+
+La règle du modèle reste stricte : aucune minute d’attente n’est ajoutée
+implicitement au trajet. Un éventuel choix utilisateur « je peux attendre » reste
+à concevoir et à évaluer sur le terrain.
