@@ -1,7 +1,7 @@
 /* Analyse d'un essai à deux téléphones : les journaux sont produits par le vrai code de l'appli
    (journalCSV) sur deux téléphones simulés, sans réseau, avec une horloge simulée. */
 const fs = require('node:fs'), vm = require('node:vm'), os = require('node:os'), path = require('node:path');
-const {execFileSync} = require('node:child_process');
+const {execFileSync, spawnSync} = require('node:child_process');
 const assert = require('node:assert/strict');
 const A = require('../outils/analyser-essai.js');
 
@@ -56,6 +56,20 @@ fs.writeFileSync(fTom, tom.journalCSV()); fs.writeFileSync(fStan, stan.journalCS
 const lignes = A.lireCSV(fs.readFileSync(fTom, 'utf8'));
 assert.ok(lignes.length >= 4 && lignes[0].id && lignes[0].type, 'CSV mal lu');
 assert.throws(() => A.lireCSV('a;b\n1;2\n'), /journal PlaceLibre/);
+const entete = 'id;date;heure;type;place';
+assert.throws(() => A.lireCSV(entete + '\n"incomplet'), /guillemet non fermé/);
+assert.throws(() => A.lireCSV(entete + '\n"id"texte;2026-11-18;10:00:00;libre;b01-0'), /caractère inattendu/);
+assert.throws(() => A.lireCSV(entete + '\nx;2026-11-18;10:00:00;libre'), /colonnes incorrect/);
+assert.throws(() => A.lireCSV(entete + ';place\nx;2026-11-18;10:00:00;libre;b01-0;b01-0'), /répétées/);
+assert.equal(A.lireCSV(entete + ';par\nx;2026-11-18;10:00:00;libre;b01-0;"T;""om"')[0].par, 'T;"om');
+const valide = {id:'valid', date:'2026-11-18', heure:'10:00:00', type:'libre', place:'b01-0'};
+for(const date of ['2026-02-30', '2026-13-01', '2026-11-00', 'invalide'])
+  assert.throws(() => A.evenement({...valide, date}), /date ou heure invalide/);
+assert.throws(() => A.evenement({...valide, heure:'25:00:00'}), /date ou heure invalide/);
+for(const champ of ['precision_m', 'delai_reception_ms', 'horizon_min']) for(const invalide of ['NaN', 'Infinity', '-1', 'abc'])
+  assert.throws(() => A.evenement({...valide, [champ]:invalide}), /nombre fini positif ou nul/);
+assert.throws(() => A.evenement({...valide, id:''}), /id et type/);
+assert.throws(() => A.evenement({...valide, type:'controle', depart_id:'d', horizon_min:'12', etat:'libre'}), /contrôle invalide/);
 
 // 2. Analyse
 const tels = [{nom:'tom', evenements:A.lireCSV(fs.readFileSync(fTom, 'utf8')).map(A.evenement)},
@@ -72,14 +86,46 @@ assert.deepEqual(r.parHorizon[5], {libre:1, occupee:0, non_observe:0, contradict
 assert.deepEqual(r.parHorizon[10], {libre:0, occupee:1, non_observe:0, contradictoire:0});
 assert.deepEqual(r.parHorizon[30], {libre:0, occupee:0, non_observe:1, contradictoire:0}, 'non observé compté une fois, pas une fois par téléphone');
 assert.equal(r.parEmetteur.tom, 3); assert.equal(r.parEmetteur.stan, 3);
+assert.throws(() => A.analyser([tels[0], tels[0]]), /nom non vide et unique/);
+assert.throws(() => A.analyser([{nom:'', evenements:[]}]), /nom non vide et unique/);
+const nomsSpeciaux = A.analyser([{nom:'__proto__', evenements:[A.evenement(valide)]}, {nom:'constructor', evenements:[]}]);
+assert.equal(nomsSpeciaux.parEmetteur.__proto__, 1);
+assert.equal(nomsSpeciaux.pertes[0].absent, 'constructor');
+const placeLocale = A.analyser([{nom:'A', evenements:[A.evenement({...valide, place:'local-1'})]}, {nom:'B', evenements:[]}]);
+assert.equal(placeLocale.partages, 0);
+assert.equal(placeLocale.horsRegistre, 1);
+assert.equal(placeLocale.pertes.length, 0);
+const rattrapage = A.analyser([{nom:'A', evenements:[A.evenement(valide)]}, {nom:'B', evenements:[A.evenement(valide)]}]);
+assert.equal(rattrapage.rattrapes.length, 1);
+assert.ok(A.compteRendu(rattrapage).includes('rattrapage possible'));
 
 // 3. Compte rendu en ligne de commande
 const sortie = path.join(tmp, 'cr.md');
 execFileSync('node', ['outils/analyser-essai.js', fTom, fStan, '--noms', 'Tom,Stan', '--sortie', sortie]);
 const cr = fs.readFileSync(sortie, 'utf8');
 for(const attendu of ['# Essai à 2 téléphones', '| Délai médian | 1,1 s |', '| Délai maximal | 15 s |', 'Réceptions lentes',
-  '| Signalements absents d’au moins un téléphone | 2 |', '| Précision > 25 m (place probablement fausse) | 25 % |', '| 30 min | 0 | 0 | 1 |'])
+  '| Signalements absents d’au moins un téléphone | 2 |', '| Précision annoncée > 25 m | 25 % |', '| 30 min | 0 | 0 | 1 |'])
   assert.ok(cr.includes(attendu), 'compte rendu sans : ' + attendu + '\n' + cr);
+const original = fs.readFileSync(fTom, 'utf8');
+const erreursCLI = [
+  [[fTom, '--noms'], /valeur manquante/],
+  [[fTom, '--inconnu'], /option inconnue/],
+  [[fTom, '--noms', 'A,B'], /un nom par fichier/],
+  [[fTom, fStan, '--noms', 'A,A'], /nom non vide et unique/],
+  [[fTom, fStan, '--noms', 'A,'], /nom non vide et unique/],
+  [[fTom, fTom], /fourni qu’une fois/],
+  [[fTom, '--sortie', fTom], /ne doit pas écraser/]
+];
+const lien = path.join(tmp, 'lien.csv'); fs.symlinkSync(fTom, lien);
+erreursCLI.push([[fTom, '--sortie', lien], /ne doit pas écraser/]);
+const lienDur = path.join(tmp, 'lien-dur.csv'); fs.linkSync(fTom, lienDur);
+erreursCLI.push([[fTom, '--sortie', lienDur], /ne doit pas écraser/]);
+for(const [args, message] of erreursCLI){
+  const essai = spawnSync('node', ['outils/analyser-essai.js', ...args], {encoding:'utf8'});
+  assert.notEqual(essai.status, 0, 'commande invalide acceptée : ' + args.join(' '));
+  assert.match(essai.stderr, message);
+}
+assert.equal(fs.readFileSync(fTom, 'utf8'), original, 'un journal a été écrasé');
 if(process.env.GARDER) console.log(cr);
 fs.rmSync(tmp, {recursive:true, force:true});
 
