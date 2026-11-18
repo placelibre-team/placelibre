@@ -19,10 +19,9 @@ function renderStatus(){
   }else{
     let free = 0, soon = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid') free++; else if(k === 'soon') soon++; });
     const bs = !free && SLOTS.length ? bestStreet() : null;
-    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' signalée' + (free > 1 ? 's' : '') + ' en ce moment' : soon ? soon + ' départ' + (soon > 1 ? 's' : '') + ' annoncé' + (soon > 1 ? 's' : '') + ' · pas encore libre' + (soon > 1 ? 's' : '') : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place cartographiée ici';
-    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places sur la carte' : SLOTS.length + ' places cartographiées' + (mapReady ? ' · touche Carto pour en ajouter' : ' · mode liste');
+    main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' signalée' + (free > 1 ? 's' : '') + ' en ce moment' : soon ? soon + ' départ' + (soon > 1 ? 's' : '') + ' annoncé' + (soon > 1 ? 's' : '') + ' · pas encore libre' + (soon > 1 ? 's' : '') : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place suivie ici';
+    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places suivies' : SLOTS.length + ' places suivies' + (mapReady ? (teamMode() ? ' · touche Carto pour en ajouter' : '') : ' · mode liste');
   }
-  if(!S.me) sub = 'Choisis ton prénom dans ⚙︎ pour que les autres voient qui signale · ' + sub;
   const live = syncOk ? '<span style="color:var(--free);font-weight:600">● ' + (TEST ? 'Canal de test' : 'En direct') + '</span> · ' : '';
   const n = S.outbox.length, wait = n ? ' · ' + n + ' envoi' + (n > 1 ? 's' : '') + ' en attente (réseau)' : '';
   $('status').innerHTML = '<strong>' + esc(main) + '</strong><small>' + live + esc(sub + wait) + '</small>';
@@ -103,7 +102,7 @@ function renderList(){
     .sort((a,b) => b.p - a.p || a.d - b.d).slice(0, 14);
   const ul = $('list'); ul.innerHTML = '';
   if(!list.length){
-    ul.innerHTML = '<li class="empty">Pas encore de places cartographiées près d’ici. ' + (mapReady ? 'Touche <b>Carto</b> à droite de la carte, puis dessine les files de places de ta rue sur la photo aérienne.' : 'La cartographie nécessite le mode carte ; réessaie lorsque la carte est disponible.') + '</li>';
+    ul.innerHTML = '<li class="empty">PlaceLibre ne suit pas encore de places près d’ici. Pour l’instant : rue Bricka et rue Saint-Honorat, à Juan-les-Pins.' + (teamMode() ? (mapReady ? ' <br>Équipe : touche <b>Carto</b> à droite de la carte, puis dessine les files de places de la rue sur la photo aérienne.' : ' <br>Équipe : la cartographie nécessite le mode carte.') : '') + '</li>';
     return;
   }
   list.forEach(g => {
@@ -217,15 +216,35 @@ $('btnLeave').addEventListener('click', () => askSlot('depart'));
 /* ---------- Réglages ---------- */
 $('busUrl').textContent = BUS;
 
-function buildMe(){
-  const box = $('meChips'); box.innerHTML = '';
-  ['Shad','Tom','Stan'].forEach(n => {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = n;
-    b.setAttribute('aria-pressed', String(S.me === n));
-    b.addEventListener('click', () => { S.me = n; save(); buildMe(); renderStatus(); toast('Tu es ' + n + '.'); });
-    box.appendChild(b);
-  });
+function buildMe(){ $('meName').value = S.me || ''; }
+$('meName').addEventListener('change', () => {
+  S.me = $('meName').value.trim().slice(0, 20); save(); renderStatus();
+  toast(S.me ? 'Prénom enregistré : ' + S.me + '.' : 'Tu restes anonyme.');
+});
+
+/* Mode équipe : outils de cartographie, canal de test et mesures du modèle, cachés du public.
+   On l'active en touchant 5 fois le logo (ou avec ?equipe=1) ; la préférence reste sur le téléphone. */
+const EQUIPE_KEY = 'plj:equipe';
+function teamMode(){ try{ return localStorage.getItem(EQUIPE_KEY) === '1'; }catch(e){ return false; } }
+function applyTeam(){
+  const on = teamMode();
+  $('equipe').hidden = !on; $('tDraw').hidden = !on;
+  if(!on && typeof mode !== 'undefined' && mode === 'draw' && typeof setMode === 'function') setMode('view');
 }
+function setTeam(on){
+  try{ if(on) localStorage.setItem(EQUIPE_KEY, '1'); else localStorage.removeItem(EQUIPE_KEY); }catch(e){}
+  applyTeam(); renderStatus(); renderList();
+}
+(function(){
+  let taps = 0, last = 0;
+  $('brand').addEventListener('click', () => {
+    const now = Date.now(); taps = now - last < 1500 ? taps + 1 : 1; last = now;
+    if(taps >= 5){ taps = 0; const on = !teamMode(); setTeam(on); toast(on ? 'Mode équipe activé : voir les Réglages.' : 'Mode équipe désactivé.'); }
+  });
+  $('btnEquipeOff').addEventListener('click', () => { setTeam(false); $('settings').hidden = true; toast('Mode équipe désactivé.'); });
+  if(URLP.get('equipe') === '1') try{ localStorage.setItem(EQUIPE_KEY, '1'); }catch(e){}
+  applyTeam();
+})();
 function renderSettings(){
   buildMe();
   const m = S.model;
@@ -308,7 +327,7 @@ async function passHere(isFree){
     toast('Merci ! Place libre signalée ici.');
   }else{
     const near = SLOTS.filter(s => dist(cur, s) < 35);
-    if(!near.length){ toast('Aucune place cartographiée à moins de 35 m.'); return; }
+    if(!near.length){ toast('Aucune place suivie à moins de 35 m.'); return; }
     near.forEach(s => report(s.id, false));
     toast('Merci ! ' + near.length + ' place' + (near.length > 1 ? 's' : '') + ' notée' + (near.length > 1 ? 's' : '') + ' occupée' + (near.length > 1 ? 's' : '') + '.');
   }
@@ -327,14 +346,16 @@ function showWelcome(step){
   const dots = '<div class="dots">' + Array.from({length:steps}, (_, i) => '<b class="' + (i === step ? 'on' : '') + '"></b>').join('') + '</div>';
   let body = '';
   if(step === 0){
-    body = '<h1>Trouve une place, aide les autres</h1><p>PlaceLibre montre où se garer à Juan-les-Pins. Plus on est nombreux à signaler, plus c’est juste.</p>' +
-      '<input id="wcName" placeholder="Ton prénom" maxlength="20" autocomplete="given-name" value="' + esc(S.me || '') + '">' +
+    body = '<h1>Trouve une place plus vite</h1><p>PlaceLibre te montre où il y a des chances de se garer à Juan-les-Pins, et te prévient quand une place se libère. Aucun compte à créer.</p>' +
+      '<label class="sr-only" for="wcName">Ton prénom (facultatif)</label>' +
+      '<input id="wcName" placeholder="Ton prénom (facultatif)" maxlength="20" autocomplete="given-name" value="' + esc(S.me || '') + '">' +
+      '<p class="hint">Il s’affiche quand tu signales une place. Laisse vide pour rester anonyme.</p>' +
       '<button class="btn primary" id="wcNext">Continuer</button><button class="skip" id="wcSkip">Passer</button>';
   }else if(step === 1){
-    body = '<h1>3 gestes qui aident tout le monde</h1><div class="steps">' +
-      '<div class="st"><i>1</i><div><b>Tu pars</b><span>Touche « Je pars » : ta place est signalée libre aux autres.</span></div></div>' +
-      '<div class="st"><i>2</i><div><b>Tu te gares</b><span>Touche « Je me gare ici » : la place passe en occupée.</span></div></div>' +
-      '<div class="st"><i>3</i><div><b>Tu passes dans une rue</b><span>« Place libre ici » ou « Rue pleine » : une touche suffit.</span></div></div></div>' +
+    body = '<h1>Comment ça marche</h1><div class="steps">' +
+      '<div class="st"><i>1</i><div><b>Tu cherches</b><span>Tape ta destination : PlaceLibre estime tes chances de trouver une place à l’arrivée.</span></div></div>' +
+      '<div class="st"><i>2</i><div><b>Tu te gares ou tu pars</b><span>Touche « Je me gare ici » ou « Je pars » : les autres voient la place changer.</span></div></div>' +
+      '<div class="st"><i>3</i><div><b>Tu passes dans une rue</b><span>« Place libre ici » ou « Rue pleine » : une touche suffit. Plus on est nombreux, plus c’est juste.</span></div></div></div>' +
       '<button class="btn primary" id="wcNext">' + (steps > 2 ? 'Continuer' : 'C’est parti') + '</button>';
   }else{
     body = '<h1>Mets PlaceLibre sur ton écran d’accueil</h1><div class="steps">' +
