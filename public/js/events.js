@@ -98,23 +98,25 @@ function slotStateWord(id){
   if(k === 'soon') return 'départ annoncé dans ~' + state.secs + ' s';
   return k === 'occ' ? 'occupée' : (k === 'high' || k === 'mid' || k === 'low') ? 'signalée libre' : 'état inconnu';
 }
-async function askSlot(kind){
+async function askSlot(kind, opt){
   if(CONF) return;
-  let cur = null; try{ cur = await getPos(8000); lastPos = cur; }catch(e){}
+  let cur = opt && opt.cur || null;
+  if(!cur){ try{ cur = await getPos(8000); lastPos = cur; }catch(e){} }
   if(!cur){ toast('Position introuvable : autorise la localisation pour ce site.'); return; }
   let ref = cur, remembered = null;
   if(kind === 'depart' && S.parked && dist(S.parked, cur) < 300){
     ref = {lat:S.parked.lat, lng:S.parked.lng};
     remembered = S.parked.slotId && SLOT_BY_ID[S.parked.slotId];
   }
-  const near = nearSlots(ref, 30, 4);
-  if(remembered && dist(ref, remembered) <= 30 && !near.some(x => x.s.id === remembered.id)){
+  const near = nearSlots(ref, Math.max(30, opt && opt.margin || 0), 4);
+  if(remembered && dist(ref, remembered) <= Math.max(30, opt && opt.margin || 0) && !near.some(x => x.s.id === remembered.id)){
     near.push({s:remembered, d:dist(ref, remembered)});
     near.sort((a,b) => a.d - b.d);
   }
-  if(!near.length){ kind === 'depart' ? startDepart('manuel', cur) : doArrive('manuel', cur); return; }
+  const src = opt && opt.src || 'manuel';
+  if(!near.length){ kind === 'depart' ? startDepart(src, cur) : doArrive(src, cur); return; }
   const pick = remembered && near.some(x => x.s.id === remembered.id) ? remembered.id : near[0].s.id;
-  CONF = {kind, cur, ref, near, pick};
+  CONF = {kind, cur, ref, near, pick, src, note:opt && opt.note || ''};
   drawConfirm();
   fly(SLOT_BY_ID[pick], 19);
 }
@@ -122,14 +124,17 @@ function drawConfirm(){
   const c = CONF, box = $('confBody'); if(!c) return;
   const leave = c.kind === 'depart';
   box.innerHTML = '<h2>' + (leave ? 'Tu pars de quelle place ?' : 'Tu te gares sur quelle place ?') + '</h2>' +
-    '<p>Le GPS peut se tromper de quelques mètres. Choisis la bonne place.</p>' +
+    '<p>' + (c.note ? esc(c.note) : 'Le GPS peut se tromper de quelques mètres. Choisis la bonne place.') + '</p>' +
     '<div class="opts">' + c.near.map((x, i) => '<button class="opt' + (x.s.id === c.pick ? ' on' : '') + '" data-slot="' + esc(x.s.id) + '">' +
       '<b>' + esc(x.s.name || 'Place') + ' · ' + esc(x.s.id) + (x.s.type === 'pmr' ? ' · PMR' : '') + (i === 0 ? ' <em>la plus proche</em>' : '') + '</b>' +
       '<span>' + (x.d < 3 ? 'ici' : 'à ' + Math.round(x.d) + ' m vers ' + bearingWord(c.ref, x.s)) + ' · ' + slotStateWord(x.s.id) + '</span></button>').join('') + '</div>' +
     '<div class="row2"><button class="btn" id="confNo">Annuler</button><button class="btn primary" id="confOk">' + (leave ? 'Je pars de cette place' : 'Je me gare ici') + '</button></div>';
   $('confirmSlot').hidden = false;
 }
-function closeConfirm(){ CONF = null; $('confirmSlot').hidden = true; }
+function closeConfirm(){
+  const was = CONF; CONF = null; $('confirmSlot').hidden = true;
+  if(was && was.src === 'detection' && !was.done && typeof detAnswer === 'function') detAnswer(false);
+}
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && CONF) closeConfirm(); });
 document.addEventListener('click', e => {
   if(!CONF) return;
@@ -137,7 +142,8 @@ document.addEventListener('click', e => {
   if(o){ CONF.pick = o.dataset.slot; drawConfirm(); const s = SLOT_BY_ID[CONF.pick]; if(s) fly(s, 19); return; }
   if(e.target.closest('#confNo') || e.target === $('confirmSlot')){ closeConfirm(); return; }
   if(e.target.closest('#confOk')){
-    const c = CONF; closeConfirm();
-    c.kind === 'depart' ? startDepart('manuel', c.cur, c.pick) : doArrive('manuel', c.cur, c.pick);
+    const c = CONF; c.done = true; closeConfirm();
+    if(c.src === 'detection' && typeof detAnswer === 'function') detAnswer(true);
+    c.kind === 'depart' ? startDepart(c.src, c.cur, c.pick) : doArrive(c.src, c.cur, c.pick);
   }
 });
