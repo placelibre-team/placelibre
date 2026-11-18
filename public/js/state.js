@@ -25,9 +25,9 @@ function mergeBase(s){
   return s;
 }
 let S = load();
-/* Enregistrement dans le téléphone. Si le stockage est plein, on allège d'abord ce qui ne sert qu'à l'affichage
-   (historique ancien, places perdues, anciens événements par place), jamais la file d'envoi ni le journal
-   des observations ; si cela ne suffit pas, on prévient (sans répéter le message plus d'une fois par minute). */
+/* Si le stockage est plein, seul l'historique ancien est allégé. Les événements par place servent
+   au calcul de l'état et à la déduplication, et les places locales peuvent encore être actives.
+   Ces données, la file d'envoi et le journal des observations restent conservés. */
 const alertesStockage = {};
 function avertirStockage(msg){
   if(Date.now() - (alertesStockage[msg] || 0) < 60e3) return;   // chaque message au plus une fois par minute
@@ -37,8 +37,7 @@ function avertirStockage(msg){
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }catch(e){}
   try{
-    S.history = S.history.slice(-300); S.loose = [];
-    Object.keys(S.slotLog || {}).forEach(k => { S.slotLog[k] = S.slotLog[k].slice(-10); });
+    S.history = S.history.slice(-300);
     localStorage.setItem(KEY, JSON.stringify(S));
     avertirStockage('Stockage du téléphone presque plein : l’historique le plus ancien a été allégé.');
     return true;

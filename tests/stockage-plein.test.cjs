@@ -1,5 +1,5 @@
-/* Stockage du téléphone plein : l'appli allège ce qui ne sert qu'à l'affichage, garde la file d'envoi et
-   le journal, et prévient l'utilisateur au lieu d'échouer en silence. Aucun réseau. */
+/* Stockage du téléphone plein : allègement de l'historique ancien, conservation des signalements
+   et de leur état, avertissement en cas d'échec. Aucun réseau. */
 const fs = require('node:fs'), vm = require('node:vm');
 const assert = require('node:assert/strict');
 
@@ -41,4 +41,55 @@ assert.equal(app.save(), false);
 assert.equal(toasts.length, 2, 'pas de répétition dans la minute');
 assert.equal(app.S.outbox.length, 1, 'la file d’envoi reste en mémoire');
 
-console.log('OK : stockage plein → historique allégé, file d’envoi et journal gardés, utilisateur prévenu.');
+// 3. L'allègement doit conserver les preuves utilisées pour départager deux signalements.
+const {telephone: telephoneSynchronise} = require('./aide-telephone.cjs');
+const A = telephoneSynchronise(), B = telephoneSynchronise();
+const place = A.app.PLACES[0].id;
+function evenement(i, k, by){
+  return {v:1, id:'saturation-' + i, slot:place, k, ts:now - 20000 + i*1000, by, dev:by, src:'signalement'};
+}
+function recevoirSur(tel, ev){
+  return tel.app.receive({event:'message', id:ev.id, time:Math.floor(ev.ts/1000), message:JSON.stringify(ev)}, true);
+}
+for(const tel of [A, B]){
+  recevoirSur(tel, evenement(0, 'occ', 'Stan'));
+  for(let i = 1; i <= 10; i++) recevoirSur(tel, evenement(i, 'free', 'Tom'));
+  tel.app.S.loose.push({id:'locale-recente', lat:43.57, lng:7.105, t:now, free:now});
+}
+assert.equal(A.app.slotState(place, now).k, 'occ');
+assert.equal(B.app.slotState(place, now).k, 'occ');
+for(let i = 0; i < 3000; i++) A.app.S.history.push({type:'depart', t:now - i*1000});
+vm.runInContext('save()', A);
+const quota = A.store[A.app.KEY].length - 1000;
+const enregistrer = A.localStorage.setItem;
+A.localStorage.setItem = (k, v) => {
+  if(String(v).length > quota) throw new Error('QuotaExceededError');
+  enregistrer(k, v);
+};
+const logAvant = JSON.stringify(A.app.S.slotLog);
+const localesAvant = JSON.stringify(A.app.S.loose);
+assert.equal(vm.runInContext('save()', A), true);
+assert.equal(JSON.stringify(A.app.S.slotLog), logAvant, 'l’allègement a effacé une preuve de signalement');
+assert.equal(JSON.stringify(A.app.S.loose), localesAvant, 'une place locale récente a disparu');
+
+// La reprise d'un ancien message garde la déduplication et les observations inchangées.
+const observationsAvant = JSON.stringify(A.app.S.obs);
+assert.equal(recevoirSur(A, evenement(1, 'free', 'Tom')).applied, false);
+assert.equal(JSON.stringify(A.app.S.obs), observationsAvant, 'un ancien événement a été appris deux fois');
+
+// Un rechargement puis le même message doivent donner le même état sur les deux téléphones.
+const apresRechargement = telephoneSynchronise({store:A.store});
+for(const tel of [A, B, apresRechargement]){
+  recevoirSur(tel, evenement(11, 'free', 'Tom'));
+  assert.equal(tel.app.slotState(place, now).k, 'occ', 'une place occupée est devenue libre après allègement');
+}
+assert.equal(JSON.stringify(A.app.S.slotState[place]), JSON.stringify(B.app.S.slotState[place]));
+
+// Même si l'enregistrement échoue encore, conserver les preuves et places locales en mémoire.
+A.localStorage.setItem = () => { throw new Error('QuotaExceededError'); };
+const logPlein = JSON.stringify(A.app.S.slotLog);
+assert.equal(vm.runInContext('save()', A), false);
+assert.equal(JSON.stringify(A.app.S.slotLog), logPlein);
+assert.equal(JSON.stringify(A.app.S.loose), localesAvant);
+
+console.log('OK : stockage plein → alerte, données de signalement conservées, convergence et déduplication après rechargement.');
