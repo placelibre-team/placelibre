@@ -24,3 +24,10 @@ logs/
 # Système
 .DS_Store
 Thumbs.db
+
+# Certificats et clés Apple : jamais dans GitHub
+*.p12
+*.p8
+*.cer
+*.certSigningRequest
+*.mobileprovision
