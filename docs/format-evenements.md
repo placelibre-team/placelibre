@@ -55,7 +55,7 @@ Un événement est un message JSON envoyé sur le canal temps réel (ntfy). Vers
 | `eta` | non | `1794494474132` | Pour `soon` : heure prévue de libération |
 | `by` | non | `"Tom"` | Prénom choisi dans Réglages |
 | `dev` | non | `"k3j9x0q2ab"` | Identifiant aléatoire du téléphone (aucune donnée personnelle), pour reconnaître qu'un même téléphone se corrige |
-| `src` | non | `"bluetooth"` | Origine : `bluetooth`, `manuel`, `signalement`, `confirmation`, `controle` |
+| `src` | non | `"bluetooth"` | Origine : `bluetooth`, `detection` (détection automatique de l'app iPhone, validée ou très sûre), `manuel`, `signalement`, `confirmation`, `controle` |
 | `acc` | non | `12` | Précision GPS au moment du signalement, en mètres |
 | `dep`, `h`, `etat` | pour `ctl` | `"…"`, `10`, `"libre"` | Départ contrôlé, horizon en minutes, résultat (`libre`, `occupee`, `non_observe`) |
 
