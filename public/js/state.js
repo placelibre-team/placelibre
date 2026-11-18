@@ -85,10 +85,18 @@ function readCache(k, maxAge){
 function writeCache(k, v){try{localStorage.setItem(k, JSON.stringify({t:Date.now(), v}));}catch(e){}}
 async function requestWake(){try{ if(navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); }catch(e){}}
 function releaseWake(){try{ if(wake) wake.release(); }catch(e){} wake = null;}
+function nativeApp(){ return globalThis.PlaceLibreNative || null; }
+function positionService(){ return nativeApp() ? nativeApp().geolocation : navigator.geolocation; }
+function copyText(text){
+  if(nativeApp()) return nativeApp().copyText(text);
+  if(!navigator.clipboard) return Promise.reject(new Error('Presse-papiers indisponible'));
+  return navigator.clipboard.writeText(text);
+}
 function getPos(timeout){
   return new Promise((res, rej) => {
-    if(!navigator.geolocation) return rej(new Error('nogps'));
-    navigator.geolocation.getCurrentPosition(
+    const geo = positionService();
+    if(!geo) return rej(new Error('nogps'));
+    geo.getCurrentPosition(
       p => res({lat:p.coords.latitude, lng:p.coords.longitude, acc:p.coords.accuracy}),
       rej, {enableHighAccuracy:true, timeout:timeout||12000, maximumAge:5000});
   });

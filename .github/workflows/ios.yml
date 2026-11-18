@@ -1,0 +1,42 @@
+name: Application iPhone
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    name: Compilation iPhone (simulateur)
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Sélectionner Xcode 26
+        run: sudo xcode-select --switch /Applications/Xcode_26.2.app/Contents/Developer
+      - run: npm ci
+      - run: npm run ios:synchroniser
+      - name: Compiler sans compte Apple ni certificat
+        run: >-
+          xcodebuild -project ios/App/App.xcodeproj -scheme App
+          -configuration Debug -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath "$RUNNER_TEMP/placelibre-build"
+          CODE_SIGNING_ALLOWED=NO build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PlaceLibre-simulateur
+          path: ${{ runner.temp }}/placelibre-build/Build/Products/Debug-iphonesimulator/App.app
+          retention-days: 7
