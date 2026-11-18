@@ -45,9 +45,15 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 #searchForm:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
 #q{flex:1;min-width:0;border:0;background:transparent;color:var(--fg);padding:8px 8px 8px 14px;font:inherit;outline:none}
 #q::placeholder{color:var(--muted)}
-#searchForm button{border:0;background:var(--brand);color:var(--accent-fg);border-radius:999px;padding:0 16px;font-weight:600;font-size:14px}
-.icon-btn{border:0;background:var(--bg);border-radius:50%;width:40px;height:40px;display:grid;place-items:center;flex:none;font-size:18px;color:var(--muted)}
+#searchForm button{border:0;background:var(--brand);color:var(--accent-fg);border-radius:999px;padding:0 16px;font-weight:600;font-size:14px;min-width:44px;min-height:44px;flex:none}
+.icon-btn{border:0;background:var(--bg);border-radius:50%;width:44px;height:44px;display:grid;place-items:center;flex:none;font-size:18px;color:var(--muted)}
 .icon-btn:hover{color:var(--fg)}
+/* Sur téléphone, garder la recherche lisible et les boutons faciles à toucher. */
+@media (max-width:480px){
+  .top{flex-wrap:wrap}
+  .top .brand{flex:1}
+  #searchForm{order:1;flex-basis:100%}
+}
 
 .map-wrap{position:relative;min-height:0}
 #map{position:absolute;inset:0}
