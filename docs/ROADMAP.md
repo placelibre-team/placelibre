@@ -11,7 +11,7 @@
 - [x] Relier Netlify au dépôt pour les aperçus de PR : aperçu de #23 confirmé par Netlify.
 - [x] Contrôler les fichiers publiés et exécuter les tests sur GitHub (`outils/verifier-site.js`, workflow `Tests`). Ces contrôles ne bloquent pas automatiquement les déploiements Netlify.
 - [ ] Vérifier la publication du dernier `main` en production. Au contrôle HTTP du 17/11, le site sert encore `pl-v4-confirmation` dans `sw.js` et `/verification-terrain/verif.js` renvoie 404, alors que ces fichiers ont évolué dans `main`. Examiner le déploiement Netlify et son journal avant de relancer si nécessaire.
-- [x] Protéger `main` : [règle active](https://github.com/placelibre-team/placelibre/settings/rules/27469736), PR avec une approbation, contrôle « Tous les contrôles » réussi sur une branche à jour, discussions résolues, suppression et poussées forcées interdites, aucune dérogation configurée.
+- [x] Protéger `main` : [règle active](https://github.com/placelibre-team/placelibre/settings/rules/27469736), PR obligatoire (approbations facultatives, relecture par accord d’équipe), contrôle « Tous les contrôles » réussi sur une branche à jour, discussions résolues, suppression et poussées forcées interdites, aucune dérogation configurée.
 
 ## V0 — Fiabiliser le pilote
 
