@@ -9,7 +9,13 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>PlaceLibre utilise ta position quand l’app est ouverte pour afficher les places proches et situer tes signalements.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>PlaceLibre utilise ta position quand l’app est ouverte pour afficher les places proches et situer tes signalements.</string>
+	<string>Si tu actives la détection automatique, PlaceLibre utilise ta position, même quand l’app est fermée, pour repérer où tu gares ta voiture. Elle reste sur ton téléphone.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>PlaceLibre utilise le mouvement du téléphone (voiture, marche) pour deviner quand tu te gares. Ces données restent sur ton téléphone.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>CFBundleDisplayName</key>
         <string>PlaceLibre</string>
 	<key>CFBundleExecutable</key>
