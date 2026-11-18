@@ -19,7 +19,7 @@
 <body>
 <div id="app">
   <header class="top">
-    <span class="brand"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d7c86"/><stop offset="1" stop-color="#14a27a"/></linearGradient></defs><rect width="32" height="32" rx="9.5" fill="url(#lg)"/><path d="M16 5.8c-4.2 0-7.4 3.1-7.4 7.1 0 5 5.7 10.9 6.6 11.8a1.2 1.2 0 0 0 1.6 0c.9-.9 6.6-6.8 6.6-11.8 0-4-3.2-7.1-7.4-7.1z" fill="#fff"/><path d="M13.4 9.9h3.2a2.7 2.7 0 0 1 0 5.4h-1.6v3.2h-1.6z" fill="url(#lg)"/></svg><span>Place<b>Libre</b></span></span>
+    <span class="brand" id="brand"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d7c86"/><stop offset="1" stop-color="#14a27a"/></linearGradient></defs><rect width="32" height="32" rx="9.5" fill="url(#lg)"/><path d="M16 5.8c-4.2 0-7.4 3.1-7.4 7.1 0 5 5.7 10.9 6.6 11.8a1.2 1.2 0 0 0 1.6 0c.9-.9 6.6-6.8 6.6-11.8 0-4-3.2-7.1-7.4-7.1z" fill="#fff"/><path d="M13.4 9.9h3.2a2.7 2.7 0 0 1 0 5.4h-1.6v3.2h-1.6z" fill="url(#lg)"/></svg><span>Place<b>Libre</b></span></span>
     <form id="searchForm" autocomplete="off">
       <input id="q" type="search" placeholder="Où vas-tu ?" aria-label="Destination">
       <button type="submit">Aller</button>
@@ -30,7 +30,7 @@
   <div class="map-wrap" role="region" aria-label="Carte">
     <div id="map"></div>
     <div class="tools">
-      <button class="tool" id="tDraw" aria-pressed="false"><span>✎</span>Carto</button>
+      <button class="tool" id="tDraw" aria-pressed="false" hidden><span>✎</span>Carto</button>
       <button class="tool" id="t3d" aria-pressed="true"><span>▦</span>3D</button>
       <button class="tool" id="tSat" aria-pressed="false"><span>◩</span>Photo</button>
       <button class="tool" id="tPark" aria-pressed="false"><span>P</span>Parkings</button>
@@ -80,39 +80,10 @@
     </div>
 
     <div class="card">
-      <h2>Qui es-tu ?</h2>
-      <p>Ton prénom s'affiche chez les autres quand tu libères ou signales une place.</p>
-      <div class="chips" id="meChips"></div>
-    </div>
-
-    <div class="card">
-      <h2>Aide en 3 gestes</h2>
-      <p>Chaque signalement aide tout le monde, et rend les pourcentages plus fiables.</p>
-      <button class="btn" id="btnWelcome">Revoir l'accueil</button>
-    </div>
-
-    <div class="card">
-      <h2>Comment tester dans la rue</h2>
-      <ol>
-        <li>Touche <b>Carto</b> : la vue passe en photo aérienne. Dessine les files de places de ta rue (début → fin) et choisis le type.</li>
-        <li>Chaque file est découpée en places de 5 m, avec une voiture 3D sur chacune.</li>
-        <li>En te promenant, touche une place et indique <b>Libre</b> ou <b>Occupée</b>.</li>
-        <li>Quand tu pars ou te gares, le Bluetooth (ou les boutons en bas) met à jour la place la plus proche.</li>
-      </ol>
-    </div>
-
-    <div class="card" id="canalCard">
-      <h2>Canal du groupe</h2>
-      <p id="canalEtat" style="margin-bottom:10px"></p>
-      <div class="row2"><button class="btn" id="btnInvite" hidden>Copier le lien d’invitation</button><button class="btn" id="btnNewCanal">Créer un canal privé</button></div>
-      <p id="canalAide" style="margin-top:8px"></p>
-      <div id="nativeGroup" hidden>
-        <p>Pour rejoindre un groupe dans l’app iPhone, colle ici le lien reçu.</p>
-        <label for="nativeInvitation">Lien d’invitation PlaceLibre</label>
-        <input id="nativeInvitation" type="url" placeholder="https://…/#cle=…" autocomplete="off" autocapitalize="none" spellcheck="false">
-        <div class="row2"><button class="btn" id="btnJoinNative">Rejoindre le groupe</button><button class="btn" id="btnNativeTest">Passer au canal de test</button></div>
-        <p>La version iPhone ne récupère pas automatiquement l’historique de Safari. Les essais se font dans le canal de test.</p>
-      </div>
+      <h2>Ton prénom (facultatif)</h2>
+      <p>Il s’affiche chez les autres quand tu signales une place. Laisse vide pour rester anonyme.</p>
+      <label class="sr-only" for="meName">Ton prénom</label>
+      <input id="meName" type="text" maxlength="20" autocomplete="given-name" placeholder="Anonyme">
     </div>
 
     <div class="card" id="detectCard" hidden>
@@ -123,53 +94,9 @@
     </div>
 
     <div class="card">
-      <h2>Bluetooth automatique (iPhone, même verrouillé)</h2>
-      <p>Crée 2 automatisations dans l'app <b>Raccourcis</b> → <b>Automatisation</b> → <b>+</b> → <b>Bluetooth</b> → ta voiture → <b>Exécuter immédiatement</b>.</p>
-      <p><b>1. « Est connecté » (tu pars)</b>, ajoute 2 actions :</p>
-      <ol>
-        <li><b>Obtenir la position actuelle</b></li>
-        <li><b>Obtenir le contenu de l'URL</b> : URL ci-dessous, Méthode <b>POST</b>, Corps de la requête <b>JSON</b> avec 4 champs : <b>k</b> = texte <code>depart</code>, <b>lat</b> = Latitude (de la position), <b>lng</b> = Longitude, <b>by</b> = ton prénom.</li>
-      </ol>
-      <div class="url"><code id="busUrl" tabindex="0" aria-label="Adresse du canal pour les Raccourcis"></code><button class="btn" data-copy="busUrl">Copier</button></div>
-      <p><b>2. « Est déconnecté » (tu t'es garé)</b> : la même chose, avec <b>k</b> = <code>arrive</code>.</p>
-      <p>L'appli n'a pas besoin d'être ouverte : tes amis voient la place changer en direct.</p>
-    </div>
-
-    <div class="card">
-      <h2>D’où viennent les données</h2>
-      <p><a class="btn" href="donnees-pilote/">Explorer les données Bricka / Saint-Honorat et alentours</a></p>
-      <ol>
-        <li><b>Ville d’Antibes (inventaire du 17/02/2023)</b> : 10 horodateurs rue Bricka. Adresses et horaires historiques consultables dans le dossier du quartier, à vérifier sur place. Saint-Honorat : aucune ligne horodateur trouvée, tarif inconnu. Les places dessinées dans le prototype restent à vérifier.</li>
-        <li><b>Photos aériennes IGN</b> : emplacement de chaque place.</li>
-        <li><b>Modèle de prévision</b> : heure, jour, saison, jours fériés, Jazz à Juan, heures payantes. Il marche dès le premier jour, sans utilisateurs.</li>
-        <li><b>Utilisateurs</b> : Bluetooth automatique, boutons Je pars / Je me gare, signalements. Chaque départ affine la prévision de la rue.</li>
-      </ol>
-      <p>Pas encore disponibles : occupation en direct des parkings, tickets des applis de paiement (PayByPhone, Flowbird), capteurs. Aucun accès à ces flux n’a été confirmé dans notre recherche du 12/11/2026. Une demande à la Ville ou aux opérateurs reste à faire.</p>
-    </div>
-
-    <div class="card">
-      <h2>Ce que l'IA a appris</h2>
-      <div class="kv" id="modelKv"></div>
-      <p>Le délai entre la connexion Bluetooth et le vrai départ s'ajuste à chaque trajet. La durée de vie d'une place libre s'ajuste avec tes signalements.</p>
-    </div>
-
-    <div class="card">
-      <h2>Fiabilité des pourcentages à l’arrivée</h2>
-      <p>Chaque prévision « à ton arrivée » est comparée à ta réponse (« place trouvée ? »). Ces mesures servent à corriger le calcul.</p>
-      <div class="kv" id="calKv"></div>
-    </div>
-
-    <div class="card">
-      <h2>Combien de temps une place reste libre</h2>
-      <p>Mesuré après chaque départ grâce aux contrôles à 5, 10 et 30 min et aux arrivées signalées. Tant qu'il y a moins de 5 mesures, c'est une estimation de départ.</p>
-      <table class="tbl" id="survTbl"></table>
-    </div>
-
-    <div class="card">
-      <h2>Journal des observations</h2>
-      <p>Départs, arrivées, signalements et contrôles. Aucune position GPS n'est enregistrée dans le journal.</p>
-      <div class="kv" id="journalKv"></div>
-      <button class="btn" id="btnCsv">Exporter le journal (CSV)</button>
+      <h2>Comment ça marche</h2>
+      <p>Chaque signalement aide tout le monde, et rend les pourcentages plus fiables.</p>
+      <button class="btn" id="btnWelcome">Revoir l'accueil</button>
     </div>
 
     <div class="card">
@@ -186,19 +113,102 @@
     </div>
 
     <div class="card">
+      <h2>D’où viennent les chiffres</h2>
+      <p>PlaceLibre estime les chances de trouver une place avec les règles de stationnement de la Ville d’Antibes, l’heure, le jour et la saison, et les signalements des utilisateurs. Pour l’instant, seules la rue Bricka et la rue Saint-Honorat (Juan-les-Pins) sont suivies.</p>
+      <details>
+        <summary>Voir le détail des sources</summary>
+        <p><a class="btn" href="donnees-pilote/">Explorer les données de la Ville (Bricka, Saint-Honorat)</a></p>
+        <ol>
+          <li><b>Ville d’Antibes (inventaire du 17/02/2023)</b> : 10 horodateurs rue Bricka. Saint-Honorat : aucune ligne horodateur trouvée, tarif inconnu. À vérifier sur place.</li>
+          <li><b>Photos aériennes IGN</b> : emplacement de chaque place.</li>
+          <li><b>Modèle de prévision</b> : heure, jour, saison, jours fériés, Jazz à Juan, heures payantes.</li>
+          <li><b>Utilisateurs</b> : boutons Je pars / Je me gare, signalements. Chaque départ affine la prévision de la rue.</li>
+        </ol>
+        <p>Pas encore disponibles : occupation en direct des parkings, tickets des applis de paiement, capteurs.</p>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Tes données</h2>
+      <p>Ton historique reste sur ton téléphone. Seuls les signalements que tu envoies (place, heure, prénom si tu en as mis un) sont visibles des autres utilisateurs.</p>
+      <button class="btn danger" id="btnReset">Tout effacer sur ce téléphone</button>
+      <p id="resetConfirm" hidden>Appuie encore une fois pour confirmer.</p>
+      <p>Sources : © OpenStreetMap, OpenFreeMap, photos aériennes © IGN (BD ORTHO, licence ouverte).</p>
+    </div>
+
+    <div id="equipe" hidden>
+      <div class="card">
+        <h2>Outils de l’équipe</h2>
+        <p>Mode réservé à l’équipe PlaceLibre : cartographie des places, canal de test, mesures du modèle. Les utilisateurs ne le voient pas.</p>
+        <button class="btn" id="btnEquipeOff">Quitter le mode équipe</button>
+      </div>
+    <div class="card">
+      <h2>Comment tester dans la rue</h2>
+      <ol>
+        <li>Touche <b>Carto</b> : la vue passe en photo aérienne. Dessine les files de places de ta rue (début → fin) et choisis le type.</li>
+        <li>Chaque file est découpée en places de 5 m, avec une voiture 3D sur chacune.</li>
+        <li>En te promenant, touche une place et indique <b>Libre</b> ou <b>Occupée</b>.</li>
+        <li>Quand tu pars ou te gares, le Bluetooth (ou les boutons en bas) met à jour la place la plus proche.</li>
+      </ol>
+    </div>
+    <div class="card" id="canalCard">
+      <h2>Canal du groupe</h2>
+      <p id="canalEtat" style="margin-bottom:10px"></p>
+      <div class="row2"><button class="btn" id="btnInvite" hidden>Copier le lien d’invitation</button><button class="btn" id="btnNewCanal">Créer un canal privé</button></div>
+      <p id="canalAide" style="margin-top:8px"></p>
+      <div id="nativeGroup" hidden>
+        <p>Pour rejoindre un groupe dans l’app iPhone, colle ici le lien reçu.</p>
+        <label for="nativeInvitation">Lien d’invitation PlaceLibre</label>
+        <input id="nativeInvitation" type="url" placeholder="https://…/#cle=…" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <div class="row2"><button class="btn" id="btnJoinNative">Rejoindre le groupe</button><button class="btn" id="btnNativeTest">Passer au canal de test</button></div>
+        <p>La version iPhone ne récupère pas automatiquement l’historique de Safari. Les essais se font dans le canal de test.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Bluetooth automatique (iPhone, même verrouillé)</h2>
+      <p>Crée 2 automatisations dans l'app <b>Raccourcis</b> → <b>Automatisation</b> → <b>+</b> → <b>Bluetooth</b> → ta voiture → <b>Exécuter immédiatement</b>.</p>
+      <p><b>1. « Est connecté » (tu pars)</b>, ajoute 2 actions :</p>
+      <ol>
+        <li><b>Obtenir la position actuelle</b></li>
+        <li><b>Obtenir le contenu de l'URL</b> : URL ci-dessous, Méthode <b>POST</b>, Corps de la requête <b>JSON</b> avec 4 champs : <b>k</b> = texte <code>depart</code>, <b>lat</b> = Latitude (de la position), <b>lng</b> = Longitude, <b>by</b> = ton prénom.</li>
+      </ol>
+      <div class="url"><code id="busUrl" tabindex="0" aria-label="Adresse du canal pour les Raccourcis"></code><button class="btn" data-copy="busUrl">Copier</button></div>
+      <p><b>2. « Est déconnecté » (tu t'es garé)</b> : la même chose, avec <b>k</b> = <code>arrive</code>.</p>
+      <p>L'appli n'a pas besoin d'être ouverte : tes amis voient la place changer en direct.</p>
+    </div>
+    <div class="card">
+      <h2>Ce que l'IA a appris</h2>
+      <div class="kv" id="modelKv"></div>
+      <p>Le délai entre la connexion Bluetooth et le vrai départ s'ajuste à chaque trajet. La durée de vie d'une place libre s'ajuste avec tes signalements.</p>
+    </div>
+    <div class="card">
+      <h2>Fiabilité des pourcentages à l’arrivée</h2>
+      <p>Chaque prévision « à ton arrivée » est comparée à ta réponse (« place trouvée ? »). Ces mesures servent à corriger le calcul.</p>
+      <div class="kv" id="calKv"></div>
+    </div>
+    <div class="card">
+      <h2>Combien de temps une place reste libre</h2>
+      <p>Mesuré après chaque départ grâce aux contrôles à 5, 10 et 30 min et aux arrivées signalées. Tant qu'il y a moins de 5 mesures, c'est une estimation de départ.</p>
+      <table class="tbl" id="survTbl"></table>
+    </div>
+    <div class="card">
+      <h2>Journal des observations</h2>
+      <p>Départs, arrivées, signalements et contrôles. Aucune position GPS n'est enregistrée dans le journal.</p>
+      <div class="kv" id="journalKv"></div>
+      <button class="btn" id="btnCsv">Exporter le journal (CSV)</button>
+    </div>
+    <div class="card">
       <h2>Partager ta cartographie</h2>
       <p>Copie tes files de places pour les envoyer à tes associés, ou colle les leurs ici.</p>
       <div class="row2"><button class="btn" id="btnExport">Copier ma carto</button><button class="btn" id="btnImport">Importer</button></div>
       <textarea id="importBox" aria-label="Cartographie à importer" placeholder="Colle ici une cartographie copiée depuis l'appli"></textarea>
     </div>
 
-    <div class="card">
-      <h2>Données</h2>
-      <p id="dataInfo"></p>
-      <button class="btn" id="btnReloadData">Recharger les rues OpenStreetMap</button>
-      <button class="btn danger" id="btnReset">Tout effacer</button>
-      <p id="resetConfirm" hidden>Appuie encore une fois pour confirmer.</p>
-      <p>Sources : © OpenStreetMap, OpenFreeMap, photos aériennes © IGN (BD ORTHO, licence ouverte).</p>
+      <div class="card">
+        <h2>Données de la carte</h2>
+        <p id="dataInfo"></p>
+        <button class="btn" id="btnReloadData">Recharger les rues OpenStreetMap</button>
+      </div>
     </div>
   </div>
 </div>
