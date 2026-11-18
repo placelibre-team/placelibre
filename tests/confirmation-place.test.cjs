@@ -58,6 +58,9 @@ this.T={get S(){return S;},get slots(){return SLOTS;},get conf(){return CONF;},g
   assert.match(t.originText({name:'A',live:0}),/dans cette rue/);
   t.isolate([]);t.map(false);t.renderList();t.renderStatus();
   assert.doesNotMatch(a.nodes.list.innerHTML,/<b>Carto<\/b>/);assert.doesNotMatch(a.nodes.status.innerHTML,/touche Carto/);
-  t.map(true);t.renderList();assert.match(a.nodes.list.innerHTML,/<b>Carto<\/b>/);
+  // Grand public : jamais de mention de Carto. Mode équipe : l'explication de cartographie revient.
+  t.map(true);t.renderList();assert.doesNotMatch(a.nodes.list.innerHTML,/Carto/);assert.doesNotMatch(a.nodes.status.innerHTML,/Carto/);
+  assert.match(a.nodes.list.innerHTML,/rue Bricka et rue Saint-Honorat/);
+  a.store['plj:equipe']='1';t.renderList();t.renderStatus();assert.match(a.nodes.list.innerHTML,/<b>Carto<\/b>/);
   console.log('OK : choix conservé après rechargement, départ automatique, présélection, suppression, état annoncé, observations et mode liste.');
 })().catch(e=>{console.error(e);process.exit(1);});
