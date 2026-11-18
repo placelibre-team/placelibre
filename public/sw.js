@@ -1,7 +1,7 @@
 /* PlaceLibre · service worker : ouverture rapide et hors-ligne partiel.
    Fichiers du site : réseau d'abord (toujours à jour), cache en secours.
    Bibliothèque de carte et polices : cache d'abord. Le reste (temps réel, tuiles) n'est pas touché. */
-const V = 'pl-v6-accessibilite-20261117';
+const V = 'pl-v7-pont-ios-20261118';
 const SHELL = ['./', 'index.html', 'css/app.css', 'js/config.js', 'js/places.js', 'js/state.js', 'js/geometry.js', 'js/model.js', 'js/journal.js',
   'js/predict.js', 'js/sync.js', 'js/events.js', 'js/map.js', 'js/ui.js', 'js/dialogues.js', 'js/main.js', 'manifest.webmanifest', 'icons/icon-192.png'];
 const STATIC_HOSTS = ['unpkg.com', 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];

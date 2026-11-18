@@ -258,11 +258,11 @@ function renderSettings(){
 $('btnMenu').addEventListener('click', () => { renderSettings(); $('settings').hidden = false; });
 $('btnCloseSet').addEventListener('click', () => { $('settings').hidden = true; $('resetConfirm').hidden = true; });
 document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
-  navigator.clipboard.writeText($(b.dataset.copy).textContent).then(() => toast('Lien copié.'), () => toast('Copie impossible : appuie longtemps sur le lien pour le sélectionner.'));
+  copyText($(b.dataset.copy).textContent).then(() => toast('Lien copié.'), () => toast('Copie impossible : appuie longtemps sur le lien pour le sélectionner.'));
 }));
 $('btnExport').addEventListener('click', () => {
   const txt = JSON.stringify({app:'placelibre', v:2, segments:S.segments});
-  navigator.clipboard.writeText(txt).then(() => toast('Cartographie copiée : colle-la dans un message.'),
+  copyText(txt).then(() => toast('Cartographie copiée : colle-la dans un message.'),
     () => { $('importBox').value = txt; $('importBox').select(); toast('Sélectionne le texte et copie-le à la main.'); });
 });
 $('btnImport').addEventListener('click', () => {
@@ -276,14 +276,19 @@ $('btnImport').addEventListener('click', () => {
   }catch(e){ toast('Texte non reconnu : colle exactement ce qui a été copié depuis l’appli.'); }
 });
 $('btnReloadData').addEventListener('click', () => { toast('Rechargement…'); loadOsmStreets(true); });
-$('btnCsv').addEventListener('click', () => {
+$('btnCsv').addEventListener('click', async () => {
   const csv = journalCSV(), name = 'placelibre-journal-' + new Date().toISOString().slice(0, 10) + (TEST ? '-test' : '') + '.csv';
+  if(nativeApp()){
+    try{ await nativeApp().exportCsv(csv, name); }
+    catch(e){ toast('Export annulé ou indisponible. Tu peux réessayer.'); }
+    return;
+  }
   try{
     const url = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
     const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast('Journal exporté (' + S.journal.length + ' lignes).');
-  }catch(e){ navigator.clipboard.writeText(csv).then(() => toast('Journal copié dans le presse-papiers.'), () => toast('Export impossible sur ce navigateur.')); }
+  }catch(e){ copyText(csv).then(() => toast('Journal copié dans le presse-papiers.'), () => toast('Export impossible sur ce navigateur.')); }
 });
 let resetArmed = false;
 $('btnReset').addEventListener('click', () => {
@@ -315,7 +320,7 @@ $('btnPassFull').addEventListener('click', () => passHere(false));
 /* ---------- Accueil (première ouverture) ---------- */
 const WKEY = 'plj:welcome' + (TEST ? ':test' : '');
 function welcomeSeen(){ try{ return !!localStorage.getItem(WKEY); }catch(e){ return true; } }
-function isIosBrowser(){ return /iphone|ipad/i.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches); }
+function isIosBrowser(){ return !nativeApp() && /iphone|ipad/i.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches); }
 function closeWelcome(){ try{ localStorage.setItem(WKEY, '1'); }catch(e){} $('welcome').hidden = true; renderStatus(); }
 function showWelcome(step){
   const box = $('wcBody'), steps = isIosBrowser() ? 3 : 2; $('welcome').hidden = false;
@@ -353,7 +358,7 @@ function nouvelleCle(){
   const b = new Uint8Array(16); crypto.getRandomValues(b);
   return Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
 }
-function lienInvitation(){ return location.origin + location.pathname + (TEST ? '?canal=test' : '') + '#cle=' + CLE_CANAL; }
+function lienInvitation(){ return (nativeApp() ? nativeApp().publicUrl : location.origin + location.pathname) + (TEST ? '?canal=test' : '') + '#cle=' + CLE_CANAL; }
 function renderCanal(){
   $('canalEtat').innerHTML = CLE_CANAL
     ? '<b>Canal par invitation.</b> Toute personne qui connaît le lien ou le nom du canal peut lire et envoyer des signalements. Ce n’est pas une authentification.'
@@ -367,8 +372,10 @@ function renderCanal(){
 $('btnInvite').addEventListener('click', async () => {
   const url = lienInvitation();
   try{
-    if(navigator.share) await navigator.share({title:'PlaceLibre', text:'Lien du groupe PlaceLibre (ne pas le publier)', url});
-    else { await navigator.clipboard.writeText(url); toast('Lien d’invitation copié : envoie-le en message privé.'); }
+    const options = {title:'PlaceLibre', text:'Lien du groupe PlaceLibre (ne pas le publier)', url};
+    if(nativeApp()) await nativeApp().share(options);
+    else if(navigator.share) await navigator.share(options);
+    else { await copyText(url); toast('Lien d’invitation copié : envoie-le en message privé.'); }
   }catch(e){ if(e && e.name !== 'AbortError') toast('Copie impossible : ' + url); }
 });
 let canalArme = 0;
@@ -387,3 +394,13 @@ $('btnNewCanal').addEventListener('click', () => {
   location.reload();
 });
 renderCanal();
+
+if(nativeApp()){
+  $('nativeGroup').hidden = false;
+  $('btnNativeTest').textContent = TEST ? 'Quitter le canal de test' : 'Passer au canal de test';
+  $('btnNativeTest').addEventListener('click', () => { location.href = TEST ? '/' : '/?canal=test'; });
+  $('btnJoinNative').addEventListener('click', () => {
+    try{ location.href = nativeApp().invitationPath($('nativeInvitation').value); }
+    catch(e){ toast(e.message); }
+  });
+}

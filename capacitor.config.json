@@ -1,5 +1,5 @@
 {
   "appId": "fr.placelibre.app",
   "appName": "PlaceLibre",
-  "webDir": "public"
+  "webDir": ".capacitor-web"
 }

@@ -25,7 +25,27 @@ function mergeBase(s){
   return s;
 }
 let S = load();
-function save(){try{localStorage.setItem(KEY, JSON.stringify(S));}catch(e){}}
+/* Si le stockage est plein, seul l'historique ancien est allégé. Les événements par place servent
+   au calcul de l'état et à la déduplication, et les places locales peuvent encore être actives.
+   Ces données, la file d'envoi et le journal des observations restent conservés. */
+const alertesStockage = {};
+function avertirStockage(msg){
+  if(Date.now() - (alertesStockage[msg] || 0) < 60e3) return;   // chaque message au plus une fois par minute
+  alertesStockage[msg] = Date.now();
+  try{ if(typeof toast === 'function' && document.getElementById('toast')) toast(msg, 9000); }catch(e){}
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }catch(e){}
+  try{
+    S.history = S.history.slice(-300);
+    localStorage.setItem(KEY, JSON.stringify(S));
+    avertirStockage('Stockage du téléphone presque plein : l’historique le plus ancien a été allégé.');
+    return true;
+  }catch(e){
+    avertirStockage('Stockage du téléphone plein : tes derniers signalements ne sont pas enregistrés. Exporte ton journal (⚙ Réglages) et libère de la place.');
+    return false;
+  }
+}
 (function prune(){
   const now = Date.now();
   S.loose = S.loose.filter(s => now - s.t < 2*3600e3);
@@ -65,10 +85,18 @@ function readCache(k, maxAge){
 function writeCache(k, v){try{localStorage.setItem(k, JSON.stringify({t:Date.now(), v}));}catch(e){}}
 async function requestWake(){try{ if(navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); }catch(e){}}
 function releaseWake(){try{ if(wake) wake.release(); }catch(e){} wake = null;}
+function nativeApp(){ return globalThis.PlaceLibreNative || null; }
+function positionService(){ return nativeApp() ? nativeApp().geolocation : navigator.geolocation; }
+function copyText(text){
+  if(nativeApp()) return nativeApp().copyText(text);
+  if(!navigator.clipboard) return Promise.reject(new Error('Presse-papiers indisponible'));
+  return navigator.clipboard.writeText(text);
+}
 function getPos(timeout){
   return new Promise((res, rej) => {
-    if(!navigator.geolocation) return rej(new Error('nogps'));
-    navigator.geolocation.getCurrentPosition(
+    const geo = positionService();
+    if(!geo) return rej(new Error('nogps'));
+    geo.getCurrentPosition(
       p => res({lat:p.coords.latitude, lng:p.coords.longitude, acc:p.coords.accuracy}),
       rej, {enableHighAccuracy:true, timeout:timeout||12000, maximumAge:5000});
   });

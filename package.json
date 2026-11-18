@@ -4,16 +4,23 @@
   "private": true,
   "description": "PlaceLibre : appli web (dossier public/) et son enveloppe iPhone avec Capacitor.",
   "scripts": {
-    "ios:synchroniser": "cap sync ios",
+    "ios:preparer": "node outils/preparer-ios.mjs",
+    "ios:synchroniser": "npm run ios:preparer && cap sync ios",
     "ios:ouvrir": "cap open ios",
     "test:capacitor": "node tests/capacitor-config.test.cjs"
   },
   "dependencies": {
-    "@capacitor/core": "^8.0.0",
-    "@capacitor/ios": "^8.0.0"
+    "@capacitor/app": "8.1.2",
+    "@capacitor/clipboard": "8.0.1",
+    "@capacitor/core": "8.6.2",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/geolocation": "8.2.5",
+    "@capacitor/ios": "8.6.2",
+    "@capacitor/share": "8.0.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.0.0"
+    "@capacitor/cli": "8.6.2",
+    "esbuild": "0.28.2"
   },
   "engines": {
     "node": ">=22"

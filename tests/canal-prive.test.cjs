@@ -17,7 +17,7 @@ function charger({search = '', hash = '', store = {}, stockageBloque = false, st
       getItem:k => { if(stockageBloque) throw new Error('bloqué'); return store[k] ?? null; },
       setItem:(k, v) => { if(stockageBloque) throw new Error('bloqué'); if(!stockageMuet) store[k] = v; }},
     crypto:cryptoDisponible ? {getRandomValues:b => { tirages++; b.forEach((_, i) => { b[i] = i; }); return b; }} : undefined,
-    $:element, toast:m => messages.push(m), navigator:{}});
+    $:element, toast:m => messages.push(m), navigator:{}, nativeApp:() => null});
   vm.runInContext(SRC + (avecEtat ? '\n' + STATE : '') +
     '\nthis.R = {BUS, BUS_PUBLIC, CLE_CANAL, CLE_STORAGE, CLE_PERSISTEE, TEST, KEY};' +
     (avecEtat ? '\nthis.R.etat = S;' : ''), ctx);
