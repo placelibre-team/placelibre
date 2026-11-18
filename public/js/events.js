@@ -29,7 +29,7 @@ async function startDepart(src, paramPos, forcedId){
   pendingDepart = Object.assign({spot, t:now}, ref);
   requestWake(); startWatch();
   toast(ref.slotId ? 'Départ détecté : ta place passe en libre dans ~' + Math.round(S.model.delay) + ' s.'
-                   : 'Départ détecté, mais aucune place cartographiée ici : un point est ajouté.');
+                   : 'Départ détecté, mais cette rue n’est pas encore suivie : un point est ajouté.');
   fly(spot, 18);
   render();
   const myT = now;
@@ -58,7 +58,7 @@ async function doArrive(src, paramPos, forcedId){
   S.parked = {lat:slot ? slot.lat : cur.lat, lng:slot ? slot.lng : cur.lng, t:now, slotId:slot ? slot.id : null};
   S.history.push({type:'arrive', lat:cur.lat, lng:cur.lng, t:now});
   save(); render();
-  toast('Voiture garée' + (slot ? ' sur une place cartographiée.' : (mapReady ? '. Aucune place cartographiée ici : dessine-la avec Carto.' : '. Aucune place cartographiée ici ; la cartographie nécessite le mode carte.')));
+  toast('Voiture garée' + (slot ? ' sur une place suivie.' : (mapReady && typeof teamMode === 'function' && teamMode() ? '. Aucune place suivie ici : dessine-la avec Carto.' : '. Cette rue n’est pas encore suivie par PlaceLibre.')));
 }
 function report(slotId, isFree){
   const now = Date.now(), st = S.slotState[slotId] || (S.slotState[slotId] = {});
