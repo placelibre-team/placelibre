@@ -39,6 +39,8 @@ La carte, la recherche et le service de signalements utilisent des services exte
 Pour tout lancer d'un coup (site publié, registre des places, tous les tests, simulateur s'il est présent) :
 
 ```bash
+npm ci                       # Node.js 22 ou plus
+npm run ios:preparer          # prépare l'interface embarquée à vérifier
 bash outils/tout-tester.sh
 ```
 
@@ -56,6 +58,23 @@ node outils/verifier-places.js         # registre des places
 ```
 
 Les tests de signalements simulent des téléphones sans réseau : rien n'est envoyé, ni sur le canal réel ni sur le canal de test.
+
+## Application iPhone
+
+Le projet Xcode est dans `ios/App/App.xcodeproj`. Il réutilise le site et ajoute les
+accès natifs à la localisation, au partage et à l'export CSV. Suivre le
+[guide Mac, iPhone et TestFlight](docs/application-iphone.md) pour installer la bêta.
+
+```bash
+npm ci
+npm run ios:synchroniser
+npm run ios:ouvrir            # sur un Mac avec Xcode 26 ou plus
+```
+
+GitHub compile aussi une version pour simulateur dans le workflow **Application iPhone**.
+Cet artefact non signé n'est pas une installation TestFlight. La signature avec votre
+équipe Apple, l'essai sur un vrai iPhone et l'envoi à App Store Connect restent à faire
+sur Mac. Le Bluetooth natif et le suivi en arrière-plan ne sont pas inclus.
 
 ## Attention pendant les essais
 

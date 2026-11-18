@@ -71,8 +71,9 @@ function report(slotId, isFree){
 
 let watchId = null, meMarker = null;
 function startWatch(){
-  if(watchId !== null || !navigator.geolocation) return;
-  watchId = navigator.geolocation.watchPosition(p => {
+  const geo = positionService();
+  if(watchId !== null || !geo) return;
+  watchId = geo.watchPosition(p => {
     lastPos = {lat:p.coords.latitude, lng:p.coords.longitude, acc:p.coords.accuracy, speed:p.coords.speed};
     if(pendingDepart){
       const d = dist(lastPos, pendingDepart.spot);

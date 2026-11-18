@@ -8,9 +8,10 @@ Le dépôt est la base de code commune. Les collaborateurs doivent être invité
 4. Modifier et tester localement. Éviter de modifier simultanément les mêmes zones du fichier `public/index.html`.
 5. Faire des commits courts, avec un message descriptif sur une ligne.
 6. Ouvrir une pull request vers `main`, avec les changements et les vérifications effectuées.
-7. Faire relire et tester par un autre membre avant de fusionner.
+7. Un autre membre de l’équipe relit les fichiers dans **Files changed** et teste ce qui a changé. Il peut aussi pousser une correction sur la branche de la PR.
+8. Une fois satisfait de la version finale, ce membre clique manuellement sur **Merge pull request** lorsque le contrôle **Tous les contrôles** est vert et que les discussions sont résolues. L’auteur de la PR lui laisse la fusion.
 
-Ne pas développer directement sur `main`. Depuis le 17 novembre 2026, la [protection de `main`](https://github.com/placelibre-team/placelibre/settings/rules/27469736) impose une PR, une approbation, le contrôle « Tous les contrôles » réussi sur une branche à jour avec `main`, et la résolution des discussions. Une modification après approbation demande une nouvelle relecture. La suppression et les poussées forcées sont bloquées, sans dérogation configurée.
+La [protection de `main`](https://github.com/placelibre-team/placelibre/rules/27469736) exige une PR, une branche à jour avec `main`, la réussite de **Tous les contrôles** et la résolution des discussions. Les approbations GitHub sont facultatives. La relecture et le choix de la personne qui clique sur **Merge** relèvent de notre accord d’équipe. La fusion automatique est désactivée.
 
 ## Tester
 

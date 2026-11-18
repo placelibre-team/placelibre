@@ -70,7 +70,16 @@ ou OpenStreetMap ne masque pas une place partagée. Sans `ts`, l'heure est celle
 - `k` inconnu, `slot` absent ou `ts` non numérique ;
 - `ts` plus de 10 minutes dans le futur (horloge du téléphone déréglée) ;
 - `v` présent mais non entier, inférieur à 1 ou supérieur à la version connue ;
-- place absente du registre ou retirée.
+- place absente du registre ou retirée ;
+- `id` absent, de plus de 64 caractères ou avec d'autres caractères que lettres, chiffres, `_ . : -` ;
+- `soon` dont `eta` n'est pas un nombre ou tombe plus de 15 min après `ts` (un `eta` antérieur à `ts` est ramené à `ts`) ;
+- `ctl` dont `etat` n'est pas `libre`, `occupee` ou `non_observe`, dont `h` n'est pas 5, 10 ou 30, ou sans `dep` valide.
+
+Les autres champs sont **nettoyés** plutôt que refusés : `by` coupé à 30 caractères sans caractères de contrôle,
+`dev` gardé seulement s'il fait au plus 32 lettres, chiffres, `_` ou `-`, `src` inconnu remplacé par `''`,
+`acc` gardé seulement entre 0 et 5000 m. Tout autre champ est ignoré (par exemple `lat` / `lng`, qui ne sont
+pas conservés). Raison : le canal est ouvert à quiconque le connaît ; sans ces limites, un seul message pouvait
+ajouter plus d'un mégaoctet au stockage de chaque téléphone. Les textes reçus sont toujours affichés échappés.
 
 ## Même état sur tous les téléphones
 

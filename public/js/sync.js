@@ -70,6 +70,35 @@ function applyEv(ev){
   return true;
 }
 
+/* Nettoyage d'un événement reçu : le canal est ouvert à quiconque le connaît (voir docs/canal-prive.md).
+   On ne garde que les champs connus, de bon type, de longueur bornée et de valeur plausible : un message
+   abîmé ou malveillant ne doit ni gonfler le stockage du téléphone, ni fausser l'état, ni casser l'affichage. */
+const EV_SRC = new Set(['', 'bluetooth', 'manuel', 'signalement', 'confirmation', 'controle', 'test']);
+const EV_ETATS = new Set(['libre', 'occupee', 'non_observe']);
+const EV_ID = /^[A-Za-z0-9_.:-]{1,64}$/, EV_DEV = /^[A-Za-z0-9_-]{1,32}$/;
+const EV_ETA_MAX = 15*60e3;     // un départ annoncé se libère au plus 15 min après l'annonce
+const texteCourt = (v, max) => typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, max) : '';
+function nettoyerEv(ev){
+  if(!validEv(ev)) return null;
+  const id = typeof ev.id === 'string' || typeof ev.id === 'number' ? String(ev.id) : '';
+  if(!EV_ID.test(id)) return null;
+  const acc = typeof ev.acc === 'number' || typeof ev.acc === 'string' ? Number(ev.acc) : NaN;
+  const out = {v:ev.v == null ? undefined : ev.v, id, slot:ev.slot, k:ev.k, ts:ev.ts, eta:null,
+    by:texteCourt(ev.by, 30), dev:typeof ev.dev === 'string' && EV_DEV.test(ev.dev) ? ev.dev : '',
+    src:EV_SRC.has(ev.src) ? ev.src : '', acc:Number.isFinite(acc) && acc >= 0 && acc <= 5000 ? Math.round(acc) : null};
+  if(ev.k === 'soon'){
+    const eta = ev.eta == null ? ev.ts + S.model.delay*1000 : Number(ev.eta);
+    if(!Number.isFinite(eta) || eta > ev.ts + EV_ETA_MAX) return null;
+    out.eta = Math.max(eta, ev.ts);
+  }
+  if(ev.k === 'ctl'){
+    const h = Number(ev.h), dep = typeof ev.dep === 'string' ? ev.dep : '';
+    if(!EV_ETATS.has(ev.etat) || !CHECK_H.includes(h) || !EV_ID.test(dep)) return null;
+    Object.assign(out, {etat:ev.etat, h, dep});
+  }
+  return out;
+}
+
 // Message ntfy → événement. Le Raccourci iPhone (Bluetooth) envoie {k:'depart'|'arrive', lat, lng, by}.
 const num = v => parseFloat(String(v == null ? '' : v).replace(',', '.'));
 function fromMsg(m){
@@ -87,9 +116,9 @@ function fromMsg(m){
     if(!sl) return null;
     const base = {v:ev.v, id:ev.id, slot:sl.id, ts:ev.ts, by:ev.by || '', dev:ev.dev, src:'bluetooth', acc:num(ev.acc)};
     const conv = ev.k === 'depart' ? Object.assign(base, {k:'soon', eta:ev.ts + S.model.delay*1000}) : Object.assign(base, {k:'occ'});
-    return validEv(conv) ? conv : null;   // même contrôle (place du registre, date) que les autres événements
+    return nettoyerEv(conv);   // même contrôle (place du registre, date, champs) que les autres événements
   }
-  return validEv(ev) ? ev : null;
+  return nettoyerEv(ev);
 }
 /* ---------- Envois : file d'attente en cas de coupure réseau ----------
    Chaque signalement partagé entre dans S.outbox (conservé dans le téléphone) avec son heure d'origine.
