@@ -73,7 +73,7 @@ function applyEv(ev){
 /* Nettoyage d'un événement reçu : le canal est ouvert à quiconque le connaît (voir docs/canal-prive.md).
    On ne garde que les champs connus, de bon type, de longueur bornée et de valeur plausible : un message
    abîmé ou malveillant ne doit ni gonfler le stockage du téléphone, ni fausser l'état, ni casser l'affichage. */
-const EV_SRC = new Set(['', 'bluetooth', 'manuel', 'signalement', 'confirmation', 'controle', 'test']);
+const EV_SRC = new Set(['', 'bluetooth', 'detection', 'manuel', 'signalement', 'confirmation', 'controle', 'test']);
 const EV_ETATS = new Set(['libre', 'occupee', 'non_observe']);
 const EV_ID = /^[A-Za-z0-9_.:-]{1,64}$/, EV_DEV = /^[A-Za-z0-9_-]{1,32}$/;
 const EV_ETA_MAX = 15*60e3;     // un départ annoncé se libère au plus 15 min après l'annonce

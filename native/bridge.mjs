@@ -1,10 +1,10 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Clipboard } from '@capacitor/clipboard';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Geolocation } from '@capacitor/geolocation';
 import { Share } from '@capacitor/share';
-import { PUBLIC_URL, invitationPath, foregroundGeolocation, fileExporter } from './services.mjs';
+import { PUBLIC_URL, invitationPath, foregroundGeolocation, fileExporter, parkingSignals } from './services.mjs';
 
 if (Capacitor.isNativePlatform()) {
   const geolocation = foregroundGeolocation(Geolocation);
@@ -23,6 +23,7 @@ if (Capacitor.isNativePlatform()) {
     copyText: text => Clipboard.write({ string: text }),
     share: options => Share.share(options),
     exportCsv: fileExporter(Filesystem, Share, Directory.Cache, Encoding.UTF8),
-    invitationPath
+    invitationPath,
+    parkingSignals: parkingSignals(registerPlugin('ParkingSignals'))
   };
 }

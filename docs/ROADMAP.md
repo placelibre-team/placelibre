@@ -36,6 +36,7 @@ L'issue #17 reste ouverte pour les validations réelles :
 - [ ] Effectuer l'essai à deux vrais téléphones sur la même version et `?canal=test`, puis analyser les journaux selon `docs/essai-deux-telephones.md`. Garder les exports hors du dépôt et consigner uniquement un bilan anonymisé.
 
 Les tests automatiques ne permettent pas de cocher ces deux points. Vérifier la version publiée avant le déplacement ; un aperçu Netlify de la version à tester peut servir si la production n'est pas encore à jour.
+- [ ] Détection automatique du stationnement dans l'app iPhone (mouvement + Bluetooth/CarPlay + position) : moteur, plugin natif et écran fournis, voir `docs/detection-stationnement.md`. À valider sur de vrais iPhone avant toute conclusion sur la fiabilité.
 
 ## V1 — Structurer le code et les données
 

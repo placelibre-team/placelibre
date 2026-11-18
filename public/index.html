@@ -115,6 +115,13 @@
       </div>
     </div>
 
+    <div class="card" id="detectCard" hidden>
+      <h2>Détection automatique du stationnement (bêta)</h2>
+      <p>L’app croise ta position, le mouvement du téléphone et le Bluetooth ou CarPlay de ta voiture pour deviner quand tu te gares ou repars. Ces mesures restent sur ton téléphone (3 h au plus) ; seule la place détectée est partagée, et seulement si tu la valides.</p>
+      <div class="row2"><button class="btn" id="detOn" aria-pressed="false">Activer la détection</button><button class="btn" id="detAuto" aria-pressed="false" hidden>Partage automatique : désactivé</button></div>
+      <p id="detEtat" style="margin-top:8px"></p>
+    </div>
+
     <div class="card">
       <h2>Bluetooth automatique (iPhone, même verrouillé)</h2>
       <p>Crée 2 automatisations dans l'app <b>Raccourcis</b> → <b>Automatisation</b> → <b>+</b> → <b>Bluetooth</b> → ta voiture → <b>Exécuter immédiatement</b>.</p>
@@ -208,6 +215,7 @@
 <script src="js/map.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/dialogues.js"></script>
+<script src="js/detection.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

@@ -69,7 +69,7 @@ function liveText(b){
     const delay = seconds < 60 ? seconds + ' s' : Math.ceil(seconds/60) + ' min';
     return 'Départ annoncé par ' + (b.by || 'quelqu’un') + ' · libération prévue ~' + delay + ' après ton arrivée (non confirmée)';
   }
-  const who = b.by || 'quelqu’un', how = b.src === 'bluetooth' ? ' (Bluetooth)' : '';
+  const who = b.by || 'quelqu’un', how = b.src === 'bluetooth' ? ' (Bluetooth)' : b.src === 'detection' ? ' (détection auto)' : '';
   const what = b.src === 'signalement' || b.src === 'controle' ? 'Vue libre' : 'Départ signalé';
   return what + ' par ' + who + ' il y a ' + fmtAge(b.age*60) + how + (b.age > 20 ? ' (ancien, moins fiable)' : '') + ' · ' +
     Math.round(b.p*100) + ' % encore libre à ton arrivée' +

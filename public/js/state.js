@@ -21,6 +21,9 @@ function mergeBase(s){
   s.journal = Array.isArray(s.journal) ? s.journal : [];
   s.slotLog = s.slotLog && typeof s.slotLog === 'object' ? s.slotLog : {};
   s.outbox = Array.isArray(s.outbox) ? s.outbox : [];
+  s.det = Object.assign({on:false, auto:false, seq:0, cars:{}, personal:{}}, s.det && typeof s.det === 'object' ? s.det : {});
+  if(typeof s.det.cars !== 'object' || !s.det.cars) s.det.cars = {};
+  if(typeof s.det.personal !== 'object' || !s.det.personal) s.det.personal = {};
   if(typeof s.dev !== 'string' || !s.dev) s.dev = Math.random().toString(36).slice(2, 12);   // identifiant aléatoire de ce téléphone
   return s;
 }
