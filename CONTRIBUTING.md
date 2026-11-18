@@ -9,9 +9,9 @@ Le dépôt est la base de code commune. Les collaborateurs doivent être invité
 5. Faire des commits courts, avec un message descriptif sur une ligne.
 6. Ouvrir une pull request vers `main`, avec les changements et les vérifications effectuées.
 7. Un autre membre de l’équipe relit les fichiers dans **Files changed** et teste ce qui a changé. Il peut aussi pousser une correction sur la branche de la PR.
-8. Une fois satisfait de la version finale, ce membre clique sur **Review changes → Approve → Submit review**. Quand le contrôle **Tous les contrôles** est vert et que les discussions sont résolues, c’est lui qui clique sur **Merge pull request**. L’auteur de la PR lui laisse la fusion.
+8. Une fois satisfait de la version finale, ce membre clique manuellement sur **Merge pull request** lorsque le contrôle **Tous les contrôles** est vert et que les discussions sont résolues. L’auteur de la PR lui laisse la fusion.
 
-La [protection de `main`](https://github.com/placelibre-team/placelibre/rules/27469736) exige une approbation par un autre membre ayant les droits d’écriture. Si une nouvelle modification invalide cette approbation, il faut relire la version mise à jour et l’approuver à nouveau. Le choix de la personne qui clique sur **Merge** relève de notre accord d’équipe.
+La [protection de `main`](https://github.com/placelibre-team/placelibre/rules/27469736) exige une PR, une branche à jour avec `main`, la réussite de **Tous les contrôles** et la résolution des discussions. Les approbations GitHub sont facultatives. La relecture et le choix de la personne qui clique sur **Merge** relèvent de notre accord d’équipe. La fusion automatique est désactivée.
 
 ## Tester
 

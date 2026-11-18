@@ -10,4 +10,4 @@ Décrire le problème et le comportement obtenu.
 
 Préciser les limites ou les tests qui restent à faire.
 
-La personne qui a relu et approuvé la version finale clique sur **Merge** quand les contrôles passent et que les discussions sont résolues.
+La personne qui a relu la version finale clique manuellement sur **Merge** quand les tests obligatoires passent et que les discussions sont résolues. L’approbation GitHub est facultative.
