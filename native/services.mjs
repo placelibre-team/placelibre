@@ -88,3 +88,31 @@ export function fileExporter(filesystem, share, cacheDirectory, utf8) {
     }
   };
 }
+
+// Signaux du téléphone pour la détection du stationnement : voir ParkingSignalsPlugin.swift.
+// Le plugin natif enregistre les signaux (même si la page est suspendue) ; la page les relit avec drain().
+export function parkingSignals(plugin) {
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+  return {
+    start: () => plugin.start(),
+    stop: () => plugin.stop(),
+    status: () => plugin.status(),
+    drain: async after => {
+      const result = await plugin.drain({ after: Number.isFinite(after) ? after : 0 });
+      return { signals: Array.isArray(result && result.signals) ? result.signals : [] };
+    },
+    onSignal(callback) {
+      plugin.addListener('signal', callback);
+    },
+    // iOS montre les fenêtres d'autorisation l'une après l'autre : on attend la réponse (au plus 60 s).
+    async requestAccess() {
+      await plugin.requestAccess();
+      for (let i = 0; i < 60; i++) {
+        const status = await plugin.status();
+        if (status.location !== 'unknown' && status.motion !== 'unknown') return status;
+        await wait(1000);
+      }
+      return plugin.status();
+    }
+  };
+}
