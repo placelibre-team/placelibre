@@ -19,7 +19,27 @@
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		AB00112233445566778899A2 /* ParkingSignalsPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB00112233445566778899A1 /* ParkingSignalsPlugin.swift */; };
 		AB00112233445566778899A4 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB00112233445566778899A3 /* MainViewController.swift */; };
+		AC1911260000000000000004 /* ParkingStartupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1911260000000000000003 /* ParkingStartupTests.swift */; };
+		AC191126000000000000000F /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = AC1911260000000000000010 /* CapApp-SPM */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AC191126000000000000000A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 504EC3031FED79650016851F;
+			remoteInfo = App;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		AC1911260000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 504EC3031FED79650016851F /* App */;
+			targetProxy = AC191126000000000000000A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXFileReference section */
 		AB0011223344556677889902 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -36,6 +56,8 @@
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		AB00112233445566778899A1 /* ParkingSignalsPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkingSignalsPlugin.swift; sourceTree = "<group>"; };
 		AB00112233445566778899A3 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		AC1911260000000000000002 /* AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC1911260000000000000003 /* ParkingStartupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkingStartupTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +69,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AC1911260000000000000007 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (AC191126000000000000000F /* CapApp-SPM in Frameworks */,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -55,6 +83,7 @@
 			children = (
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
+				AC1911260000000000000005 /* AppTests */,
 				504EC3051FED79650016851F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				AC1911260000000000000002 /* AppTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -84,6 +114,12 @@
 				50B271D01FEDC1A000F3C39B /* public */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		AC1911260000000000000005 /* AppTests */ = {
+			isa = PBXGroup;
+			children = (AC1911260000000000000003 /* ParkingStartupTests.swift */,);
+			path = AppTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -109,6 +145,22 @@
 			productReference = 504EC3041FED79650016851F /* App.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AC1911260000000000000001 /* AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AC191126000000000000000B /* Build configuration list for PBXNativeTarget "AppTests" */;
+			buildPhases = (
+				AC1911260000000000000006 /* Sources */,
+				AC1911260000000000000007 /* Frameworks */,
+				AC1911260000000000000008 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = (AC1911260000000000000009 /* PBXTargetDependency */,);
+			name = AppTests;
+			packageProductDependencies = (AC1911260000000000000010 /* CapApp-SPM */,);
+			productName = AppTests;
+			productReference = AC1911260000000000000002 /* AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -118,6 +170,10 @@
 				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 0920;
 				TargetAttributes = {
+					AC1911260000000000000001 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 504EC3031FED79650016851F;
+					};
 					504EC3031FED79650016851F = {
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1100;
@@ -142,6 +198,7 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				AC1911260000000000000001 /* AppTests */,
 			);
 		};
 /* End PBXProject section */
@@ -161,6 +218,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AC1911260000000000000008 = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -173,6 +236,12 @@
 				AB00112233445566778899A4 /* MainViewController.swift in Sources */,
 				AB00112233445566778899A2 /* ParkingSignalsPlugin.swift in Sources */,
 			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AC1911260000000000000006 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (AC1911260000000000000004 /* ParkingStartupTests.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -350,6 +419,38 @@
 			};
 			name = Release;
 		};
+		AC191126000000000000000C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+				PRODUCT_BUNDLE_IDENTIFIER = fr.placelibre.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/App";
+			};
+			name = Debug;
+		};
+		AC191126000000000000000D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+				PRODUCT_BUNDLE_IDENTIFIER = fr.placelibre.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/App";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -371,6 +472,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		AC191126000000000000000B /* Build configuration list for PBXNativeTarget "AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AC191126000000000000000C /* Debug */,
+				AC191126000000000000000D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -382,6 +492,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		4D22ABE82AF431CB00220026 /* CapApp-SPM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D4C12C0A2AAA248700AAC8A2 /* XCLocalSwiftPackageReference "CapApp-SPM" */;
+			productName = "CapApp-SPM";
+		};
+		AC1911260000000000000010 /* CapApp-SPM */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D4C12C0A2AAA248700AAC8A2 /* XCLocalSwiftPackageReference "CapApp-SPM" */;
 			productName = "CapApp-SPM";

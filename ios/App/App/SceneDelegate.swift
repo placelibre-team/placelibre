@@ -8,7 +8,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        // La scène crée sa propre fenêtre : elle doit aussi enregistrer nos plugins locaux.
+        window?.rootViewController = MainViewController()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)

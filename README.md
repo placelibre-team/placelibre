@@ -71,10 +71,14 @@ npm run ios:synchroniser
 npm run ios:ouvrir            # sur un Mac avec Xcode 26 ou plus
 ```
 
-GitHub compile aussi une version pour simulateur dans le workflow **Application iPhone**.
+GitHub compile et lance aussi l'app dans un simulateur dans le workflow **Application iPhone**.
+Deux tests vérifient le contrôleur réellement ouvert et la réponse du module de stationnement
+à un appel JavaScript depuis la page embarquée. Sur Mac : sélectionner un simulateur dans
+Xcode, le schéma **App**, puis **Product → Test** (⌘U).
 Cet artefact non signé n'est pas une installation TestFlight. La signature avec votre
 équipe Apple, l'essai sur un vrai iPhone et l'envoi à App Store Connect restent à faire
-sur Mac. Le Bluetooth natif et le suivi en arrière-plan ne sont pas inclus.
+sur Mac. Le module expérimental de détection est inclus ; le Bluetooth/CarPlay et le
+comportement en arrière-plan restent à vérifier sur de vrais appareils.
 
 ## Attention pendant les essais
 
