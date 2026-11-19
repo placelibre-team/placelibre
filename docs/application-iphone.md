@@ -7,11 +7,11 @@ exécuter `npx cap add ios` : le projet existe déjà.
 ## Ce qui est préparé
 
 - Code de l'interface embarqué, sans chargement de la page Netlify au démarrage.
-- Localisation native lorsque l'application est ouverte ; suivi suspendu en arrière-plan.
+- Localisation native de la carte au premier plan ; module expérimental distinct pour la détection du stationnement.
 - Presse-papiers et feuille de partage iOS ; export CSV par un fichier temporaire.
 - Invitations de groupe en HTTPS, import du lien depuis les réglages et bouton de canal de test.
 - Descriptions de permission de localisation en français et manifeste requis par le plugin d'export.
-- Dépendances verrouillées, tests sans réseau et compilation pour simulateur sur GitHub Actions.
+- Dépendances verrouillées, tests JavaScript sans réseau et tests de démarrage dans un simulateur sur GitHub Actions.
 
 La signature Apple, l'installation sur un vrai iPhone et l'envoi TestFlight restent des étapes
 à effectuer avec votre compte sur Mac. Un contrôle vert de compilation ne valide pas
@@ -47,18 +47,18 @@ ne confirme pas le statut de l'abonnement du titulaire.
 
 ## 1. Récupérer et ouvrir le projet sur le Mac
 
-Pendant la revue de la PR nº 27 :
+Depuis la branche commune :
 
 ```bash
-git clone --branch capacitor-ios https://github.com/placelibre-team/placelibre.git
+git clone --branch main https://github.com/placelibre-team/placelibre.git
 cd placelibre
 npm ci
 npm run ios:synchroniser
 npm run ios:ouvrir
 ```
 
-Après fusion, utiliser `main` à la place de `capacitor-ios`. Si le dépôt est déjà sur le
-Mac, sauvegarder ses modifications, puis récupérer la branche avec Git avant ces commandes.
+Si le dépôt est déjà sur le Mac, sauvegarder ses modifications, puis récupérer `main`
+avec Git avant les commandes npm.
 
 `ios:synchroniser` copie `public/` dans `.capacitor-web/`, ajoute le pont natif compilé,
 puis synchronise Xcode et ses dépendances Swift Package Manager. Ces copies sont ignorées
@@ -91,10 +91,12 @@ Adapter le chemin si Xcode a un autre nom. Les paquets Swift sont téléchargés
    quand l'application est utilisée. Pour le groupe, coller le même lien d'invitation de test
    sur les téléphones : le canal est indiqué par le bandeau de test.
 
-Les descriptions de permission sont déjà présentes dans `Info.plist`. Les deux clés demandées
-par le plugin Geolocation ne signifient pas qu'on demande un suivi permanent : la version
-actuelle n'active aucun mode de localisation en arrière-plan.
-Source : [plugin Geolocation](https://capacitorjs.com/docs/apis/geolocation).
+Les descriptions de permission sont présentes dans `Info.plist`. Le suivi de la carte au
+premier plan et le module optionnel de détection sont distincts. Ce dernier configure la
+localisation en arrière-plan et les mouvements lorsqu'il est activé ; les autorisations et
+le comportement réel restent à tester sur iPhone.
+Sources dans le dépôt : [adaptateurs](../native/services.mjs),
+[module de détection](../ios/App/App/ParkingSignalsPlugin.swift).
 
 ## 3. Distribuer la bêta à l'équipe avec TestFlight
 
@@ -124,6 +126,16 @@ bash outils/tout-tester.sh
 ```
 
 Sur GitHub, regarder **Tous les contrôles** et **Compilation iPhone (simulateur)**.
+Ce second contrôle lance l'app et exécute deux tests : la fenêtre ouverte doit enregistrer
+`ParkingSignals`, puis la page embarquée doit obtenir une réponse réelle de `status()` via
+le pont JavaScript/Swift. Il ne démarre pas la détection et n'envoie aucun signalement.
+Le rapport Xcode est conservé dans l'artefact **Resultats-demarrage-iPhone**.
+Pour reproduire sur Mac : choisir un simulateur **iOS 26.2** et le schéma **App**, puis
+**Product → Test** (⌘U). Le runtime iOS 18.5 a un
+[défaut WebKit connu](https://bugs.webkit.org/show_bug.cgi?id=293831) qui peut empêcher le
+chargement des tests. La cible minimale de l'app reste iOS 15 ; ce contrôle automatisé
+ne couvre pas toutes les versions iOS.
+
 Sur deux appareils, dans le même canal de test, vérifier :
 
 - démarrage, accueil, carte ou mode liste et affichage avec les marges de l'écran ;
@@ -145,10 +157,10 @@ de services externes. Le service worker du site n'est pas actif sous `capacitor:
 Le canal dit privé reste une adresse partagée par invitation, pas une authentification.
 Les pourcentages de disponibilité restent expérimentaux.
 
-Le **Bluetooth natif et la détection en arrière-plan** viendront dans un chantier séparé,
-après validation sur deux iPhone. Les explications Raccourcis déjà présentes dans le site ne
-constituent pas une intégration Bluetooth native. Une autorisation de localisation ne garantit
-pas une détection automatique fiable du stationnement ni un accès au Bluetooth de toute voiture.
+Le module natif expérimental observe les mouvements, la position et la sortie audio
+Bluetooth/CarPlay. Il ne scanne pas tous les appareils Bluetooth. Les tests de démarrage
+ne prouvent pas la détection d'un trajet, son fonctionnement sans musique ou app fermée :
+ces scénarios doivent être vérifiés sur deux vrais iPhone avant de les annoncer comme fiables.
 
 Une mise à jour Netlify ne met pas à jour le code embarqué dans la bêta : après modification,
 refaire `npm run ios:synchroniser`, vérifier, augmenter le build et envoyer une nouvelle archive.
