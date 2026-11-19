@@ -28,17 +28,20 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_26.2.app/Contents/Developer
       - run: npm ci
       - run: npm run ios:synchroniser
-      - name: Choisir un simulateur iPhone disponible
+      - name: Choisir un simulateur iPhone iOS 26.2
         run: |
           xcrun simctl list devices available --json > "$RUNNER_TEMP/simulators.json"
           python3 - <<'PY'
           import json, os
           from pathlib import Path
           devices = json.loads((Path(os.environ['RUNNER_TEMP']) / 'simulators.json').read_text())['devices']
-          iphones = [d for runtime, items in devices.items() if '.iOS-' in runtime
-                     for d in items if d['name'].startswith('iPhone') and d['isAvailable']]
+          # Même version que le SDK sélectionné ; ne pas prendre le premier ancien runtime.
+          # iOS 18.5 présente notamment le bug WebKit https://bugs.webkit.org/show_bug.cgi?id=293831
+          runtime = 'com.apple.CoreSimulator.SimRuntime.iOS-26-2'
+          iphones = [d for d in devices.get(runtime, [])
+                     if d['name'].startswith('iPhone') and d['isAvailable']]
           if not iphones:
-              raise SystemExit('Aucun simulateur iPhone disponible')
+              raise SystemExit('Aucun simulateur iPhone iOS 26.2 disponible')
           with open(os.environ['GITHUB_ENV'], 'a') as env:
               env.write('IOS_SIMULATOR_ID=' + iphones[0]['udid'] + '\n')
           print(iphones[0]['name'], iphones[0]['udid'])

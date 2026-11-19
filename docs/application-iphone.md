@@ -130,7 +130,11 @@ Ce second contrôle lance l'app et exécute deux tests : la fenêtre ouverte doi
 `ParkingSignals`, puis la page embarquée doit obtenir une réponse réelle de `status()` via
 le pont JavaScript/Swift. Il ne démarre pas la détection et n'envoie aucun signalement.
 Le rapport Xcode est conservé dans l'artefact **Resultats-demarrage-iPhone**.
-Pour reproduire sur Mac : choisir un simulateur et le schéma **App**, puis **Product → Test** (⌘U).
+Pour reproduire sur Mac : choisir un simulateur **iOS 26.2** et le schéma **App**, puis
+**Product → Test** (⌘U). Le runtime iOS 18.5 a un
+[défaut WebKit connu](https://bugs.webkit.org/show_bug.cgi?id=293831) qui peut empêcher le
+chargement des tests. La cible minimale de l'app reste iOS 15 ; ce contrôle automatisé
+ne couvre pas toutes les versions iOS.
 
 Sur deux appareils, dans le même canal de test, vérifier :
 
