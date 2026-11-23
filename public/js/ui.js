@@ -115,7 +115,7 @@ function renderList(){
   list.forEach(g => {
     const li = document.createElement('li'), open = openStreet === g.name;
     li.innerHTML = '<span class="pct" style="color:' + chanceColor(g.p) + '">' + Math.round(g.p*100) + '<small>%</small></span>' +
-      '<div class="li-main"><b></b><span class="l1"></span><span class="l2"></span><span class="l3"></span></div><span class="li-dist">' + fmtDist(g.d) + '</span>';
+      '<div class="li-main"><b></b><span class="l1"></span><span class="l2"></span><span class="l3"></span></div><span class="li-dist">' + (g.d < 15 ? 'ici' : fmtDist(g.d)) + '</span>';
     li.querySelector('b').textContent = g.name;
     li.querySelector('.l1').textContent = 'chance de place · ' + (g.n ? (g.n + ' places') : '') + (g.pmr ? ' + ' + g.pmr + ' PMR' : '');
     li.querySelector('.l2').textContent = (g.best ? liveText(g.best) + ' · ' : '') + (ruleText(g.name, nowD) || '');
@@ -137,6 +137,7 @@ function render(){
   renderMap();
   $('btnClearDest').hidden = !S.dest;
   renderStatus(); checksKey = ''; renderChecks(); renderList(); renderArrival();
+  if($('btnPark').classList){ $('btnPark').classList.toggle('primary', !S.parked); $('btnLeave').classList.toggle('primary', !!S.parked); }
   (function(){ const sp = $('pass') && $('pass').querySelector('span'); if(sp){ const n = helpCount(); sp.textContent = 'Ce que tu vois dans la rue' + (n ? ' · tu as aidé ' + n + ' fois' : ''); } })();
 }
 
@@ -186,10 +187,42 @@ function showSugg(list){
   });
   ul.hidden = false; $('q').setAttribute('aria-expanded', 'true');
 }
+/* Panneau du bas : 3 hauteurs (réduit, moyen, grand), on le tire avec le doigt ou on touche la poignée */
+const SHEET_STATES = ['peek', 'half', 'full'];
+function setSheet(st){
+  const app = $('app'); if(!app || !app.style || !app.dataset) return;
+  app.style.removeProperty('--sh'); app.dataset.sheet = st;
+  const g = $('sheetGrip'); if(g) g.setAttribute('aria-valuetext', {peek:'réduit', half:'moyen', full:'grand'}[st]);
+}
+(function initSheet(){
+  const g = $('sheetGrip'), sh = $('sheet'), app = $('app'); if(!g || !sh || !app || !app.dataset || !app.style || !g.addEventListener) return;
+  setSheet('half');
+  let y0 = 0, h0 = 0, moved = 0, t0 = 0, on = false;
+  const px = () => sh.getBoundingClientRect().height, vh = () => window.innerHeight || 700;
+  const target = [() => Math.max(190, .34*vh()), () => .50*vh(), () => Math.max(190, vh() - 200)];
+  g.addEventListener('pointerdown', e => { on = true; y0 = e.clientY; h0 = px(); moved = 0; t0 = Date.now(); sh.classList.add('drag'); try{ g.setPointerCapture(e.pointerId); }catch(_){} });
+  g.addEventListener('pointermove', e => {
+    if(!on) return; moved = Math.max(moved, Math.abs(e.clientY - y0));
+    const h = Math.min(target[2](), Math.max(target[0](), h0 + (y0 - e.clientY)));
+    app.style.setProperty('--sh', h + 'px');
+  });
+  const end = e => {
+    if(!on) return; on = false; sh.classList.remove('drag');
+    const cur = SHEET_STATES.indexOf(app.dataset.sheet);
+    if(moved < 6){ setSheet(SHEET_STATES[(cur + 1) % 3]); return; }          // simple toucher : état suivant
+    const h = px(), fast = (y0 - e.clientY) / Math.max(1, Date.now() - t0) * 1000;   // px/s, positif = vers le haut
+    const aim = h + fast * .15;
+    let best = 0; target.forEach((f, i) => { if(Math.abs(f() - aim) < Math.abs(target[best]() - aim)) best = i; });
+    setSheet(SHEET_STATES[best]);
+  };
+  g.addEventListener('pointerup', end); g.addEventListener('pointercancel', end);
+  g.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setSheet(SHEET_STATES[(SHEET_STATES.indexOf(app.dataset.sheet) + 1) % 3]); } });
+  if(window.ResizeObserver && $('map')) new ResizeObserver(() => { try{ if(mapReady) map.resize(); }catch(_){} }).observe($('map'));
+})();
 function chooseDest(d){
   S.dest = d; ARR = {mode:'auto', eta:null, src:'', predId:null, key:''}; save();
   $('q').value = d.label; hideSugg(); $('q').blur();
-  fly(S.dest, 18); render();
+  setSheet('half'); fly(S.dest, 18); render();
   try{ $('arrival').scrollIntoView({block:'nearest'}); const sh = document.querySelector('.sheet'); if(sh) sh.scrollTop = 0; }catch(e){}
 }
 $('q').addEventListener('input', () => {
@@ -410,12 +443,20 @@ const WKEY = 'plj:welcome' + (TEST ? ':test' : '');
 function welcomeSeen(){ try{ return !!localStorage.getItem(WKEY); }catch(e){ return true; } }
 function isIosBrowser(){ return !nativeApp() && /iphone|ipad/i.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches); }
 function closeWelcome(){ try{ localStorage.setItem(WKEY, '1'); }catch(e){} $('welcome').hidden = true; renderStatus(); }
+const WC_ART = '<svg class="wc-art" viewBox="0 0 320 120" role="img" aria-label="Une rue avec des voitures garées et une place libre" preserveAspectRatio="xMidYMid slice">' +
+  '<rect width="320" height="120" rx="18" fill="var(--bg)"/><rect y="62" width="320" height="38" fill="var(--line)"/>' +
+  '<path d="M0 81h320" stroke="var(--surface)" stroke-width="2" stroke-dasharray="14 12"/>' +
+  [14, 78, 142, 270].map((x, i) => '<rect x="' + x + '" y="22" width="48" height="30" rx="9" fill="' + ['#8fa6ab', '#b4c4c7', '#6f8a90', '#9fb3b6'][i] + '"/><rect x="' + (x + 8) + '" y="27" width="32" height="9" rx="4" fill="var(--surface)" opacity=".55"/>').join('') +
+  '<rect x="206" y="20" width="52" height="34" rx="10" fill="color-mix(in srgb,var(--free) 18%,var(--surface))" stroke="var(--free)" stroke-width="2.5" stroke-dasharray="5 4"/>' +
+  '<text x="232" y="44" text-anchor="middle" font-family="Space Grotesk,system-ui,sans-serif" font-weight="700" font-size="22" fill="var(--free)">P</text>' +
+  '<circle cx="262" cy="18" r="11" fill="var(--free)"/><path d="m257 18 4 4 7-8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+  '</svg>';
 function showWelcome(step){
   const box = $('wcBody'), steps = isIosBrowser() ? 3 : 2; $('welcome').hidden = false;
   const dots = '<div class="dots">' + Array.from({length:steps}, (_, i) => '<b class="' + (i === step ? 'on' : '') + '"></b>').join('') + '</div>';
   let body = '';
   if(step === 0){
-    body = '<h1>Trouve une place plus vite</h1><p>PlaceLibre te montre où il y a des chances de se garer à Juan-les-Pins, et te prévient quand une place se libère. Aucun compte à créer.</p>' +
+    body = WC_ART + '<h1>Trouve une place plus vite</h1><p>PlaceLibre te montre où il y a des chances de se garer à Juan-les-Pins, et te prévient quand une place se libère. Aucun compte à créer.</p>' +
       '<label class="sr-only" for="wcName">Ton prénom (facultatif)</label>' +
       '<input id="wcName" placeholder="Ton prénom (facultatif)" maxlength="20" autocomplete="given-name" value="' + esc(S.me || '') + '">' +
       '<p class="hint">Il s’affiche quand tu signales une place. Laisse vide pour rester anonyme.</p>' +
