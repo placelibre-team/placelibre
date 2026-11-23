@@ -144,7 +144,7 @@ function calibration(){
 // Mot simple pour la destination, d'après la chance à moins de 100 m
 function difficulty(pr){
   const p = pr.rows.find(x => x.r === 100).p;
-  return p >= .6 ? {cls:'ez', t:'Facile'} : p >= .3 ? {cls:'mid', t:'Moyen'} : {cls:'hard', t:'Difficile'};
+  return p >= .5 ? {cls:'ez', t:'Facile'} : p >= .25 ? {cls:'mid', t:'Possible'} : {cls:'hard', t:'Difficile'};
 }
 // Nombre de contributions de la personne (signalements, départs, arrivées, contrôles)
 function helpCount(){

@@ -20,7 +20,7 @@ function renderStatus(){
     let free = 0, soon = 0; SLOTS.forEach(s => { const k = slotState(s.id, now).k; if(k === 'high' || k === 'mid') free++; else if(k === 'soon') soon++; });
     const bs = !free && SLOTS.length ? bestStreet() : null;
     main = SLOTS.length ? (free ? free + ' place' + (free > 1 ? 's' : '') + ' libre' + (free > 1 ? 's' : '') + ' signalée' + (free > 1 ? 's' : '') + ' en ce moment' : soon ? soon + ' départ' + (soon > 1 ? 's' : '') + ' annoncé' + (soon > 1 ? 's' : '') + ' · pas encore libre' + (soon > 1 ? 's' : '') : bs ? 'Meilleure chance : ' + bs.name + ' (' + Math.round(bs.p*100) + ' %)' : 'Aucune place libre signalée') : 'Aucune place suivie ici';
-    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places suivies' : SLOTS.length + ' places suivies' + (mapReady ? (teamMode() ? ' · touche Carto pour en ajouter' : '') : ' · mode liste');
+    sub = S.parked ? 'Garé depuis ' + hhmm(S.parked.t) + ' · ' + SLOTS.length + ' places suivies' : SLOTS.length + ' places suivies' + (mapReady ? (teamMode() ? ' · touche Carto pour en ajouter' : '') : ' · carte indisponible');
   }
   const live = syncOk ? '<span style="color:var(--free);font-weight:600">● ' + (TEST ? 'Canal de test' : 'En direct') + '</span> · ' : '';
   const n = S.outbox.length, wait = n ? ' · ' + n + ' envoi' + (n > 1 ? 's' : '') + ' en attente (réseau)' : '';
@@ -59,7 +59,7 @@ function sparkSVG(street){
     '<polygon points="' + area + '" fill="var(--accent)" opacity=".12"/>' +
     '<polyline points="' + line + '" fill="none" stroke="var(--accent)" stroke-width="2"/>' +
     '<line x1="' + px(nh) + '" x2="' + px(nh) + '" y1="4" y2="' + (H - 16) + '" stroke="var(--fg)" stroke-dasharray="3 3" stroke-width="1"/>' +
-    [0, 6, 12, 18, 23].map(h => '<text x="' + px(h) + '" y="' + (H - 2) + '" font-size="10" text-anchor="middle" fill="var(--muted)">' + h + 'h</text>').join('') +
+    [0, 6, 12, 18, 23].map(h => '<text x="' + px(h) + '" y="' + (H - 2) + '" font-size="11" text-anchor="' + (h === 0 ? 'start' : h === 23 ? 'end' : 'middle') + '" fill="var(--muted)">' + h + 'h</text>').join('') +
     '</svg>';
 }
 function liveText(b){
@@ -79,13 +79,19 @@ function streetSamples(street){
   return S.journal.filter(e => e.street === street && e.src !== 'auto' && (e.type === 'libre' || e.type === 'occupee' || (e.type === 'controle' && (e.etat === 'libre' || e.etat === 'occupee')))).length;
 }
 /* D'où vient le pourcentage affiché pour une rue */
+function originShort(g){
+  const n = streetSamples(g.name);
+  if(g.live >= 0.3) return 'Basé sur des signalements en direct';
+  if(g.live > 0.05) return 'Prévision + un signalement récent';
+  return n >= 5 ? 'Basé sur ' + n + ' mesures passées' : 'Estimation, pas encore vérifiée sur place';
+}
 function originText(g){
   const n = streetSamples(g.name);
-  if(g.live >= 0.3) return 'Origine : signalements en direct' + (n ? ' + ' + n + ' mesure' + (n > 1 ? 's' : '') + ' passée' + (n > 1 ? 's' : '') : '');
-  if(g.live > 0.05) return 'Origine : prévision + un signalement récent';
-  return n >= 5 ? 'Origine : ' + n + ' mesures passées dans cette rue, aucun signalement en direct'
-    : n ? 'Origine : prévision, seulement ' + n + ' mesure' + (n > 1 ? 's' : '') + ' réelle' + (n > 1 ? 's' : '') + ' (estimation prudente)'
-    : 'Données manquantes : estimation par l’heure et les règles, jamais vérifiée ici';
+  if(g.live >= 0.3) return 'Basé sur les signalements en direct' + (n ? ' + ' + n + ' mesure' + (n > 1 ? 's' : '') + ' passée' + (n > 1 ? 's' : '') : '');
+  if(g.live > 0.05) return 'Prévision + un signalement récent';
+  return n >= 5 ? 'Basé sur ' + n + ' mesures passées dans cette rue, aucun signalement en direct'
+    : n ? 'Prévision, seulement ' + n + ' mesure' + (n > 1 ? 's' : '') + ' réelle' + (n > 1 ? 's' : '') + ' (estimation prudente)'
+    : 'Estimation d’après l’heure et les règles, pas encore vérifiée sur place';
 }
 function renderList(){
   const ref = S.dest || lastPos || {lat:CENTER[1], lng:CENTER[0]};
@@ -110,15 +116,16 @@ function renderList(){
     li.innerHTML = '<span class="pct" style="color:' + chanceColor(g.p) + '">' + Math.round(g.p*100) + '<small>%</small></span>' +
       '<div class="li-main"><b></b><span class="l1"></span><span class="l2"></span><span class="l3"></span></div><span class="li-dist">' + fmtDist(g.d) + '</span>';
     li.querySelector('b').textContent = g.name;
-    li.querySelector('.l1').textContent = 'de chances de trouver en 5 min · ' + (g.n ? (g.n + ' places') : '') + (g.pmr ? ' + ' + g.pmr + ' PMR' : '');
+    li.querySelector('.l1').textContent = 'chance de place · ' + (g.n ? (g.n + ' places') : '') + (g.pmr ? ' + ' + g.pmr + ' PMR' : '');
     li.querySelector('.l2').textContent = (g.best ? liveText(g.best) + ' · ' : '') + (ruleText(g.name, nowD) || '');
-    li.querySelector('.l3').textContent = originText(g);
+    li.querySelector('.l3').textContent = open ? '' : originShort(g);
     if(open){
       const rule = RULES[g.name], det = document.createElement('div'); det.className = 'detail';
-      det.innerHTML = '<div class="det-row"><span>Prévision (heure, jour, saison, règles)</span><b>' + Math.round(g.prior*100) + ' %</b></div>' +
-        '<div class="det-row"><span>Places signalées, estimées à ton arrivée</span><b>' + (g.live > 0.05 ? Math.round(g.live*100) + ' %' : 'aucune') + '</b></div>' +
-        '<p class="det-h">Aujourd’hui, heure par heure</p>' + sparkSVG(g.name) +
-        (rule ? '<p class="det-src">' + esc(rule.src) + (rule.residents ? ' · Abonnement résidents : ' + esc(rule.residents) : '') + '</p>' : '');
+      det.innerHTML = '<div class="det-row"><span>Selon l’heure, le jour et les règles</span><b>' + Math.round(g.prior*100) + ' %</b></div>' +
+        '<div class="det-row"><span>Selon les signalements récents</span><b>' + (g.live > 0.05 ? Math.round(g.live*100) + ' %' : 'aucun signalement') + '</b></div>' +
+        '<p class="det-src">' + esc(originText(g)) + '</p>' +
+        '<p class="det-h">Tes chances aujourd’hui, heure par heure</p>' + sparkSVG(g.name) +
+        (rule ? '<p class="det-src">Source : ' + esc(rule.src) + (rule.residents ? ' · Abonnement résidents : ' + esc(rule.residents) : '') + '</p>' : '');
       li.appendChild(det);
     }
     li.addEventListener('click', () => { openStreet = open ? null : g.name; renderList(); if(!open) fly(g.best ? g.best.slot : g.near, 18.5); });
@@ -129,7 +136,7 @@ function render(){
   renderMap();
   $('btnClearDest').hidden = !S.dest;
   renderStatus(); checksKey = ''; renderChecks(); renderList(); renderArrival();
-  (function(){ const sp = $('pass') && $('pass').querySelector('span'); if(sp){ const n = helpCount(); sp.textContent = 'En passant dans une rue :' + (n ? ' · tu as aidé ' + n + ' fois' : ''); } })();
+  (function(){ const sp = $('pass') && $('pass').querySelector('span'); if(sp){ const n = helpCount(); sp.textContent = 'Ce que tu vois dans la rue' + (n ? ' · tu as aidé ' + n + ' fois' : ''); } })();
 }
 
 /* ---------- Boutons dans les fenêtres de la carte et contrôles ---------- */
@@ -194,11 +201,11 @@ function drawArrival(log){
   const df = difficulty(pr);
   el.innerHTML = '<h3>' + esc(S.dest.label) + '<span class="pill ' + df.cls + '">' + df.t + '</span></h3>' +
     '<p class="sub">Arrivée dans ~' + pr.eta + ' min (' + hhmm(pr.arr) + ') · ' + esc(ARR.src) + '</p>' +
-    '<div class="etas">' + chip('auto', 'Mon trajet') + chip(5, '5 min') + chip(10, '10 min') + chip(20, '20 min') + chip(30, '30 min') + '</div>' +
-    '<div class="rr">' + pr.rows.map(x => '<div><b style="color:' + chanceColor(x.p) + '">' + (Math.round(x.p*20)*5) + ' %</b><span>à moins de ' + x.r + ' m</span></div>').join('') + '</div>' +
+    '<div class="etas">' + chip('auto', 'Trajet') + chip(5, '5 min') + chip(10, '10 min') + chip(20, '20 min') + chip(30, '30 min') + '</div>' +
+    '<div class="rr">' + pr.rows.map(x => '<div><b style="color:' + chanceColor(x.p) + '">' + (Math.round(x.p*20)*5) + ' %</b><span>moins de ' + x.r + ' m</span></div>').join('') + '</div>' +
     '<p class="note">' + (pr.d50 ? 'Une place libre est plus probable que non à moins de ' + pr.d50 + ' m. ' : 'Moins d’une chance sur deux d’avoir une place à moins de 300 m. ') +
     (pr.liveN ? pr.liveN + ' place' + (pr.liveN > 1 ? 's' : '') + ' signalée' + (pr.liveN > 1 ? 's' : '') + ' libre' + (pr.liveN > 1 ? 's' : '') + ' en ce moment. ' : 'Aucune place signalée libre en ce moment. ') +
-    '<b>Origine :</b> ' + esc(qualityText(pr.quality)) + '</p>' +
+    '<b>Fiabilité :</b> ' + esc(qualityText(pr.quality)) + '</p>' +
     (arrived ? '<div class="ask">Place trouvée à moins de 100 m ? <button class="btn ok" data-pred="1">Oui</button><button class="btn ko" data-pred="0">Non</button></div>' : '');
 }
 document.addEventListener('click', e => {

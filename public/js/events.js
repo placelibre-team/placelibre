@@ -28,8 +28,8 @@ async function startDepart(src, paramPos, forcedId){
   S.parked = null; save();
   pendingDepart = Object.assign({spot, t:now}, ref);
   requestWake(); startWatch();
-  toast(ref.slotId ? 'Départ détecté : ta place passe en libre dans ~' + Math.round(S.model.delay) + ' s.'
-                   : 'Départ détecté, mais cette rue n’est pas encore suivie : un point est ajouté.');
+  toast(ref.slotId ? 'C’est noté : ta place sera signalée libre dans quelques secondes.'
+                   : 'C’est noté, mais cette rue n’est pas encore suivie par PlaceLibre.');
   fly(spot, 18);
   render();
   const myT = now;
@@ -41,7 +41,7 @@ function confirmMove(){
   if(pendingDepart.slotId) share(pendingDepart.slotId, 'free', {src:'confirmation'});
   if(pendingDepart.looseId){ const l = S.loose.find(x => x.id === pendingDepart.looseId); if(l){ l.free = now; l.soon = null; } }
   pendingDepart = null; releaseWake(); save(); render();
-  toast('Tu roules : place libérée. Délai mesuré : ' + Math.max(0, Math.round(measured)) + ' s.');
+  toast('Merci ! Ta place est signalée libre.');
 }
 async function doArrive(src, paramPos, forcedId){
   let cur = paramPos || null;
