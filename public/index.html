@@ -21,9 +21,10 @@
   <header class="top">
     <span class="brand" id="brand"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d7c86"/><stop offset="1" stop-color="#14a27a"/></linearGradient></defs><rect width="32" height="32" rx="9.5" fill="url(#lg)"/><path d="M16 5.8c-4.2 0-7.4 3.1-7.4 7.1 0 5 5.7 10.9 6.6 11.8a1.2 1.2 0 0 0 1.6 0c.9-.9 6.6-6.8 6.6-11.8 0-4-3.2-7.1-7.4-7.1z" fill="#fff"/><path d="M13.4 9.9h3.2a2.7 2.7 0 0 1 0 5.4h-1.6v3.2h-1.6z" fill="url(#lg)"/></svg><span>Place<b>Libre</b></span></span>
     <form id="searchForm" autocomplete="off">
-      <input id="q" type="search" placeholder="Où vas-tu ?" aria-label="Destination">
+      <input id="q" type="search" placeholder="Où vas-tu ? Adresse, lieu…" aria-label="Destination" autocapitalize="off" enterkeyhint="search" role="combobox" aria-expanded="false" aria-controls="sugg">
       <button type="submit">Aller</button>
     </form>
+    <ul id="sugg" role="listbox" aria-label="Adresses proposées" hidden></ul>
     <button class="icon-btn" id="btnMenu" aria-label="Réglages"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
 
@@ -53,6 +54,7 @@
     <div class="test-banner" id="testBanner" hidden>Canal de test : tes signalements ne vont pas sur le canal réel.</div>
     <div class="status" id="status"><strong>Chargement…</strong><small></small></div>
     <div class="checks" id="checks" aria-live="polite"></div>
+    <div class="arrival" id="arrival" hidden></div>
     <p class="grp">Ma voiture</p>
     <div class="actions">
       <button class="btn" id="btnPark">Je me gare ici</button>
@@ -63,7 +65,6 @@
       <button class="btn ok" id="btnPassFree">Place libre ici</button>
       <button class="btn ko" id="btnPassFull">Rue pleine</button>
     </div>
-    <div class="arrival" id="arrival" hidden></div>
     <div class="list-head"><h2 id="listTitle">Rues autour de toi</h2><button id="btnClearDest" hidden>Effacer la destination</button></div>
     <ul id="list"></ul>
   </main>

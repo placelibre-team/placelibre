@@ -24,6 +24,7 @@ function renderStatus(){
   }
   const live = syncOk ? '<span style="color:var(--free);font-weight:600">● ' + (TEST ? 'Canal de test' : 'En direct') + '</span> · ' : '';
   const n = S.outbox.length, wait = n ? ' · ' + n + ' envoi' + (n > 1 ? 's' : '') + ' en attente (réseau)' : '';
+  $('status').hidden = !!S.dest && !pendingDepart && !S.parked && mode !== 'draw';
   $('status').innerHTML = '<strong>' + esc(main) + '</strong><small>' + live + esc(sub + wait) + '</small>';
 }
 
@@ -164,17 +165,59 @@ async function geocode(q){
   const j = await r.json(); if(!j.length) return null;
   return {lat:+j[0].lat, lng:+j[0].lon, label:j[0].display_name.split(',').slice(0,2).join(',')};
 }
+/* Suggestions d'adresses pendant la saisie (Géoplateforme IGN, gratuit, sans clé) */
+let SUGG = [], suggTimer = 0, suggSeq = 0;
+async function geocodeMany(q, n){
+  const ref = lastPos || {lat:CENTER[1], lng:CENTER[0]};
+  const r = await fetch('https://data.geopf.fr/geocodage/search?limit=' + n + '&lat=' + ref.lat + '&lon=' + ref.lng + '&q=' + encodeURIComponent(q));
+  const j = await r.json();
+  return (j.features || []).map(f => ({lat:f.geometry.coordinates[1], lng:f.geometry.coordinates[0], label:f.properties.label}));
+}
+function hideSugg(){ SUGG = []; $('sugg').hidden = true; $('sugg').innerHTML = ''; $('q').setAttribute('aria-expanded', 'false'); }
+function showSugg(list){
+  SUGG = list; const ul = $('sugg'); ul.innerHTML = '';
+  if(!list.length){ hideSugg(); return; }
+  list.forEach((d, i) => {
+    const li = document.createElement('li'); li.setAttribute('role', 'option'); li.dataset.i = i;
+    const parts = d.label.split(' '), zip = parts.findIndex(p => /^\d{5}$/.test(p));
+    const main = document.createElement('b'), sub = document.createElement('span');
+    main.textContent = zip > 0 ? parts.slice(0, zip).join(' ') : d.label; sub.textContent = zip > 0 ? parts.slice(zip).join(' ') : '';
+    li.append(main, sub); ul.appendChild(li);
+  });
+  ul.hidden = false; $('q').setAttribute('aria-expanded', 'true');
+}
+function chooseDest(d){
+  S.dest = d; ARR = {mode:'auto', eta:null, src:'', predId:null, key:''}; save();
+  $('q').value = d.label; hideSugg(); $('q').blur();
+  fly(S.dest, 18); render();
+  try{ $('arrival').scrollIntoView({block:'nearest'}); const sh = document.querySelector('.sheet'); if(sh) sh.scrollTop = 0; }catch(e){}
+}
+$('q').addEventListener('input', () => {
+  clearTimeout(suggTimer);
+  const q = $('q').value.trim();
+  if(q.length < 3){ hideSugg(); return; }
+  const mine = ++suggSeq;
+  suggTimer = setTimeout(async () => {
+    try{ const l = await geocodeMany(q, 5); if(mine === suggSeq) showSugg(l); }catch(e){ if(mine === suggSeq) hideSugg(); }
+  }, 250);
+});
+$('q').addEventListener('keydown', e => { if(e.key === 'Escape') hideSugg(); });
+$('q').addEventListener('blur', () => setTimeout(hideSugg, 200));
+$('sugg').addEventListener('pointerdown', e => {
+  const li = e.target.closest('li'); if(!li) return;
+  e.preventDefault(); const d = SUGG[+li.dataset.i]; if(d) chooseDest(d);
+});
 $('searchForm').addEventListener('submit', async e => {
   e.preventDefault();
   const q = $('q').value.trim(); if(!q) return;
+  if(SUGG.length){ chooseDest(SUGG[0]); return; }
   try{
     const d = await geocode(q);
-    if(!d){ toast('Adresse introuvable.'); return; }
-    S.dest = d; ARR = {mode:'auto', eta:null, src:'', predId:null, key:''}; save();
-    fly(S.dest, 18); render(); $('q').blur();
-  }catch(err){ toast('Recherche impossible (réseau).'); }
+    if(!d){ toast('Adresse introuvable. Essaie avec le nom de la rue et la ville.'); return; }
+    chooseDest(d);
+  }catch(err){ toast('Recherche impossible : vérifie ta connexion.'); }
 });
-$('btnClearDest').addEventListener('click', () => { S.dest = null; ARR.key = ''; save(); render(); });
+$('btnClearDest').addEventListener('click', () => { S.dest = null; ARR.key = ''; $('q').value = ''; save(); render(); });
 
 async function resolveEta(){
   if(ARR.mode !== 'auto'){ ARR.eta = ARR.mode; ARR.src = 'choisi'; return; }
@@ -187,28 +230,47 @@ async function renderArrival(){
   const key = S.dest.lat + '|' + S.dest.lng + '|' + ARR.mode;
   if(key === ARR.key && !el.hidden) { updateArrivalNums(); return; }
   ARR.key = key; el.hidden = false;
+  const nt = nearestTracked(S.dest);
+  if(nt && nt.d > ZONE_M){ drawOutOfZone(nt); return; }
   await resolveEta();
   if(key !== ARR.key) return;
   ARR.predId = null; drawArrival(true);
 }
-function updateArrivalNums(){ if(ARR.eta != null) drawArrival(false); }
+function updateArrivalNums(){ if(ARR.eta != null && !$('arrival').querySelector('[data-zone]')) drawArrival(false); }
+/* Au-delà de cette distance d'une place suivie, on ne donne pas de chiffre : ce serait inventé */
+const ZONE_M = 400;
+function nearestTracked(p){
+  let best = null, bd = Infinity;
+  SLOTS.forEach(s => { if(s.type === 'pmr') return; const d = dist(p, s); if(d < bd){ bd = d; best = s; } });
+  return best ? {s:best, d:bd} : null;
+}
+function drawOutOfZone(nt){
+  $('arrival').innerHTML = '<h3>' + esc(S.dest.label) + '</h3>' +
+    '<p class="sub">PlaceLibre ne suit pas encore de places près de cette adresse.</p>' +
+    '<p class="note">Pour l’instant, seules la rue Bricka et la rue Saint-Honorat (Juan-les-Pins) sont suivies, à ' + fmtDist(nt.d) + ' d’ici.</p>' +
+    '<button class="btn" data-zone="1">Voir la zone suivie</button>';
+}
 function drawArrival(log){
   const el = $('arrival'), pr = predictArrival(S.dest, ARR.eta);
   if(log && !ARR.predId && !ARR.answered) ARR.predId = logPred(S.dest, pr);
   const chip = (m, t) => '<button data-eta="' + m + '" class="' + (ARR.mode === m ? 'on' : '') + '">' + t + '</button>';
   const pend = (S.preds || []).find(x => x.id === ARR.predId);
   const arrived = pend && pend.out == null && Date.now() >= pend.arr && lastPos && dist(lastPos, S.dest) < 250;
-  const df = difficulty(pr);
-  el.innerHTML = '<h3>' + esc(S.dest.label) + '<span class="pill ' + df.cls + '">' + df.t + '</span></h3>' +
-    '<p class="sub">Arrivée dans ~' + pr.eta + ' min (' + hhmm(pr.arr) + ') · ' + esc(ARR.src) + '</p>' +
+  const df = difficulty(pr), r100 = pr.rows.find(x => x.r === 100), nt = nearestTracked(S.dest);
+  el.innerHTML = '<h3>' + esc(S.dest.label) + '</h3>' +
+    '<div class="big" style="color:' + chanceColor(r100.p) + '"><b>' + (Math.round(r100.p*20)*5) + ' %</b><span class="pill ' + df.cls + '">' + df.t + '</span></div>' +
+    '<p class="sub">de chances de trouver une place à moins de 100 m, en arrivant vers ' + hhmm(pr.arr) + ' (dans ~' + pr.eta + ' min)' + (/inconnue/.test(ARR.src || '') ? ' · position inconnue, 10 min par défaut' : '') + '</p>' +
+    (nt ? '<p class="sub near">Place suivie la plus proche : ' + esc(nt.s.name || 'rue sans nom') + ', ' + (nt.d < 15 ? 'juste à côté' : 'à ' + fmtDist(nt.d)) + '</p>' : '') +
     '<div class="etas">' + chip('auto', 'Trajet') + chip(5, '5 min') + chip(10, '10 min') + chip(20, '20 min') + chip(30, '30 min') + '</div>' +
-    '<div class="rr">' + pr.rows.map(x => '<div><b style="color:' + chanceColor(x.p) + '">' + (Math.round(x.p*20)*5) + ' %</b><span>moins de ' + x.r + ' m</span></div>').join('') + '</div>' +
-    '<p class="note">' + (pr.d50 ? 'Une place libre est plus probable que non à moins de ' + pr.d50 + ' m. ' : 'Moins d’une chance sur deux d’avoir une place à moins de 300 m. ') +
+    '<p class="rr">' + pr.rows.filter(x => x.r !== 100).map(x => 'à moins de ' + x.r + ' m : <b>' + (Math.round(x.p*20)*5) + ' %</b>').join(' · ') + '</p>' +
+    '<p class="note">' +
     (pr.liveN ? pr.liveN + ' place' + (pr.liveN > 1 ? 's' : '') + ' signalée' + (pr.liveN > 1 ? 's' : '') + ' libre' + (pr.liveN > 1 ? 's' : '') + ' en ce moment. ' : 'Aucune place signalée libre en ce moment. ') +
     '<b>Fiabilité :</b> ' + esc(qualityText(pr.quality)) + '</p>' +
     (arrived ? '<div class="ask">Place trouvée à moins de 100 m ? <button class="btn ok" data-pred="1">Oui</button><button class="btn ko" data-pred="0">Non</button></div>' : '');
 }
 document.addEventListener('click', e => {
+  const z = e.target.closest('#arrival [data-zone]');
+  if(z){ fly({lat:CENTER[1], lng:CENTER[0]}, 17); return; }
   const b = e.target.closest('#arrival [data-eta]');
   if(b){ ARR.mode = b.dataset.eta === 'auto' ? 'auto' : +b.dataset.eta; ARR.key = ''; renderArrival(); return; }
   const a = e.target.closest('#arrival [data-pred]');
