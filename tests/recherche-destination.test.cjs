@@ -34,3 +34,9 @@ for (const [p, mot, couleur] of [[.7, 'Facile', 'var(--free)'], [.5, 'Facile', '
   assert.equal(T.chanceColor(p), couleur, 'couleur à ' + p);
 }
 console.log('OK : suggestions, zone suivie et barème des chances');
+
+// Panneau du bas : poignée accessible, trois hauteurs définies dans la feuille de style.
+assert.match(html, /<div class="grip" id="sheetGrip" role="button" tabindex="0"/);
+const css = fs.readFileSync(path.join(racine, 'public/css/app.css'), 'utf8');
+for (const etat of ['peek', 'half', 'full']) assert.match(css, new RegExp('#app\\[data-sheet=' + etat + '\\]\\{--sh:'), 'hauteur ' + etat);
+console.log('OK : panneau du bas à trois hauteurs');
